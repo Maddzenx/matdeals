@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { SearchBar } from "@/components/SearchBar";
 import { StoreTags } from "@/components/StoreTags";
@@ -15,6 +16,12 @@ const Index = () => {
     { id: "fruits", name: "Frukt & grönt" },
     { id: "bread", name: "Bröd & bageri" },
     { id: "meat", name: "Kött, fågel & chark" },
+    { id: "dairy", name: "Mejeri & Ägg" },
+    { id: "fish", name: "Fisk & Skaldjur" },
+    { id: "readymeals", name: "Färdigmat & Frysta Matvaror" },
+    { id: "bakery", name: "Bröd & Bakverk" },
+    { id: "drinks", name: "Drycker" },
+    { id: "snacks", name: "Snacks & Godis" },
   ]);
 
   const [activeCategory, setActiveCategory] = useState("fruits");
