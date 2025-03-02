@@ -28,11 +28,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
   return (
     <div className="shadow-[0_0_2px_rgba(0,0,0,0.08),0_0_20px_rgba(0,0,0,0.04)] relative bg-white p-3 rounded-lg max-sm:p-2.5">
-      <img
-        src={image}
-        alt={name}
-        className="w-full h-[85px] object-cover mb-3 rounded-[5px]"
-      />
+      <div className="w-full h-[85px] mb-3 flex items-center justify-center rounded-[5px] overflow-hidden bg-neutral-50">
+        <img
+          src={image}
+          alt={name}
+          className="max-w-full max-h-[85px] object-contain"
+        />
+      </div>
       <div className="flex flex-col gap-1">
         <h3 className="text-sm font-bold text-[#1C1C1C] line-clamp-1">{name}</h3>
         <p className="text-xs font-medium text-[#6A6A6A] line-clamp-2 min-h-[2rem]">{details}</p>
