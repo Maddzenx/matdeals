@@ -1,7 +1,8 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 interface ProductCardProps {
+  id: string;
   image: string;
   name: string;
   details: string;
@@ -9,9 +10,11 @@ interface ProductCardProps {
   originalPrice: string;
   store: string;
   offerBadge?: string;
+  onQuantityChange?: (productId: string, newQuantity: number, previousQuantity: number) => void;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
+  id,
   image,
   name,
   details,
@@ -19,12 +22,35 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   originalPrice,
   store,
   offerBadge,
+  onQuantityChange,
 }) => {
   const [quantity, setQuantity] = useState(0);
 
-  const handleAdd = () => setQuantity(1);
-  const handleIncrement = () => setQuantity((prev) => prev + 1);
-  const handleDecrement = () => setQuantity((prev) => Math.max(0, prev - 1));
+  const handleAdd = () => {
+    const newQuantity = 1;
+    setQuantity(newQuantity);
+    if (onQuantityChange) {
+      onQuantityChange(id, newQuantity, 0);
+    }
+  };
+
+  const handleIncrement = () => {
+    const prevQuantity = quantity;
+    const newQuantity = prevQuantity + 1;
+    setQuantity(newQuantity);
+    if (onQuantityChange) {
+      onQuantityChange(id, newQuantity, prevQuantity);
+    }
+  };
+
+  const handleDecrement = () => {
+    const prevQuantity = quantity;
+    const newQuantity = Math.max(0, prevQuantity - 1);
+    setQuantity(newQuantity);
+    if (onQuantityChange) {
+      onQuantityChange(id, newQuantity, prevQuantity);
+    }
+  };
 
   return (
     <div className="shadow-[0_0_2px_rgba(0,0,0,0.08),0_0_20px_rgba(0,0,0,0.04)] relative bg-white p-3 rounded-lg max-sm:p-2.5">

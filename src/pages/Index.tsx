@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { SearchBar } from "@/components/SearchBar";
 import { StoreTags } from "@/components/StoreTags";
@@ -25,14 +24,26 @@ const Index = () => {
   ]);
 
   const [activeCategory, setActiveCategory] = useState("fruits");
+  
+  const [cartCount, setCartCount] = useState(1);
 
-  const [navItems] = useState([
+  const [navItems, setNavItems] = useState([
     { id: "offers", icon: "discount", label: "Erbjudanden", active: true },
     { id: "recipes", icon: "book", label: "Recept" },
     { id: "menu", icon: "search", label: "Matsedel" },
     { id: "cart", icon: "shopping-cart", label: "Inköpslista", badge: 1 },
     { id: "profile", icon: "user", label: "Profil" },
   ]);
+
+  React.useEffect(() => {
+    setNavItems(prev => 
+      prev.map(item => 
+        item.id === "cart" 
+          ? { ...item, badge: cartCount } 
+          : item
+      )
+    );
+  }, [cartCount]);
 
   const products = {
     fruits: [
@@ -83,13 +94,18 @@ const Index = () => {
   };
 
   const handleRemoveTag = (id: string) => {
-    // Implement tag removal logic
     console.log("Remove tag:", id);
   };
 
   const handleNavSelect = (id: string) => {
-    // Implement navigation selection logic
     console.log("Selected nav:", id);
+  };
+
+  const handleProductQuantityChange = (productId: string, newQuantity: number, previousQuantity: number) => {
+    const quantityDifference = newQuantity - previousQuantity;
+    if (quantityDifference > 0) {
+      setCartCount(prev => prev + quantityDifference);
+    }
   };
 
   return (
@@ -112,6 +128,7 @@ const Index = () => {
               <ProductGrid
                 title={categories.find((c) => c.id === category)?.name || ""}
                 products={items}
+                onQuantityChange={handleProductQuantityChange}
               />
             </section>
           ))}
