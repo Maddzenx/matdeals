@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 
 interface ProductCardProps {
@@ -33,8 +34,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         className="w-full h-[85px] object-cover mb-3 rounded-[5px]"
       />
       <div className="flex flex-col gap-1">
-        <h3 className="text-sm font-bold text-[#1C1C1C]">{name}</h3>
-        <p className="text-xs font-medium text-[#6A6A6A]">{details}</p>
+        <h3 className="text-sm font-bold text-[#1C1C1C] line-clamp-1">{name}</h3>
+        <p className="text-xs font-medium text-[#6A6A6A] line-clamp-2 min-h-[2rem]">{details}</p>
         <div className="flex items-center gap-1 mt-2">
           <span className="text-base font-extrabold text-[#1C1C1C]">
             {currentPrice}
@@ -43,22 +44,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             {originalPrice}
           </span>
         </div>
-        <div className="text-xs font-semibold text-[#1C1C1C] text-center bg-neutral-100 mx-0 my-1 px-1 py-0.5 rounded-sm">
+        <div className="text-xs font-semibold text-[#1C1C1C] text-center bg-neutral-100 mx-0 my-1 px-1 py-0.5 rounded-sm w-full">
           {store}
         </div>
 
         {quantity === 0 ? (
           <button
             onClick={handleAdd}
-            className="text-white text-center text-sm font-bold bg-[#DB2C17] mt-2 px-3 py-1.5 rounded-[100px]"
+            className="text-white text-center text-sm font-bold bg-[#DB2C17] mt-2 px-3 py-1.5 rounded-[100px] w-full"
           >
             Add to list
           </button>
         ) : (
-          <div className="flex items-center h-8 flex-1 text-center text-sm font-bold bg-neutral-100 mt-2 px-3 py-0 rounded-[100px]">
+          <div className="flex items-center h-8 flex-1 text-center text-sm font-bold bg-neutral-100 mt-2 px-1 py-0 rounded-[100px]">
             <button
               onClick={handleDecrement}
-              className="flex-1 text-center text-sm font-bold bg-white px-3 py-1.5 rounded-[100px]"
+              className="flex-1 text-center text-sm font-bold bg-white px-2 py-1.5 rounded-[100px]"
             >
               -
             </button>
@@ -67,7 +68,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             </span>
             <button
               onClick={handleIncrement}
-              className="flex-1 text-center text-sm font-bold text-white bg-[#DB2C17] px-3 py-1.5 rounded-[100px]"
+              className="flex-1 text-center text-sm font-bold text-white bg-[#DB2C17] px-2 py-1.5 rounded-[100px]"
             >
               +
             </button>
