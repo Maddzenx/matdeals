@@ -18,7 +18,7 @@ export const CategoryTabs: React.FC<CategoryTabsProps> = ({
   onSelect,
 }) => {
   return (
-    <div className="sticky top-0 z-10 bg-white flex overflow-x-auto gap-6 px-4 py-0 border-b-[#EEE] border-b border-solid">
+    <div className="sticky top-[60px] z-10 bg-white flex overflow-x-auto gap-6 px-4 py-0 border-b-[#EEE] border-b border-solid">
       {categories.map((category) => (
         <button
           key={category.id}
