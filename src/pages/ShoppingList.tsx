@@ -73,6 +73,8 @@ const ShoppingList = () => {
     }
   };
 
+  console.log("ShoppingList rendered with cartItems:", cartItems);
+
   return (
     <div className="min-h-screen w-full bg-white pb-20">
       <link

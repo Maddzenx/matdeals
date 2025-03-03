@@ -33,6 +33,8 @@ const Index = () => {
     setViewMode(prev => prev === "grid" ? "list" : "grid");
   };
 
+  console.log("Index rendered with cartItems:", cartItems);
+
   return (
     <>
       <link
