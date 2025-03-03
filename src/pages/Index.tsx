@@ -389,6 +389,34 @@ const Index = () => {
     setCartCount(prev => Math.max(0, prev + quantityDifference));
   };
 
+  // Flatten all products and add category information
+  const allProducts = React.useMemo(() => {
+    const result: any[] = [];
+    
+    Object.entries(products).forEach(([categoryId, categoryProducts]) => {
+      const categoryName = categories.find(c => c.id === categoryId)?.name || "";
+      categoryProducts.forEach(product => {
+        result.push({
+          ...product,
+          category: categoryName
+        });
+      });
+    });
+    
+    return result;
+  }, [products, categories]);
+
+  const handleCategorySelect = (categoryId: string) => {
+    setActiveCategory(categoryId);
+    
+    // Scroll to category section
+    const categoryName = categories.find(c => c.id === categoryId)?.name || "";
+    const element = document.getElementById(categoryName);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <>
       <link
@@ -401,16 +429,14 @@ const Index = () => {
         <CategoryTabs
           categories={categories}
           activeCategory={activeCategory}
-          onSelect={setActiveCategory}
+          onSelect={handleCategorySelect}
         />
         <main className="p-4">
-          {activeCategory && products[activeCategory as keyof typeof products] && (
-            <ProductGrid
-              title={categories.find((c) => c.id === activeCategory)?.name || ""}
-              products={products[activeCategory as keyof typeof products] || []}
-              onQuantityChange={handleProductQuantityChange}
-            />
-          )}
+          <ProductGrid
+            products={allProducts}
+            showCategoryHeaders={true}
+            onQuantityChange={handleProductQuantityChange}
+          />
         </main>
         <BottomNav items={navItems} onSelect={handleNavSelect} />
       </div>
