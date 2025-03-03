@@ -1,7 +1,7 @@
 
 import React from "react";
 
-interface NavItem {
+export interface NavItem {
   id: string;
   icon: string;
   label: string;

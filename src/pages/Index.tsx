@@ -1,11 +1,14 @@
+
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { SearchBar } from "@/components/SearchBar";
 import { StoreTags } from "@/components/StoreTags";
 import { CategoryTabs } from "@/components/CategoryTabs";
 import { ProductGrid } from "@/components/ProductGrid";
-import { BottomNav } from "@/components/BottomNav";
+import { BottomNav, NavItem } from "@/components/BottomNav";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [storeTags] = useState([
     { id: "1", name: "Hemköp Stadshagen" },
     { id: "2", name: "Willys Hornsberg" },
@@ -27,7 +30,7 @@ const Index = () => {
   
   const [cartCount, setCartCount] = useState(1);
 
-  const [navItems, setNavItems] = useState([
+  const [navItems, setNavItems] = useState<NavItem[]>([
     { id: "offers", icon: "discount", label: "Erbjudanden", active: true },
     { id: "recipes", icon: "book", label: "Recept" },
     { id: "menu", icon: "search", label: "Matsedel" },
@@ -98,7 +101,11 @@ const Index = () => {
   };
 
   const handleNavSelect = (id: string) => {
-    console.log("Selected nav:", id);
+    if (id === "cart") {
+      navigate("/shopping-list");
+    } else {
+      console.log("Selected nav:", id);
+    }
   };
 
   const handleProductQuantityChange = (productId: string, newQuantity: number, previousQuantity: number) => {
