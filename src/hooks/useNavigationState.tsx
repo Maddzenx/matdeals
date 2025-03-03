@@ -35,6 +35,12 @@ export const useNavigationState = (initialCartCount: number = 0) => {
     );
   }, [cartCount]);
 
+  // Sync cart count with cart items
+  useEffect(() => {
+    const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
+    setCartCount(totalItems);
+  }, [cartItems]);
+
   // Handle product quantity changes
   const handleProductQuantityChange = (productId: string, newQuantity: number, previousQuantity: number, productDetails?: {
     name: string;
@@ -42,10 +48,6 @@ export const useNavigationState = (initialCartCount: number = 0) => {
     price: string;
     image?: string;
   }) => {
-    // Update cart count
-    const quantityDifference = newQuantity - previousQuantity;
-    setCartCount(prev => Math.max(0, prev + quantityDifference));
-    
     // Update cart items
     setCartItems(prev => {
       // Find if product already exists in cart
