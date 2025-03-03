@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SearchBar } from "@/components/SearchBar";
 import { StoreTags } from "@/components/StoreTags";
@@ -28,21 +27,21 @@ const Index = () => {
 
   const [activeCategory, setActiveCategory] = useState("fruits");
   
-  const [cartCount, setCartCount] = useState(1);
+  const [cartCount, setCartCount] = useState(0);
 
   const [navItems, setNavItems] = useState<NavItem[]>([
     { id: "offers", icon: "discount", label: "Erbjudanden", active: true },
     { id: "recipes", icon: "book", label: "Recept" },
     { id: "menu", icon: "search", label: "Matsedel" },
-    { id: "cart", icon: "shopping-cart", label: "Inköpslista", badge: 1 },
+    { id: "cart", icon: "shopping-cart", label: "Inköpslista" },
     { id: "profile", icon: "user", label: "Profil" },
   ]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setNavItems(prev => 
       prev.map(item => 
         item.id === "cart" 
-          ? { ...item, badge: cartCount } 
+          ? { ...item, badge: cartCount > 0 ? cartCount : undefined } 
           : item
       )
     );
@@ -110,9 +109,7 @@ const Index = () => {
 
   const handleProductQuantityChange = (productId: string, newQuantity: number, previousQuantity: number) => {
     const quantityDifference = newQuantity - previousQuantity;
-    if (quantityDifference > 0) {
-      setCartCount(prev => prev + quantityDifference);
-    }
+    setCartCount(prev => Math.max(0, prev + quantityDifference));
   };
 
   return (
