@@ -43,7 +43,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ items, onSelect }) => {
             item.active ? "text-[#191919]" : "text-[#9E9E9E]"
           }`}
         >
-          {item.badge && (
+          {item.badge !== undefined && (
             <div className="absolute flex items-center justify-center text-white w-3 h-3 text-[8px] font-bold bg-[#DB2C17] rounded-full -right-0.5 top-0">
               {item.badge}
             </div>

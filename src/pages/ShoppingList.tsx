@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BottomNav, NavItem } from "@/components/BottomNav";
 import { useNavigate } from "react-router-dom";
 import { ShoppingCart, Search, BookOpen, Percent, User } from "lucide-react";
@@ -21,11 +20,11 @@ interface ShoppingItem {
 const ShoppingList = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"recent" | "stores">("recent");
-  const [navItems, setNavItems] = React.useState<NavItem[]>([
+  const [navItems, setNavItems] = useState<NavItem[]>([
     { id: "offers", icon: "discount", label: "Erbjudanden" },
     { id: "recipes", icon: "book", label: "Recept" },
     { id: "menu", icon: "search", label: "Matsedel" },
-    { id: "cart", icon: "shopping-cart", label: "Inköpslista", badge: 6, active: true },
+    { id: "cart", icon: "shopping-cart", label: "Inköpslista", badge: 0, active: true },
     { id: "profile", icon: "user", label: "Profil" },
   ]);
 
@@ -44,6 +43,18 @@ const ShoppingList = () => {
     { id: "5", name: "Bregott", details: "Arla, 250g", quantity: 1, price: "33 kr", checked: false },
     { id: "6", name: "Bregott", details: "Arla, 250g", quantity: 1, price: "33 kr", checked: false },
   ]);
+
+  useEffect(() => {
+    const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+    
+    setNavItems(prev => 
+      prev.map(item => 
+        item.id === "cart" 
+          ? { ...item, badge: totalItems > 0 ? totalItems : undefined }
+          : item
+      )
+    );
+  }, [items]);
 
   const handleNavSelect = (id: string) => {
     if (id === "offers") {
