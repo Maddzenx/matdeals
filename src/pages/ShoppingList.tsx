@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { BottomNav, NavItem } from "@/components/BottomNav";
 import { useNavigate } from "react-router-dom";
+import { ShoppingCart, Search, BookOpen, Percent, User } from "lucide-react";
 
 interface StorePrice {
   name: string;

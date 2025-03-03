@@ -1,5 +1,6 @@
 
 import React from "react";
+import { ShoppingCart, Search, BookOpen, Percent, User } from "lucide-react";
 
 export interface NavItem {
   id: string;
@@ -15,6 +16,23 @@ interface BottomNavProps {
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({ items, onSelect }) => {
+  const getIcon = (iconName: string) => {
+    switch (iconName) {
+      case "shopping-cart":
+        return <ShoppingCart size={20} />;
+      case "search":
+        return <Search size={20} />;
+      case "book":
+        return <BookOpen size={20} />;
+      case "discount":
+        return <Percent size={20} />;
+      case "user":
+        return <User size={20} />;
+      default:
+        return <div className="w-5 h-5" />;
+    }
+  };
+
   return (
     <nav className="fixed w-full flex justify-around items-center bg-white pt-1 bottom-0 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
       {items.map((item) => (
@@ -30,7 +48,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ items, onSelect }) => {
               {item.badge}
             </div>
           )}
-          <i className={`ti ti-${item.icon} text-base`} />
+          {getIcon(item.icon)}
           <span>{item.label}</span>
         </button>
       ))}
