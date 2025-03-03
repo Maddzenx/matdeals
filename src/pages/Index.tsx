@@ -10,7 +10,11 @@ import { Grid2X2, List } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
-  const { navItems, handleProductQuantityChange } = useNavigationState();
+  const { 
+    navItems, 
+    handleProductQuantityChange,
+    cartItems
+  } = useNavigationState();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   const handleRemoveTag = (id: string) => {

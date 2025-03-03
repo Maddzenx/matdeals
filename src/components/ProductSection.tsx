@@ -9,7 +9,17 @@ import { useProductUtils } from "@/hooks/useProductUtils";
 interface ProductSectionProps {
   categories: CategoryData[];
   storeTags: { id: string; name: string }[];
-  onProductQuantityChange: (productId: string, newQuantity: number, previousQuantity: number) => void;
+  onProductQuantityChange: (
+    productId: string, 
+    newQuantity: number, 
+    previousQuantity: number,
+    productDetails?: {
+      name: string;
+      details: string;
+      price: string;
+      image?: string;
+    }
+  ) => void;
   onRemoveTag: (id: string) => void;
   viewMode?: "grid" | "list";
 }
@@ -31,6 +41,26 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
     scrollToCategory(categoryId);
   };
 
+  const handleQuantityChange = (productId: string, newQuantity: number, previousQuantity: number) => {
+    // Find product details to include when changing quantity
+    const product = allProducts.find(p => p.id === productId);
+    if (product) {
+      onProductQuantityChange(
+        productId, 
+        newQuantity, 
+        previousQuantity, 
+        {
+          name: product.name,
+          details: product.details,
+          price: product.currentPrice,
+          image: product.image
+        }
+      );
+    } else {
+      onProductQuantityChange(productId, newQuantity, previousQuantity);
+    }
+  };
+
   return (
     <>
       <div className="px-4 pt-2">
@@ -47,7 +77,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
         <ProductGrid
           products={allProducts}
           showCategoryHeaders={true}
-          onQuantityChange={onProductQuantityChange}
+          onQuantityChange={handleQuantityChange}
           viewMode={viewMode}
         />
       </main>

@@ -1,37 +1,24 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { useNavigate } from "react-router-dom";
-import { SearchBar } from "@/components/SearchBar";
-import { categoriesData, productsData } from "@/data/productData";
-import { useProductUtils } from "@/hooks/useProductUtils";
-import { NavItem } from "@/components/BottomNav";
+import { useNavigationState, CartItem } from "@/hooks/useNavigationState";
 
 interface StorePrice {
   name: string;
   price: string;
 }
 
-interface ShoppingItem {
-  id: string;
-  name: string;
-  details: string;
-  quantity: number;
-  price: string;
-  checked: boolean;
-}
-
 const ShoppingList = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"recent" | "stores">("stores");
-  const [activeCategory, setActiveCategory] = useState("fruits");
-  const [navItems, setNavItems] = useState<NavItem[]>([
-    { id: "offers", icon: "discount", label: "Erbjudanden" },
-    { id: "recipes", icon: "book", label: "Recept" },
-    { id: "menu", icon: "search", label: "Matsedel" },
-    { id: "cart", icon: "shopping-cart", label: "Inköpslista", badge: 6, active: true },
-    { id: "profile", icon: "user", label: "Profil" },
-  ]);
+  
+  const { 
+    navItems, 
+    cartItems, 
+    handleProductQuantityChange,
+    handleItemCheck 
+  } = useNavigationState();
 
   const [stores, setStores] = useState<StorePrice[]>([
     { name: "Coop", price: "156 kr" },
@@ -40,64 +27,46 @@ const ShoppingList = () => {
 
   const [bestStore, setBestStore] = useState({ name: "Coop", savings: "55 kr" });
 
-  const [items, setItems] = useState<ShoppingItem[]>([
-    { id: "1", name: "Bregott", details: "Arla, 250g", quantity: 1, price: "33 kr", checked: false },
-    { id: "2", name: "Milk", details: "Arla, 1L", quantity: 1, price: "15 kr", checked: false },
-    { id: "3", name: "Bread", details: "Pågen, 800g", quantity: 1, price: "28 kr", checked: false },
-    { id: "4", name: "Cheese", details: "Präst, 500g", quantity: 1, price: "65 kr", checked: false },
-    { id: "5", name: "Eggs", details: "Kronägg, 12-pack", quantity: 1, price: "39 kr", checked: false },
-    { id: "6", name: "Yogurt", details: "Valio, 1L", quantity: 1, price: "22 kr", checked: false },
-  ]);
-  
-  const { getProductsWithCategories, scrollToCategory } = useProductUtils(categoriesData);
-  const allProducts = getProductsWithCategories();
-
-  useEffect(() => {
-    const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-    
-    setNavItems(prev => 
-      prev.map(item => 
-        item.id === "cart" 
-          ? { ...item, badge: totalItems > 0 ? totalItems : undefined, active: true }
-          : item
-      )
-    );
-  }, [items]);
-
   const handleNavSelect = (id: string) => {
     if (id === "offers") {
       navigate("/");
-    } else if (id === "cart") {
-      // Already on shopping list page
     } else {
       console.log("Selected nav:", id);
     }
   };
 
   const handleIncrement = (id: string) => {
-    setItems(
-      items.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
+    const item = cartItems.find(item => item.id === id);
+    if (item) {
+      handleProductQuantityChange(
+        id, 
+        item.quantity + 1, 
+        item.quantity,
+        {
+          name: item.name,
+          details: item.details,
+          price: item.price,
+          image: item.image
+        }
+      );
+    }
   };
 
   const handleDecrement = (id: string) => {
-    setItems(
-      items.map((item) =>
-        item.id === id && item.quantity > 0
-          ? { ...item, quantity: item.quantity - 1 }
-          : item
-      )
-    );
-  };
-
-  const handleCheckItem = (id: string) => {
-    setItems(
-      items.map((item) =>
-        item.id === id ? { ...item, checked: !item.checked } : item
-      )
-    );
+    const item = cartItems.find(item => item.id === id);
+    if (item && item.quantity > 0) {
+      handleProductQuantityChange(
+        id, 
+        Math.max(0, item.quantity - 1), 
+        item.quantity,
+        {
+          name: item.name,
+          details: item.details,
+          price: item.price,
+          image: item.image
+        }
+      );
+    }
   };
 
   return (
@@ -150,46 +119,58 @@ const ShoppingList = () => {
       <div className="border-b border-gray-200"></div>
       
       <div className="space-y-0 px-4">
-        {items.map((item) => (
-          <div key={item.id} className="flex items-center py-4 border-b border-gray-200">
+        {cartItems.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <p className="text-lg font-medium text-gray-500 mb-4">Din inköpslista är tom</p>
             <button
-              onClick={() => handleCheckItem(item.id)}
-              className="w-6 h-6 rounded-full border-2 border-gray-300 mr-4 flex-shrink-0 transition-colors duration-200 hover:border-gray-400"
-              aria-label={item.checked ? "Mark as incomplete" : "Mark as complete"}
+              onClick={() => navigate("/")}
+              className="text-white text-center text-sm font-bold bg-[#DB2C17] px-4 py-2 rounded-[100px]"
             >
-              {item.checked && (
-                <span className="block w-full h-full rounded-full bg-gray-400" />
-              )}
+              Gå till erbjudanden
             </button>
-            
-            <div className="flex-grow min-w-0">
-              <p className="font-bold text-[#1C1C1C] truncate">{item.name}</p>
-              <p className="text-sm text-gray-500">{item.details}</p>
-            </div>
-            
-            <div className="flex items-center gap-4 ml-2">
-              <div className="flex items-center">
-                <button
-                  onClick={() => handleDecrement(item.id)}
-                  className="flex items-center justify-center w-8 h-8 bg-gray-200 rounded-full hover:bg-gray-300 transition-colors"
-                  aria-label="Decrease quantity"
-                  disabled={item.quantity <= 0}
-                >
-                  <span className="text-lg font-bold">-</span>
-                </button>
-                <span className="mx-3 font-medium w-5 text-center">{item.quantity}</span>
-                <button
-                  onClick={() => handleIncrement(item.id)}
-                  className="flex items-center justify-center w-8 h-8 bg-gray-200 rounded-full hover:bg-gray-300 transition-colors"
-                  aria-label="Increase quantity"
-                >
-                  <span className="text-lg font-bold">+</span>
-                </button>
-              </div>
-              <span className="font-medium text-[#1C1C1C] min-w-[50px] text-right">{item.price}</span>
-            </div>
           </div>
-        ))}
+        ) : (
+          cartItems.map((item) => (
+            <div key={item.id} className="flex items-center py-4 border-b border-gray-200">
+              <button
+                onClick={() => handleItemCheck(item.id)}
+                className="w-6 h-6 rounded-full border-2 border-gray-300 mr-4 flex-shrink-0 transition-colors duration-200 hover:border-gray-400"
+                aria-label={item.checked ? "Mark as incomplete" : "Mark as complete"}
+              >
+                {item.checked && (
+                  <span className="block w-full h-full rounded-full bg-gray-400" />
+                )}
+              </button>
+              
+              <div className="flex-grow min-w-0">
+                <p className="font-bold text-[#1C1C1C] truncate">{item.name}</p>
+                <p className="text-sm text-gray-500">{item.details}</p>
+              </div>
+              
+              <div className="flex items-center gap-4 ml-2">
+                <div className="flex items-center">
+                  <button
+                    onClick={() => handleDecrement(item.id)}
+                    className="flex items-center justify-center w-8 h-8 bg-gray-200 rounded-full hover:bg-gray-300 transition-colors"
+                    aria-label="Decrease quantity"
+                    disabled={item.quantity <= 0}
+                  >
+                    <span className="text-lg font-bold">-</span>
+                  </button>
+                  <span className="mx-3 font-medium w-5 text-center">{item.quantity}</span>
+                  <button
+                    onClick={() => handleIncrement(item.id)}
+                    className="flex items-center justify-center w-8 h-8 bg-gray-200 rounded-full hover:bg-gray-300 transition-colors"
+                    aria-label="Increase quantity"
+                  >
+                    <span className="text-lg font-bold">+</span>
+                  </button>
+                </div>
+                <span className="font-medium text-[#1C1C1C] min-w-[50px] text-right">{item.price}</span>
+              </div>
+            </div>
+          ))
+        )}
       </div>
       
       <BottomNav items={navItems} onSelect={handleNavSelect} />

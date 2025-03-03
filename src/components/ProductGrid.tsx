@@ -19,13 +19,17 @@ interface ProductGridProps {
   products: Product[];
   showCategoryHeaders?: boolean;
   onQuantityChange?: (productId: string, newQuantity: number, previousQuantity: number) => void;
+  viewMode?: "grid" | "list";
+  className?: string;
 }
 
 export const ProductGrid: React.FC<ProductGridProps> = ({ 
   title, 
   products,
   showCategoryHeaders = false,
-  onQuantityChange 
+  onQuantityChange,
+  viewMode = "grid",
+  className = ""
 }) => {
   // Group products by category if showCategoryHeaders is true
   const groupedProducts = React.useMemo(() => {
@@ -44,7 +48,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   }, [products, showCategoryHeaders]);
 
   return (
-    <div>
+    <div className={className}>
       {title && <h2 className="text-base font-bold text-[#1C1C1C] mb-3">{title}</h2>}
       
       {Object.entries(groupedProducts).map(([category, categoryProducts]) => (
@@ -54,7 +58,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
               {category}
             </h3>
           )}
-          <div className="grid grid-cols-2 gap-2.5 mb-6">
+          <div className={`${viewMode === "grid" ? "grid grid-cols-2 gap-2.5" : "flex flex-col gap-2.5"} mb-6`}>
             {categoryProducts.map((product) => (
               <ProductCard
                 key={product.id}
