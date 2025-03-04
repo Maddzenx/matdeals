@@ -5,6 +5,7 @@ import { CartItem } from "@/hooks/useNavigationState";
 export const useStoreGrouping = (cartItems: CartItem[]) => {
   const groupedByStore = useMemo(() => {
     return cartItems.reduce((acc, item) => {
+      // Use the item's store property if it exists, otherwise use "Övriga produkter"
       const storeName = item.store || "Övriga produkter";
       if (!acc[storeName]) {
         acc[storeName] = [];
