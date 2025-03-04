@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { useNavigate } from "react-router-dom";
@@ -77,7 +76,6 @@ const ShoppingList = () => {
   };
 
   const handleShareList = async () => {
-    // Create a formatted text of the shopping list
     const listText = cartItems.map(item => 
       `${item.name} - ${item.quantity} st (${item.price})`
     ).join('\n');
@@ -93,7 +91,6 @@ const ShoppingList = () => {
       url: window.location.href
     };
 
-    // Try to use Web Share API if available
     if (navigator.share && navigator.canShare(shareData)) {
       try {
         await navigator.share(shareData);
@@ -103,7 +100,6 @@ const ShoppingList = () => {
         shareViaEmail(shareData);
       }
     } else {
-      // Fallback to email
       shareViaEmail(shareData);
     }
   };

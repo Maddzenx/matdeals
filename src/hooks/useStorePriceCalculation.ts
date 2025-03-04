@@ -57,28 +57,30 @@ export const useStorePriceCalculation = (cartItems: CartItem[]) => {
       return { name: storePrices[0]?.name || "N/A", savings: "0:00 kr" };
     }
     
-    // Find the store with the lowest total price
-    let lowestPriceStore = storePrices[0];
-    let secondLowestPriceStore = storePrices[0];
+    // Find the store with the highest discount compared to others
+    let highestSavingsStore = storePrices[0];
+    let highestSavings = 0;
     
+    // Find the most expensive store to compare against
+    const mostExpensiveStore = storePrices.reduce((max, store) => 
+      store.rawPrice > max.rawPrice ? store : max
+    , storePrices[0]);
+    
+    // Calculate savings for each store compared to the most expensive one
     for (const store of storePrices) {
-      if (store.rawPrice < lowestPriceStore.rawPrice) {
-        secondLowestPriceStore = lowestPriceStore;
-        lowestPriceStore = store;
-      } else if (store.rawPrice < secondLowestPriceStore.rawPrice && store.name !== lowestPriceStore.name) {
-        secondLowestPriceStore = store;
+      const storeSavings = mostExpensiveStore.rawPrice - store.rawPrice;
+      if (storeSavings > highestSavings && store.name !== mostExpensiveStore.name) {
+        highestSavings = storeSavings;
+        highestSavingsStore = store;
       }
     }
     
-    // Calculate savings compared to the second lowest price store
-    const savings = secondLowestPriceStore.rawPrice - lowestPriceStore.rawPrice;
-    
     // Format savings to Swedish format: XX:YY kr
-    const wholePart = Math.floor(savings);
-    const decimalPart = Math.round((savings % 1) * 100).toString().padStart(2, '0');
+    const wholePart = Math.floor(highestSavings);
+    const decimalPart = Math.round((highestSavings % 1) * 100).toString().padStart(2, '0');
     
     return {
-      name: lowestPriceStore.name,
+      name: highestSavingsStore.name,
       savings: `${wholePart}:${decimalPart} kr`
     };
   }, [storePrices]);
