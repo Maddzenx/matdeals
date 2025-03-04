@@ -16,7 +16,7 @@ export const ShoppingListItem: React.FC<ShoppingListItemProps> = ({
   onDecrement,
 }) => {
   return (
-    <div className={`flex items-center py-4 border-b border-gray-200 ${item.checked ? 'opacity-80 filter blur-[0.3px]' : ''}`}>
+    <div className={`flex items-center py-4 border-b border-gray-200 ${item.checked ? 'bg-gray-100' : ''}`}>
       <button
         onClick={() => onItemCheck(item.id)}
         className={`w-6 h-6 rounded-full border-2 mr-4 flex-shrink-0 transition-colors duration-200 ${
@@ -47,7 +47,7 @@ export const ShoppingListItem: React.FC<ShoppingListItemProps> = ({
       </button>
       
       <div className="flex-grow min-w-0">
-        <p className={`font-bold text-[#1C1C1C] truncate ${item.checked ? 'line-through' : ''}`}>{item.name}</p>
+        <p className={`font-bold text-[#1C1C1C] truncate ${item.checked ? 'line-through text-gray-500' : ''}`}>{item.name}</p>
         <p className="text-sm text-gray-500">{item.details}</p>
       </div>
       
