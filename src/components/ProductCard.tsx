@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from "react";
+import { useNavigationState } from "@/hooks/useNavigationState";
 
 interface ProductCardProps {
   id: string;
@@ -24,7 +25,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   offerBadge,
   onQuantityChange,
 }) => {
+  const { cartItems } = useNavigationState();
   const [quantity, setQuantity] = useState(0);
+  
+  // Sync with global cart state
+  useEffect(() => {
+    const item = cartItems.find(item => item.id === id);
+    if (item) {
+      setQuantity(item.quantity);
+    } else {
+      setQuantity(0);
+    }
+  }, [cartItems, id]);
 
   const handleAdd = () => {
     const newQuantity = 1;

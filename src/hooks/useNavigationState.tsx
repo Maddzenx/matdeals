@@ -1,6 +1,7 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { NavItem } from "@/components/BottomNav";
+import { useToast } from "@/hooks/use-toast";
 
 export interface CartItem {
   id: string;
@@ -12,9 +13,19 @@ export interface CartItem {
   image?: string;
 }
 
+// Create a singleton instance to share state across components
+let globalCartItems: CartItem[] = [];
+let globalCartCount = 0;
+let subscribers: (() => void)[] = [];
+
+const notifySubscribers = () => {
+  subscribers.forEach(callback => callback());
+};
+
 export const useNavigationState = (initialCartCount: number = 0) => {
-  const [cartCount, setCartCount] = useState(initialCartCount);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartCount, setCartCount] = useState(globalCartCount || initialCartCount);
+  const [cartItems, setCartItems] = useState<CartItem[]>(globalCartItems);
+  const { toast } = useToast();
   
   const [navItems, setNavItems] = useState<NavItem[]>([
     { id: "offers", icon: "discount", label: "Erbjudanden", active: true },
@@ -23,6 +34,23 @@ export const useNavigationState = (initialCartCount: number = 0) => {
     { id: "cart", icon: "shopping-cart", label: "Inköpslista" },
     { id: "profile", icon: "user", label: "Profil" },
   ]);
+
+  // Subscribe to global changes
+  useEffect(() => {
+    const handleChange = () => {
+      setCartItems([...globalCartItems]);
+      setCartCount(globalCartCount);
+    };
+    
+    subscribers.push(handleChange);
+    
+    // Initial sync
+    handleChange();
+    
+    return () => {
+      subscribers = subscribers.filter(sub => sub !== handleChange);
+    };
+  }, []);
 
   // Update nav items when cart count changes
   useEffect(() => {
@@ -35,63 +63,98 @@ export const useNavigationState = (initialCartCount: number = 0) => {
     );
   }, [cartCount]);
 
-  // Sync cart count with cart items
-  useEffect(() => {
-    const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
-    setCartCount(totalItems);
-  }, [cartItems]);
-
   // Handle product quantity changes
-  const handleProductQuantityChange = (productId: string, newQuantity: number, previousQuantity: number, productDetails?: {
-    name: string;
-    details: string;
-    price: string;
-    image?: string;
-  }) => {
+  const handleProductQuantityChange = useCallback((
+    productId: string, 
+    newQuantity: number, 
+    previousQuantity: number, 
+    productDetails?: {
+      name: string;
+      details: string;
+      price: string;
+      image?: string;
+    }
+  ) => {
     // Update cart items
-    setCartItems(prev => {
-      // Find if product already exists in cart
-      const existingItemIndex = prev.findIndex(item => item.id === productId);
+    let updatedCartItems = [...globalCartItems];
+    
+    // Find if product already exists in cart
+    const existingItemIndex = updatedCartItems.findIndex(item => item.id === productId);
+    
+    // If quantity is 0, remove item from cart
+    if (newQuantity === 0 && existingItemIndex !== -1) {
+      updatedCartItems = updatedCartItems.filter(item => item.id !== productId);
       
-      // If quantity is 0, remove item from cart
-      if (newQuantity === 0 && existingItemIndex !== -1) {
-        return prev.filter(item => item.id !== productId);
+      // Show toast notification for removed item
+      toast({
+        title: "Removed from shopping list",
+        description: updatedCartItems[existingItemIndex]?.name || "Item removed",
+      });
+    } 
+    // If item exists, update quantity
+    else if (existingItemIndex !== -1) {
+      updatedCartItems = updatedCartItems.map((item, index) => 
+        index === existingItemIndex 
+          ? { ...item, quantity: newQuantity }
+          : item
+      );
+      
+      // Show toast notification for updated item
+      if (newQuantity > previousQuantity) {
+        toast({
+          title: "Added to shopping list",
+          description: `${updatedCartItems[existingItemIndex].name} (${newQuantity})`,
+        });
       }
+    } 
+    // If item is new and we have details, add it to cart
+    else if (productDetails && newQuantity > 0) {
+      const newItem = {
+        id: productId,
+        name: productDetails.name,
+        details: productDetails.details,
+        quantity: newQuantity,
+        price: productDetails.price,
+        checked: false,
+        image: productDetails.image
+      };
       
-      // If item exists, update quantity
-      if (existingItemIndex !== -1) {
-        return prev.map((item, index) => 
-          index === existingItemIndex 
-            ? { ...item, quantity: newQuantity }
-            : item
-        );
-      }
+      updatedCartItems = [...updatedCartItems, newItem];
       
-      // If item is new and we have details, add it to cart
-      if (productDetails && newQuantity > 0) {
-        return [...prev, {
-          id: productId,
-          name: productDetails.name,
-          details: productDetails.details,
-          quantity: newQuantity,
-          price: productDetails.price,
-          checked: false,
-          image: productDetails.image
-        }];
-      }
-      
-      return prev;
-    });
-  };
+      // Show toast notification for new item
+      toast({
+        title: "Added to shopping list",
+        description: `${newItem.name} (${newQuantity})`,
+      });
+    }
+    
+    // Update global state
+    globalCartItems = updatedCartItems;
+    globalCartCount = updatedCartItems.reduce((total, item) => total + item.quantity, 0);
+    
+    // Update local state
+    setCartItems(updatedCartItems);
+    setCartCount(globalCartCount);
+    
+    // Notify all subscribers
+    notifySubscribers();
+  }, [toast]);
 
   // Handle item checked status
-  const handleItemCheck = (id: string) => {
-    setCartItems(prev =>
-      prev.map(item =>
-        item.id === id ? { ...item, checked: !item.checked } : item
-      )
+  const handleItemCheck = useCallback((id: string) => {
+    const updatedCartItems = globalCartItems.map(item =>
+      item.id === id ? { ...item, checked: !item.checked } : item
     );
-  };
+    
+    // Update global state
+    globalCartItems = updatedCartItems;
+    
+    // Update local state
+    setCartItems(updatedCartItems);
+    
+    // Notify all subscribers
+    notifySubscribers();
+  }, []);
 
   return {
     navItems,

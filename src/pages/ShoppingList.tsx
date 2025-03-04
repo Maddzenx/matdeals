@@ -1,8 +1,8 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { useNavigate } from "react-router-dom";
-import { useNavigationState, CartItem } from "@/hooks/useNavigationState";
+import { useNavigationState } from "@/hooks/useNavigationState";
 import { ShoppingListTabs } from "@/components/ShoppingList/ShoppingListTabs";
 import { StorePriceComparison } from "@/components/ShoppingList/StorePriceComparison";
 import { ShoppingListItem } from "@/components/ShoppingList/ShoppingListItem";
@@ -29,7 +29,7 @@ const ShoppingList = () => {
     { name: "ICA", price: "101 kr" },
   ]);
 
-  const [bestStore, setBestStore] = useState({ name: "Coop", savings: "55 kr" });
+  const [bestStore, setBestStore] = useState({ name: "ICA", savings: "55 kr" });
 
   const handleNavSelect = (id: string) => {
     if (id === "offers") {
