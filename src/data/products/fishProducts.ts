@@ -1,0 +1,55 @@
+
+import { Product } from "../types";
+
+export const fishProducts: Product[] = [
+  {
+    id: "handskalarakor1",
+    image: "https://assets.icanet.se/e_sharpen:80,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_153323/cf_259/handskaladr_r-kor%2C_i_lake.jpg",
+    name: "Handskalade Räkor",
+    details: "Falkenberg, 340/280g, Jämförpris 285:36 kr/kg, Max 3 förp/hushåll",
+    currentPrice: "79:90 kr/förp",
+    originalPrice: "91:90 kr/förp",
+    store: "Willys Hornsberg",
+    offerBadge: "SPARA 12:00",
+  },
+  {
+    id: "skagenrora1",
+    image: "https://assets.icanet.se/e_sharpen:80,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_231156/cf_259/skagenr-ra.jpg",
+    name: "Skagenröra",
+    details: "Rydbergs, 200g, Jämförpris 114:50 kr/kg",
+    currentPrice: "22:90 kr/förp",
+    originalPrice: "28:90 kr/förp",
+    store: "Willys Hornsberg",
+    offerBadge: "SPARA 6:00",
+  },
+  {
+    id: "varmroktlax1",
+    image: "https://assets.icanet.se/e_sharpen:80,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_125811/cf_259/varmr-kt_lax.jpg",
+    name: "Varmrökt Lax",
+    details: "Isfjord Norway, Ca 1kg, Jämförpris 109:00 kr/kg, Max 3 förp/hushåll",
+    currentPrice: "109:00 kr/kg",
+    originalPrice: "139:00 kr/kg",
+    store: "Willys Hornsberg",
+    offerBadge: "SPARA 30:00 PER KG",
+  },
+  {
+    id: "laxfile1",
+    image: "https://assets.icanet.se/e_sharpen:80,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_262452/cf_259/laxfile%2C_4-pack.jpg",
+    name: "Laxfilé 4-pack",
+    details: "Omega, 500g, Jämförpris 159:80 kr/kg, Max 3 förp/hushåll",
+    currentPrice: "79:90 kr/förp",
+    originalPrice: "95:90 kr/förp",
+    store: "Willys Hornsberg",
+    offerBadge: "SPARA 16:00",
+  },
+  {
+    id: "torskfilé1",
+    image: "https://assets.icanet.se/e_sharpen:80,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_144921/cf_259/torskfilefile.jpg",
+    name: "Torskfilé",
+    details: "Findus, fryst, 400g, MSC-märkt",
+    currentPrice: "49:90 kr/förp",
+    originalPrice: "",
+    store: "Hemköp",
+    offerBadge: "49:90",
+  },
+];
