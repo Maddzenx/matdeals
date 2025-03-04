@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ProductGrid } from "@/components/ProductGrid";
 import { StoreTags } from "@/components/StoreTags";
 import { CategoryTabs } from "@/components/CategoryTabs";
@@ -42,6 +42,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   
   const nonEmptyCategories = getNonEmptyCategories();
   const [activeCategory, setActiveCategory] = useState(nonEmptyCategories.length > 0 ? nonEmptyCategories[0].id : "");
+  const scrolledToCategoryRef = useRef(false);
   
   const allProducts = getProductsWithCategories();
   const allCategoryNames = getAllCategoryNames();
@@ -53,6 +54,43 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
     }
   }, [nonEmptyCategories, activeCategory]);
 
+  // Setup scroll event to update active category based on scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      // Don't trigger if we just programmatically scrolled to a category
+      if (scrolledToCategoryRef.current) {
+        scrolledToCategoryRef.current = false;
+        return;
+      }
+
+      // Find all category elements in the DOM
+      const categoryElements = allCategoryNames.map(name => document.getElementById(name));
+      
+      // Filter out null elements and get their positions
+      const validElements = categoryElements
+        .filter(el => el !== null)
+        .map(el => ({
+          id: nonEmptyCategories.find(c => c.name === el?.id)?.id || "",
+          position: el!.getBoundingClientRect().top
+        }));
+
+      // Get the header height (adjust this value based on your fixed header height)
+      const headerHeight = 120;
+
+      // Find the element closest to the top of the viewport (after the header)
+      const closestElement = validElements
+        .filter(el => el.position <= headerHeight + 50) // Add some threshold
+        .sort((a, b) => b.position - a.position)[0];
+
+      if (closestElement && closestElement.id !== activeCategory) {
+        setActiveCategory(closestElement.id);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [allCategoryNames, nonEmptyCategories, activeCategory]);
+
   // Filter products based on active store IDs
   const filteredProducts = allProducts.filter(product => {
     const storeTag = storeTags.find(tag => tag.name === product.store);
@@ -61,6 +99,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
 
   const handleCategorySelect = (categoryId: string) => {
     setActiveCategory(categoryId);
+    scrolledToCategoryRef.current = true;
     scrollToCategory(categoryId);
   };
 

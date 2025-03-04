@@ -44,7 +44,7 @@ export const useProductUtils = (categories: CategoryData[]) => {
       
       // Calculate the position to scroll to
       const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-      const offsetPosition = elementPosition - headerHeight;
+      const offsetPosition = elementPosition - headerHeight - 10; // Additional 10px for visual spacing
       
       // Scroll to the element with the offset
       window.scrollTo({
