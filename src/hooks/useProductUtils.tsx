@@ -30,7 +30,18 @@ export const useProductUtils = (categories: CategoryData[]) => {
     const categoryName = categories.find(c => c.id === categoryId)?.name || "";
     const element = document.getElementById(categoryName);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      // Get header height (CategoryTabs + other fixed elements)
+      const headerHeight = 105 + 48; // 105px from the top sticky positioning + ~48px for the tabs
+      
+      // Calculate the position to scroll to
+      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+      const offsetPosition = elementPosition - headerHeight;
+      
+      // Scroll to the element with the offset
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
     }
   }, [categories]);
 
