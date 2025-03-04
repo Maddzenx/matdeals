@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { NavItem } from "@/components/BottomNav";
 
@@ -84,11 +85,16 @@ export const useNavigationState = (initialCartCount: number = 0) => {
     if (newQuantity === 0 && existingItemIndex !== -1) {
       updatedCartItems = updatedCartItems.filter(item => item.id !== productId);
     } 
-    // If item exists, update quantity
+    // If item exists, update quantity AND ensure store information is preserved
     else if (existingItemIndex !== -1) {
       updatedCartItems = updatedCartItems.map((item, index) => 
         index === existingItemIndex 
-          ? { ...item, quantity: newQuantity }
+          ? { 
+              ...item, 
+              quantity: newQuantity,
+              // Update store information if it's provided and was previously missing
+              store: (productDetails?.store && !item.store) ? productDetails.store : item.store
+            }
           : item
       );
     } 
@@ -102,7 +108,8 @@ export const useNavigationState = (initialCartCount: number = 0) => {
         price: productDetails.price,
         checked: false,
         image: productDetails.image,
-        store: productDetails.store
+        // Ensure store is always included
+        store: productDetails.store || "Övriga produkter"
       };
       
       updatedCartItems = [...updatedCartItems, newItem];

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { useNavigate } from "react-router-dom";
@@ -49,7 +48,7 @@ const ShoppingList = () => {
           details: item.details,
           price: item.price,
           image: item.image,
-          store: item.store
+          store: item.store || "Övriga produkter"
         }
       );
     }
@@ -67,7 +66,7 @@ const ShoppingList = () => {
           details: item.details,
           price: item.price,
           image: item.image,
-          store: item.store
+          store: item.store || "Övriga produkter"
         }
       );
     }
