@@ -20,7 +20,7 @@ export const CategoryTabs: React.FC<CategoryTabsProps> = ({
   const tabsRef = useRef<HTMLDivElement>(null);
   const activeButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Center the active category when it changes - with improved smoothness
+  // Center the active category when it changes
   useEffect(() => {
     if (tabsRef.current && activeButtonRef.current) {
       const container = tabsRef.current;
@@ -34,7 +34,7 @@ export const CategoryTabs: React.FC<CategoryTabsProps> = ({
       // Calculate the scroll position that centers the active button
       const scrollPosition = activeButtonLeft - (containerWidth / 2) + (activeButtonWidth / 2);
       
-      // Apply the scroll immediately without requestAnimationFrame to avoid shaking
+      // Apply the scroll with smooth behavior
       container.scrollTo({
         left: scrollPosition,
         behavior: 'smooth'
@@ -45,14 +45,14 @@ export const CategoryTabs: React.FC<CategoryTabsProps> = ({
   return (
     <div 
       ref={tabsRef}
-      className="sticky top-[70px] z-10 bg-white flex overflow-x-auto gap-4 px-4 py-3 no-scrollbar mt-3"
+      className="sticky top-[70px] z-10 bg-white flex overflow-x-auto gap-4 px-4 py-4 no-scrollbar mt-3"
     >
       {categories.map((category) => (
         <button
           key={category.id}
           ref={activeCategory === category.id ? activeButtonRef : null}
           onClick={() => onSelect(category.id)}
-          className={`text-sm font-bold whitespace-nowrap px-1 transition-all ${
+          className={`text-sm font-bold whitespace-nowrap px-1 py-0.5 transition-all ${
             activeCategory === category.id 
               ? "text-[#191919] border-b-2 border-[#191919]" 
               : "text-[#6E6E6E] hover:text-[#4a4a4a]"

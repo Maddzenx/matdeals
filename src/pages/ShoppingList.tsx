@@ -24,12 +24,59 @@ const ShoppingList = () => {
     handleItemCheck 
   } = useNavigationState();
 
-  const [stores, setStores] = useState<StorePrice[]>([
-    { name: "Coop", price: "156 kr" },
-    { name: "ICA", price: "101 kr" },
-  ]);
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
-  const [bestStore, setBestStore] = useState({ name: "ICA", savings: "55 kr" });
+  // Calculate total price for each store
+  const calculateStorePrices = () => {
+    const storePrices: Record<string, number> = {};
+    
+    cartItems.forEach(item => {
+      const store = item.store || "Other";
+      const priceValue = parseFloat(item.price.replace(/[^0-9,.]/g, '').replace(',', '.'));
+      
+      if (!isNaN(priceValue)) {
+        if (!storePrices[store]) {
+          storePrices[store] = 0;
+        }
+        storePrices[store] += priceValue * item.quantity;
+      }
+    });
+    
+    return Object.entries(storePrices).map(([name, total]) => ({
+      name,
+      price: `${total.toFixed(0)} kr`
+    }));
+  };
+
+  // Find store with best savings
+  const findBestStore = (stores: StorePrice[]) => {
+    if (stores.length <= 1) {
+      return { name: stores[0]?.name || "N/A", savings: "0 kr" };
+    }
+    
+    // Sort stores by price (lowest first)
+    const sortedStores = [...stores].sort((a, b) => {
+      const aPrice = parseFloat(a.price.replace(/[^0-9,.]/g, '').replace(',', '.'));
+      const bPrice = parseFloat(b.price.replace(/[^0-9,.]/g, '').replace(',', '.'));
+      return aPrice - bPrice;
+    });
+    
+    // Calculate savings between cheapest and second cheapest
+    const cheapestPrice = parseFloat(sortedStores[0].price.replace(/[^0-9,.]/g, '').replace(',', '.'));
+    const secondPrice = parseFloat(sortedStores[1].price.replace(/[^0-9,.]/g, '').replace(',', '.'));
+    const savings = secondPrice - cheapestPrice;
+    
+    return {
+      name: sortedStores[0].name,
+      savings: `${savings.toFixed(0)} kr`
+    };
+  };
+
+  const stores = calculateStorePrices();
+  const bestStore = findBestStore(stores);
 
   const handleNavSelect = (id: string) => {
     if (id === "offers") {
@@ -50,7 +97,8 @@ const ShoppingList = () => {
           name: item.name,
           details: item.details,
           price: item.price,
-          image: item.image
+          image: item.image,
+          store: item.store
         }
       );
     }
@@ -67,7 +115,8 @@ const ShoppingList = () => {
           name: item.name,
           details: item.details,
           price: item.price,
-          image: item.image
+          image: item.image,
+          store: item.store
         }
       );
     }
@@ -83,8 +132,6 @@ const ShoppingList = () => {
     return acc;
   }, {} as Record<string, typeof cartItems>);
 
-  console.log("ShoppingList rendered with cartItems:", cartItems);
-
   return (
     <div className="min-h-screen w-full bg-white pb-20">
       <link
@@ -92,21 +139,21 @@ const ShoppingList = () => {
         href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"
       />
       
-      <header className="px-4 pt-6 pb-4 sticky top-0 bg-white z-10">
+      <header className="px-4 pt-6 pb-4 bg-white">
         <h1 className="text-2xl font-bold text-[#1C1C1C]">Inköpslista</h1>
       </header>
       
-      <div className="sticky top-[72px] z-10 bg-white">
+      <div className="sticky top-0 z-10 bg-white">
         <ShoppingListTabs 
           activeTab={activeTab} 
           onTabChange={setActiveTab} 
         />
-        
-        <StorePriceComparison 
-          stores={stores} 
-          bestStore={bestStore} 
-        />
       </div>
+      
+      <StorePriceComparison 
+        stores={stores} 
+        bestStore={bestStore} 
+      />
       
       <div className="border-b border-gray-200"></div>
       
