@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { useNavigate } from "react-router-dom";
@@ -24,17 +23,15 @@ const ShoppingList = () => {
     handleItemCheck 
   } = useNavigationState();
 
-  // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Calculate total price for each store
   const calculateStorePrices = () => {
     const storePrices: Record<string, number> = {};
     
     cartItems.forEach(item => {
-      const store = item.store || "Other";
+      const store = item.store || "Övriga produkter";
       const priceValue = parseFloat(item.price.replace(/[^0-9,.]/g, '').replace(',', '.'));
       
       if (!isNaN(priceValue)) {
@@ -51,20 +48,17 @@ const ShoppingList = () => {
     }));
   };
 
-  // Find store with best savings
   const findBestStore = (stores: StorePrice[]) => {
     if (stores.length <= 1) {
       return { name: stores[0]?.name || "N/A", savings: "0 kr" };
     }
     
-    // Sort stores by price (lowest first)
     const sortedStores = [...stores].sort((a, b) => {
       const aPrice = parseFloat(a.price.replace(/[^0-9,.]/g, '').replace(',', '.'));
       const bPrice = parseFloat(b.price.replace(/[^0-9,.]/g, '').replace(',', '.'));
       return aPrice - bPrice;
     });
     
-    // Calculate savings between cheapest and second cheapest
     const cheapestPrice = parseFloat(sortedStores[0].price.replace(/[^0-9,.]/g, '').replace(',', '.'));
     const secondPrice = parseFloat(sortedStores[1].price.replace(/[^0-9,.]/g, '').replace(',', '.'));
     const savings = secondPrice - cheapestPrice;
@@ -122,9 +116,8 @@ const ShoppingList = () => {
     }
   };
 
-  // Group products by store
   const groupedByStore = cartItems.reduce((acc, item) => {
-    const storeName = item.store || "Other";
+    const storeName = item.store || "Övriga produkter";
     if (!acc[storeName]) {
       acc[storeName] = [];
     }
@@ -132,7 +125,6 @@ const ShoppingList = () => {
     return acc;
   }, {} as Record<string, typeof cartItems>);
 
-  // Sort store names alphabetically for consistent display
   const sortedStoreNames = Object.keys(groupedByStore).sort();
 
   return (
@@ -165,23 +157,25 @@ const ShoppingList = () => {
           {cartItems.length === 0 ? (
             <EmptyShoppingList />
           ) : activeTab === "stores" ? (
-            // Stores view - Group by store with sorted order
             sortedStoreNames.map((storeName) => (
               <div key={storeName} className="mt-4">
-                <h2 className="text-lg font-semibold mb-2">{storeName}</h2>
-                {groupedByStore[storeName].map((item) => (
-                  <ShoppingListItem
-                    key={item.id}
-                    item={item}
-                    onItemCheck={handleItemCheck}
-                    onIncrement={handleIncrement}
-                    onDecrement={handleDecrement}
-                  />
-                ))}
+                <div className="sticky top-[116px] bg-white py-2 z-10">
+                  <h2 className="text-lg font-semibold">{storeName}</h2>
+                </div>
+                <div className="divide-y divide-gray-200">
+                  {groupedByStore[storeName].map((item) => (
+                    <ShoppingListItem
+                      key={item.id}
+                      item={item}
+                      onItemCheck={handleItemCheck}
+                      onIncrement={handleIncrement}
+                      onDecrement={handleDecrement}
+                    />
+                  ))}
+                </div>
               </div>
             ))
           ) : (
-            // Recent view - No grouping
             cartItems.map((item) => (
               <ShoppingListItem
                 key={item.id}
