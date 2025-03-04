@@ -1,11 +1,19 @@
 
 import React, { useState } from "react";
+import { StoreSelector } from "./StoreSelector";
+import { storeTagsData } from "@/data/productData";
 
 interface SearchBarProps {
   onSearch?: (query: string) => void;
+  activeStoreIds?: string[];
+  onStoreToggle?: (storeId: string) => void;
 }
 
-export const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
+export const SearchBar: React.FC<SearchBarProps> = ({ 
+  onSearch, 
+  activeStoreIds = [], 
+  onStoreToggle = () => {} 
+}) => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,12 +36,12 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
           className="bg-transparent border-none outline-none w-full text-sm font-medium text-[#6E6E6E]"
         />
       </div>
-      <button
-        className="w-10 h-10 flex items-center justify-center bg-neutral-100 rounded-[100px]"
-        aria-label="Filter"
-      >
-        <i className="ti ti-adjustments" />
-      </button>
+      <StoreSelector
+        stores={storeTagsData}
+        activeStoreIds={activeStoreIds}
+        onStoreToggle={onStoreToggle}
+        className="flex-shrink-0"
+      />
     </div>
   );
 };

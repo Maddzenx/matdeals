@@ -43,19 +43,15 @@ export const StoreSelector: React.FC<StoreSelectorProps> = ({
     <div className={cn("relative", className)} data-store-selector>
       <button
         onClick={toggleDropdown}
-        className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+        className="w-10 h-10 flex items-center justify-center bg-neutral-100 rounded-[100px]"
         aria-label="Select stores"
         aria-expanded={isOpen}
       >
-        <img 
-          src="/lovable-uploads/8ba1b803-c207-49d9-bf65-37064d3528d8.png" 
-          alt="Store selection" 
-          className="w-5 h-5" 
-        />
+        <i className="ti ti-adjustments" />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-30 py-1 border border-gray-200">
+        <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-50 py-1 border border-gray-200">
           <div className="px-3 py-2 text-sm font-semibold text-gray-700 border-b border-gray-200">
             Välj butiker
           </div>
