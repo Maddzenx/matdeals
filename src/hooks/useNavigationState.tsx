@@ -1,7 +1,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { NavItem } from "@/components/BottomNav";
-import { useToast } from "@/hooks/use-toast";
 
 export interface CartItem {
   id: string;
@@ -25,7 +24,6 @@ const notifySubscribers = () => {
 export const useNavigationState = (initialCartCount: number = 0) => {
   const [cartCount, setCartCount] = useState(globalCartCount || initialCartCount);
   const [cartItems, setCartItems] = useState<CartItem[]>(globalCartItems);
-  const { toast } = useToast();
   
   const [navItems, setNavItems] = useState<NavItem[]>([
     { id: "offers", icon: "discount", label: "Erbjudanden", active: true },
@@ -84,12 +82,6 @@ export const useNavigationState = (initialCartCount: number = 0) => {
     // If quantity is 0, remove item from cart
     if (newQuantity === 0 && existingItemIndex !== -1) {
       updatedCartItems = updatedCartItems.filter(item => item.id !== productId);
-      
-      // Show toast notification for removed item
-      toast({
-        title: "Removed from shopping list",
-        description: updatedCartItems[existingItemIndex]?.name || "Item removed",
-      });
     } 
     // If item exists, update quantity
     else if (existingItemIndex !== -1) {
@@ -98,14 +90,6 @@ export const useNavigationState = (initialCartCount: number = 0) => {
           ? { ...item, quantity: newQuantity }
           : item
       );
-      
-      // Show toast notification for updated item
-      if (newQuantity > previousQuantity) {
-        toast({
-          title: "Added to shopping list",
-          description: `${updatedCartItems[existingItemIndex].name} (${newQuantity})`,
-        });
-      }
     } 
     // If item is new and we have details, add it to cart
     else if (productDetails && newQuantity > 0) {
@@ -120,12 +104,6 @@ export const useNavigationState = (initialCartCount: number = 0) => {
       };
       
       updatedCartItems = [...updatedCartItems, newItem];
-      
-      // Show toast notification for new item
-      toast({
-        title: "Added to shopping list",
-        description: `${newItem.name} (${newQuantity})`,
-      });
     }
     
     // Update global state
@@ -138,7 +116,7 @@ export const useNavigationState = (initialCartCount: number = 0) => {
     
     // Notify all subscribers
     notifySubscribers();
-  }, [toast]);
+  }, []);
 
   // Handle item checked status
   const handleItemCheck = useCallback((id: string) => {

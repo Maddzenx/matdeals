@@ -85,6 +85,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                   store={product.store}
                   offerBadge={product.offerBadge}
                   onQuantityChange={onQuantityChange}
+                  viewMode={viewMode}
                 />
               ))}
             </div>
