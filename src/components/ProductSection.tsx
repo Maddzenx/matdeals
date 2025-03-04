@@ -32,9 +32,10 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   viewMode = "grid"
 }) => {
   const [activeCategory, setActiveCategory] = useState("fruits");
-  const { getProductsWithCategories, scrollToCategory } = useProductUtils(categories);
+  const { getProductsWithCategories, scrollToCategory, getAllCategoryNames } = useProductUtils(categories);
   
   const allProducts = getProductsWithCategories();
+  const allCategoryNames = getAllCategoryNames();
 
   const handleCategorySelect = (categoryId: string) => {
     setActiveCategory(categoryId);
@@ -79,6 +80,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
           showCategoryHeaders={true}
           onQuantityChange={handleQuantityChange}
           viewMode={viewMode}
+          allCategoryNames={allCategoryNames}
         />
       </main>
     </>

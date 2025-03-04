@@ -21,6 +21,7 @@ interface ProductGridProps {
   onQuantityChange?: (productId: string, newQuantity: number, previousQuantity: number) => void;
   viewMode?: "grid" | "list";
   className?: string;
+  allCategoryNames?: string[];
 }
 
 export const ProductGrid: React.FC<ProductGridProps> = ({ 
@@ -29,7 +30,8 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   showCategoryHeaders = false,
   onQuantityChange,
   viewMode = "grid",
-  className = ""
+  className = "",
+  allCategoryNames = []
 }) => {
   // Group products by category if showCategoryHeaders is true
   const groupedProducts = React.useMemo(() => {
@@ -37,15 +39,26 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
       return { "": products };
     }
     
-    return products.reduce((acc: Record<string, Product[]>, product) => {
+    const groups: Record<string, Product[]> = {};
+    
+    // Initialize all categories, even empty ones
+    if (allCategoryNames.length > 0) {
+      allCategoryNames.forEach(category => {
+        groups[category] = [];
+      });
+    }
+    
+    // Add products to their respective categories
+    products.forEach(product => {
       const category = product.category || "";
-      if (!acc[category]) {
-        acc[category] = [];
+      if (!groups[category]) {
+        groups[category] = [];
       }
-      acc[category].push(product);
-      return acc;
-    }, {});
-  }, [products, showCategoryHeaders]);
+      groups[category].push(product);
+    });
+    
+    return groups;
+  }, [products, showCategoryHeaders, allCategoryNames]);
 
   return (
     <div className={className}>
@@ -58,22 +71,24 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
               {category}
             </h3>
           )}
-          <div className={`${viewMode === "grid" ? "grid grid-cols-2 gap-2.5" : "flex flex-col gap-2.5"} mb-6`}>
-            {categoryProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                id={product.id}
-                image={product.image}
-                name={product.name}
-                details={product.details}
-                currentPrice={product.currentPrice}
-                originalPrice={product.originalPrice}
-                store={product.store}
-                offerBadge={product.offerBadge}
-                onQuantityChange={onQuantityChange}
-              />
-            ))}
-          </div>
+          {categoryProducts.length > 0 && (
+            <div className={`${viewMode === "grid" ? "grid grid-cols-2 gap-2.5" : "flex flex-col gap-2.5"} mb-6`}>
+              {categoryProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  id={product.id}
+                  image={product.image}
+                  name={product.name}
+                  details={product.details}
+                  currentPrice={product.currentPrice}
+                  originalPrice={product.originalPrice}
+                  store={product.store}
+                  offerBadge={product.offerBadge}
+                  onQuantityChange={onQuantityChange}
+                />
+              ))}
+            </div>
+          )}
         </div>
       ))}
     </div>

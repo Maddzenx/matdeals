@@ -20,6 +20,11 @@ export const useProductUtils = (categories: CategoryData[]) => {
     return result;
   }, [categories]);
 
+  // Get all category names from the categories array
+  const getAllCategoryNames = useCallback(() => {
+    return categories.map(category => category.name);
+  }, [categories]);
+
   // Scroll to a category when it's selected
   const scrollToCategory = useCallback((categoryId: string) => {
     const categoryName = categories.find(c => c.id === categoryId)?.name || "";
@@ -31,6 +36,7 @@ export const useProductUtils = (categories: CategoryData[]) => {
 
   return {
     getProductsWithCategories,
-    scrollToCategory
+    scrollToCategory,
+    getAllCategoryNames
   };
 };
