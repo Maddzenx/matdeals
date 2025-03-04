@@ -10,6 +10,7 @@ import { EmptyShoppingList } from "@/components/ShoppingList/EmptyShoppingList";
 import { StoreProductGroup } from "@/components/ShoppingList/StoreProductGroup";
 import { useStorePriceCalculation } from "@/hooks/useStorePriceCalculation";
 import { useStoreGrouping } from "@/hooks/useStoreGrouping";
+import { toast } from "sonner";
 
 const ShoppingList = () => {
   const navigate = useNavigate();
@@ -75,6 +76,39 @@ const ShoppingList = () => {
     }
   };
 
+  const handleShareList = async () => {
+    // Create a formatted text of the shopping list
+    const listText = cartItems.map(item => 
+      `${item.name} - ${item.quantity} st (${item.price})`
+    ).join('\n');
+    
+    const shareData = {
+      title: 'Min inköpslista',
+      text: `Kolla in min inköpslista!\n\n${listText}\n\nTotalt: ${storePrices.length > 0 ? storePrices[0].price : '0:00 kr'}`,
+      url: window.location.href
+    };
+
+    // Try to use Web Share API if available
+    if (navigator.share && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+        toast.success("Inköpslistan delad!");
+      } catch (err) {
+        console.error("Error sharing:", err);
+        shareViaEmail(shareData);
+      }
+    } else {
+      // Fallback to email
+      shareViaEmail(shareData);
+    }
+  };
+
+  const shareViaEmail = (shareData: { title: string, text: string }) => {
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(shareData.title)}&body=${encodeURIComponent(shareData.text)}`;
+    window.open(mailtoLink);
+    toast.success("Inköpslistan öppnad i email!");
+  };
+
   return (
     <div className="min-h-screen w-full bg-white pb-28">
       <link
@@ -86,15 +120,16 @@ const ShoppingList = () => {
         activeTab={activeTab} 
         onTabChange={setActiveTab}
         cartItems={cartItems}
+        onShare={handleShareList}
       />
       
-      <div className="pt-[126px]">
+      <div className="pt-[136px] pb-4">
         <StorePriceComparison 
           stores={storePrices} 
           bestStore={bestStore} 
         />
         
-        <div className="space-y-0 px-4 mt-3">
+        <div className="space-y-0 px-4 mt-4">
           {cartItems.length === 0 ? (
             <EmptyShoppingList />
           ) : activeTab === "stores" ? (

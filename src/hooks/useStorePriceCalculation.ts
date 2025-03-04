@@ -34,7 +34,7 @@ export const useStorePriceCalculation = (cartItems: CartItem[]) => {
     
     return Object.entries(priceMap).map(([name, total]) => {
       // Format price to Swedish format: XX:YY kr
-      // Convert to string and format properly for Swedish pricing (divide by 100)
+      // In Swedish pricing, we need to ensure the price is in the format XX:YY
       const wholePart = Math.floor(total);
       const decimalPart = Math.round((total % 1) * 100).toString().padStart(2, '0');
       
