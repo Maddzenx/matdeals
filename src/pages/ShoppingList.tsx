@@ -73,6 +73,16 @@ const ShoppingList = () => {
     }
   };
 
+  // Group products by store
+  const groupedByStore = cartItems.reduce((acc, item) => {
+    const storeName = item.store || "Other";
+    if (!acc[storeName]) {
+      acc[storeName] = [];
+    }
+    acc[storeName].push(item);
+    return acc;
+  }, {} as Record<string, typeof cartItems>);
+
   console.log("ShoppingList rendered with cartItems:", cartItems);
 
   return (
@@ -86,24 +96,41 @@ const ShoppingList = () => {
         <h1 className="text-2xl font-bold text-[#1C1C1C]">Inköpslista</h1>
       </header>
       
-      <ShoppingListTabs 
-        activeTab={activeTab} 
-        onTabChange={setActiveTab} 
-      />
-      
-      {activeTab === "stores" && (
+      <div className="sticky top-[72px] z-10 bg-white">
+        <ShoppingListTabs 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab} 
+        />
+        
         <StorePriceComparison 
           stores={stores} 
           bestStore={bestStore} 
         />
-      )}
+      </div>
       
       <div className="border-b border-gray-200"></div>
       
       <div className="space-y-0 px-4">
         {cartItems.length === 0 ? (
           <EmptyShoppingList />
+        ) : activeTab === "stores" ? (
+          // Stores view - Group by store
+          Object.entries(groupedByStore).map(([storeName, items]) => (
+            <div key={storeName} className="mt-4">
+              <h2 className="text-lg font-semibold mb-2">{storeName}</h2>
+              {items.map((item) => (
+                <ShoppingListItem
+                  key={item.id}
+                  item={item}
+                  onItemCheck={handleItemCheck}
+                  onIncrement={handleIncrement}
+                  onDecrement={handleDecrement}
+                />
+              ))}
+            </div>
+          ))
         ) : (
+          // Recent view - No grouping
           cartItems.map((item) => (
             <ShoppingListItem
               key={item.id}

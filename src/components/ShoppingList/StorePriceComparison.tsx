@@ -19,7 +19,7 @@ export const StorePriceComparison: React.FC<StorePriceComparisonProps> = ({
   bestStore,
 }) => {
   return (
-    <div className="bg-gray-100 mx-4 rounded-xl p-5 mb-6 shadow-sm">
+    <div className="bg-gray-100 mx-4 rounded-xl p-5 mb-4 shadow-sm">
       {stores.map((store) => (
         <div key={store.name} className="flex justify-between py-2.5">
           <span className="font-medium">{store.name}</span>

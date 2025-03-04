@@ -11,7 +11,7 @@ export const ShoppingListTabs: React.FC<ShoppingListTabsProps> = ({
   onTabChange,
 }) => {
   return (
-    <div className="px-4 mb-6">
+    <div className="px-4 mb-4">
       <div className="flex rounded-full bg-gray-100 p-1 shadow-sm">
         <button
           className={`flex-1 py-2.5 rounded-full text-center font-medium text-sm transition-colors ${
