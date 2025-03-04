@@ -1,17 +1,10 @@
 
 import React from "react";
-
-interface StorePrice {
-  name: string;
-  price: string;
-}
+import { StorePrice, BestStore } from "@/hooks/useStorePriceCalculation";
 
 interface StorePriceComparisonProps {
   stores: StorePrice[];
-  bestStore: {
-    name: string;
-    savings: string;
-  };
+  bestStore: BestStore;
 }
 
 export const StorePriceComparison: React.FC<StorePriceComparisonProps> = ({

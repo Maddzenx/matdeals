@@ -1,16 +1,15 @@
+
 import React, { useState, useEffect } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { useNavigate } from "react-router-dom";
 import { useNavigationState } from "@/hooks/useNavigationState";
-import { ShoppingListTabs } from "@/components/ShoppingList/ShoppingListTabs";
+import { ShoppingListHeader } from "@/components/ShoppingList/ShoppingListHeader";
 import { StorePriceComparison } from "@/components/ShoppingList/StorePriceComparison";
 import { ShoppingListItem } from "@/components/ShoppingList/ShoppingListItem";
 import { EmptyShoppingList } from "@/components/ShoppingList/EmptyShoppingList";
-
-interface StorePrice {
-  name: string;
-  price: string;
-}
+import { StoreProductGroup } from "@/components/ShoppingList/StoreProductGroup";
+import { useStorePriceCalculation } from "@/hooks/useStorePriceCalculation";
+import { useStoreGrouping } from "@/hooks/useStoreGrouping";
 
 const ShoppingList = () => {
   const navigate = useNavigate();
@@ -23,54 +22,12 @@ const ShoppingList = () => {
     handleItemCheck 
   } = useNavigationState();
 
+  const { storePrices, bestStore } = useStorePriceCalculation(cartItems);
+  const { groupedByStore, sortedStoreNames } = useStoreGrouping(cartItems);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
-  const calculateStorePrices = () => {
-    const storePrices: Record<string, number> = {};
-    
-    cartItems.forEach(item => {
-      const store = item.store || "Övriga produkter";
-      const priceValue = parseFloat(item.price.replace(/[^0-9,.]/g, '').replace(',', '.'));
-      
-      if (!isNaN(priceValue)) {
-        if (!storePrices[store]) {
-          storePrices[store] = 0;
-        }
-        storePrices[store] += priceValue * item.quantity;
-      }
-    });
-    
-    return Object.entries(storePrices).map(([name, total]) => ({
-      name,
-      price: `${total.toFixed(0)} kr`
-    }));
-  };
-
-  const findBestStore = (stores: StorePrice[]) => {
-    if (stores.length <= 1) {
-      return { name: stores[0]?.name || "N/A", savings: "0 kr" };
-    }
-    
-    const sortedStores = [...stores].sort((a, b) => {
-      const aPrice = parseFloat(a.price.replace(/[^0-9,.]/g, '').replace(',', '.'));
-      const bPrice = parseFloat(b.price.replace(/[^0-9,.]/g, '').replace(',', '.'));
-      return aPrice - bPrice;
-    });
-    
-    const cheapestPrice = parseFloat(sortedStores[0].price.replace(/[^0-9,.]/g, '').replace(',', '.'));
-    const secondPrice = parseFloat(sortedStores[1].price.replace(/[^0-9,.]/g, '').replace(',', '.'));
-    const savings = secondPrice - cheapestPrice;
-    
-    return {
-      name: sortedStores[0].name,
-      savings: `${savings.toFixed(0)} kr`
-    };
-  };
-
-  const stores = calculateStorePrices();
-  const bestStore = findBestStore(stores);
 
   const handleNavSelect = (id: string) => {
     if (id === "offers") {
@@ -116,17 +73,6 @@ const ShoppingList = () => {
     }
   };
 
-  const groupedByStore = cartItems.reduce((acc, item) => {
-    const storeName = item.store || "Övriga produkter";
-    if (!acc[storeName]) {
-      acc[storeName] = [];
-    }
-    acc[storeName].push(item);
-    return acc;
-  }, {} as Record<string, typeof cartItems>);
-
-  const sortedStoreNames = Object.keys(groupedByStore).sort();
-
   return (
     <div className="min-h-screen w-full bg-white pb-20">
       <link
@@ -134,20 +80,14 @@ const ShoppingList = () => {
         href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"
       />
       
-      <div className="fixed top-0 left-0 right-0 z-20 bg-white">
-        <header className="px-4 pt-6 pb-4">
-          <h1 className="text-2xl font-bold text-[#1C1C1C]">Inköpslista</h1>
-        </header>
-        
-        <ShoppingListTabs 
-          activeTab={activeTab} 
-          onTabChange={setActiveTab} 
-        />
-      </div>
+      <ShoppingListHeader 
+        activeTab={activeTab} 
+        onTabChange={setActiveTab} 
+      />
       
       <div className="pt-[116px]">
         <StorePriceComparison 
-          stores={stores} 
+          stores={storePrices} 
           bestStore={bestStore} 
         />
         
@@ -158,22 +98,14 @@ const ShoppingList = () => {
             <EmptyShoppingList />
           ) : activeTab === "stores" ? (
             sortedStoreNames.map((storeName) => (
-              <div key={storeName} className="mt-4">
-                <div className="sticky top-[116px] bg-white py-2 z-10">
-                  <h2 className="text-lg font-semibold">{storeName}</h2>
-                </div>
-                <div className="divide-y divide-gray-200">
-                  {groupedByStore[storeName].map((item) => (
-                    <ShoppingListItem
-                      key={item.id}
-                      item={item}
-                      onItemCheck={handleItemCheck}
-                      onIncrement={handleIncrement}
-                      onDecrement={handleDecrement}
-                    />
-                  ))}
-                </div>
-              </div>
+              <StoreProductGroup
+                key={storeName}
+                storeName={storeName}
+                items={groupedByStore[storeName]}
+                onItemCheck={handleItemCheck}
+                onIncrement={handleIncrement}
+                onDecrement={handleDecrement}
+              />
             ))
           ) : (
             cartItems.map((item) => (
