@@ -23,6 +23,7 @@ interface ProductSectionProps {
   ) => void;
   onRemoveTag: (id: string) => void;
   viewMode?: "grid" | "list";
+  searchQuery?: string;
 }
 
 export const ProductSection: React.FC<ProductSectionProps> = ({
@@ -31,7 +32,8 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   activeStoreIds,
   onProductQuantityChange,
   onRemoveTag,
-  viewMode = "grid"
+  viewMode = "grid",
+  searchQuery = ""
 }) => {
   const { 
     getProductsWithCategories, 
@@ -91,10 +93,22 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, [allCategoryNames, nonEmptyCategories, activeCategory]);
 
-  // Filter products based on active store IDs
+  // Filter products based on active store IDs and search query
   const filteredProducts = allProducts.filter(product => {
+    // First filter by store
     const storeTag = storeTags.find(tag => tag.name === product.store);
-    return storeTag && activeStoreIds.includes(storeTag.id);
+    const storeMatch = storeTag && activeStoreIds.includes(storeTag.id);
+    
+    // Then filter by search query if provided
+    if (!searchQuery) return storeMatch;
+    
+    // Case-insensitive search in product name, details, and category
+    const query = searchQuery.toLowerCase();
+    return storeMatch && (
+      product.name.toLowerCase().includes(query) || 
+      product.details.toLowerCase().includes(query) ||
+      (product.category && product.category.toLowerCase().includes(query))
+    );
   });
 
   const handleCategorySelect = (categoryId: string) => {

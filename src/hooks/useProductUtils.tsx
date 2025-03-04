@@ -34,22 +34,24 @@ export const useProductUtils = (categories: CategoryData[]) => {
     return nonEmptyCategories.map(category => category.name);
   }, [getNonEmptyCategories]);
 
-  // Scroll to a category when it's selected
+  // Scroll to a category when it's selected - with improved smoothness
   const scrollToCategory = useCallback((categoryId: string) => {
     const categoryName = categories.find(c => c.id === categoryId)?.name || "";
     const element = document.getElementById(categoryName);
     if (element) {
       // Get header height (CategoryTabs + other fixed elements)
-      const headerHeight = 105 + 48; // 105px from the top sticky positioning + ~48px for the tabs
+      const headerHeight = 105 + 40; // 105px from the top sticky positioning + 40px for the tabs
       
       // Calculate the position to scroll to
       const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-      const offsetPosition = elementPosition - headerHeight - 10; // Additional 10px for visual spacing
+      const offsetPosition = elementPosition - headerHeight - 8; // Slightly less spacing (8px) for better visual balance
       
-      // Scroll to the element with the offset
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
+      // Scroll to the element with the offset - use requestAnimationFrame for smoother transition
+      requestAnimationFrame(() => {
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
       });
     }
   }, [categories]);

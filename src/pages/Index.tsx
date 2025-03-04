@@ -17,6 +17,7 @@ const Index = () => {
   } = useNavigationState();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [activeStores, setActiveStores] = useState<string[]>(storeTagsData.map(store => store.id));
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleRemoveTag = (id: string) => {
     setActiveStores(prev => prev.filter(storeId => storeId !== id));
@@ -44,6 +45,10 @@ const Index = () => {
     setViewMode(prev => prev === "grid" ? "list" : "grid");
   };
 
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
   const filteredStoreTags = storeTagsData.filter(store => activeStores.includes(store.id));
 
   return (
@@ -67,6 +72,7 @@ const Index = () => {
           <SearchBar 
             activeStoreIds={activeStores}
             onStoreToggle={handleStoreToggle}
+            onSearch={handleSearch}
           />
         </div>
         
@@ -77,6 +83,7 @@ const Index = () => {
           onProductQuantityChange={handleProductQuantityChange}
           onRemoveTag={handleRemoveTag}
           viewMode={viewMode}
+          searchQuery={searchQuery}
         />
         <BottomNav items={navItems} onSelect={handleNavSelect} />
       </div>
