@@ -9,6 +9,7 @@ import { useProductUtils } from "@/hooks/useProductUtils";
 interface ProductSectionProps {
   categories: CategoryData[];
   storeTags: { id: string; name: string }[];
+  activeStoreIds: string[];
   onProductQuantityChange: (
     productId: string, 
     newQuantity: number, 
@@ -27,6 +28,7 @@ interface ProductSectionProps {
 export const ProductSection: React.FC<ProductSectionProps> = ({
   categories,
   storeTags,
+  activeStoreIds,
   onProductQuantityChange,
   onRemoveTag,
   viewMode = "grid"
@@ -36,6 +38,12 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   
   const allProducts = getProductsWithCategories();
   const allCategoryNames = getAllCategoryNames();
+
+  // Filter products based on active store IDs
+  const filteredProducts = allProducts.filter(product => {
+    const storeTag = storeTags.find(tag => tag.name.includes(product.store));
+    return storeTag && activeStoreIds.includes(storeTag.id);
+  });
 
   const handleCategorySelect = (categoryId: string) => {
     setActiveCategory(categoryId);
@@ -76,7 +84,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
       </div>
       <main className="p-4">
         <ProductGrid
-          products={allProducts}
+          products={filteredProducts}
           showCategoryHeaders={true}
           onQuantityChange={handleQuantityChange}
           viewMode={viewMode}

@@ -60,6 +60,7 @@ const Index = () => {
         <ProductSection
           categories={categoriesData}
           storeTags={filteredStoreTags}
+          activeStoreIds={activeStores}
           onProductQuantityChange={handleProductQuantityChange}
           onRemoveTag={handleRemoveTag}
           viewMode={viewMode}
