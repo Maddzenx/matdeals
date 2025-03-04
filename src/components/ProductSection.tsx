@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ProductGrid } from "@/components/ProductGrid";
 import { StoreTags } from "@/components/StoreTags";
 import { CategoryTabs } from "@/components/CategoryTabs";
@@ -33,15 +33,29 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   onRemoveTag,
   viewMode = "grid"
 }) => {
-  const [activeCategory, setActiveCategory] = useState("fruits");
-  const { getProductsWithCategories, scrollToCategory, getAllCategoryNames } = useProductUtils(categories);
+  const { 
+    getProductsWithCategories, 
+    scrollToCategory, 
+    getAllCategoryNames,
+    getNonEmptyCategories
+  } = useProductUtils(categories);
+  
+  const nonEmptyCategories = getNonEmptyCategories();
+  const [activeCategory, setActiveCategory] = useState(nonEmptyCategories.length > 0 ? nonEmptyCategories[0].id : "");
   
   const allProducts = getProductsWithCategories();
   const allCategoryNames = getAllCategoryNames();
 
+  // Set initial active category when non-empty categories change
+  useEffect(() => {
+    if (nonEmptyCategories.length > 0 && !nonEmptyCategories.some(c => c.id === activeCategory)) {
+      setActiveCategory(nonEmptyCategories[0].id);
+    }
+  }, [nonEmptyCategories, activeCategory]);
+
   // Filter products based on active store IDs
   const filteredProducts = allProducts.filter(product => {
-    const storeTag = storeTags.find(tag => tag.name.includes(product.store));
+    const storeTag = storeTags.find(tag => tag.name === product.store);
     return storeTag && activeStoreIds.includes(storeTag.id);
   });
 
@@ -77,7 +91,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
       </div>
       <div className="sticky top-[105px] z-10 bg-white">
         <CategoryTabs
-          categories={categories}
+          categories={nonEmptyCategories}
           activeCategory={activeCategory}
           onSelect={handleCategorySelect}
         />

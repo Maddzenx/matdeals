@@ -57,7 +57,10 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
       groups[category].push(product);
     });
     
-    return groups;
+    // Filter out empty categories
+    return Object.fromEntries(
+      Object.entries(groups).filter(([_, categoryProducts]) => categoryProducts.length > 0)
+    );
   }, [products, showCategoryHeaders, allCategoryNames]);
 
   return (

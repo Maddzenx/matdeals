@@ -20,10 +20,19 @@ export const useProductUtils = (categories: CategoryData[]) => {
     return result;
   }, [categories]);
 
-  // Get all category names from the categories array
-  const getAllCategoryNames = useCallback(() => {
-    return categories.map(category => category.name);
+  // Get non-empty categories
+  const getNonEmptyCategories = useCallback(() => {
+    return categories.filter(category => {
+      const categoryProducts = productsData[category.id] || [];
+      return categoryProducts.length > 0;
+    });
   }, [categories]);
+
+  // Get all category names from the non-empty categories
+  const getAllCategoryNames = useCallback(() => {
+    const nonEmptyCategories = getNonEmptyCategories();
+    return nonEmptyCategories.map(category => category.name);
+  }, [getNonEmptyCategories]);
 
   // Scroll to a category when it's selected
   const scrollToCategory = useCallback((categoryId: string) => {
@@ -48,6 +57,7 @@ export const useProductUtils = (categories: CategoryData[]) => {
   return {
     getProductsWithCategories,
     scrollToCategory,
-    getAllCategoryNames
+    getAllCategoryNames,
+    getNonEmptyCategories
   };
 };
