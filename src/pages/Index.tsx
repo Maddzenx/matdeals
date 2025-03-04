@@ -16,9 +16,10 @@ const Index = () => {
     cartItems
   } = useNavigationState();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [activeStores, setActiveStores] = useState<string[]>(storeTagsData.map(store => store.id));
 
   const handleRemoveTag = (id: string) => {
-    console.log("Remove tag:", id);
+    setActiveStores(prev => prev.filter(storeId => storeId !== id));
   };
 
   const handleNavSelect = (id: string) => {
@@ -33,7 +34,7 @@ const Index = () => {
     setViewMode(prev => prev === "grid" ? "list" : "grid");
   };
 
-  console.log("Index rendered with cartItems:", cartItems);
+  const filteredStoreTags = storeTagsData.filter(store => activeStores.includes(store.id));
 
   return (
     <>
@@ -58,7 +59,7 @@ const Index = () => {
         
         <ProductSection
           categories={categoriesData}
-          storeTags={storeTagsData}
+          storeTags={filteredStoreTags}
           onProductQuantityChange={handleProductQuantityChange}
           onRemoveTag={handleRemoveTag}
           viewMode={viewMode}
