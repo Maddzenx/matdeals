@@ -29,13 +29,6 @@ const ShoppingList = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  useEffect(() => {
-    // Debug: Check if cart items have store properties
-    console.log("Cart items:", cartItems.map(item => ({ id: item.id, store: item.store })));
-    console.log("Grouped by store:", groupedByStore);
-    console.log("Sorted store names:", sortedStoreNames);
-  }, [cartItems, groupedByStore, sortedStoreNames]);
-
   const handleNavSelect = (id: string) => {
     if (id === "offers") {
       navigate("/");
@@ -58,7 +51,7 @@ const ShoppingList = () => {
           details: item.details,
           price: item.price,
           image: item.image,
-          store: item.store // Pass the exact store value, no fallback
+          store: item.store
         }
       );
     }
@@ -76,7 +69,7 @@ const ShoppingList = () => {
           details: item.details,
           price: item.price,
           image: item.image,
-          store: item.store // Pass the exact store value, no fallback
+          store: item.store
         }
       );
     }
@@ -91,18 +84,17 @@ const ShoppingList = () => {
       
       <ShoppingListHeader 
         activeTab={activeTab} 
-        onTabChange={setActiveTab} 
+        onTabChange={setActiveTab}
+        cartItems={cartItems}
       />
       
-      <div className="pt-[116px]">
+      <div className="pt-[126px]">
         <StorePriceComparison 
           stores={storePrices} 
           bestStore={bestStore} 
         />
         
-        <div className="border-b border-gray-200"></div>
-        
-        <div className="space-y-0 px-4">
+        <div className="space-y-0 px-4 mt-3">
           {cartItems.length === 0 ? (
             <EmptyShoppingList />
           ) : activeTab === "stores" ? (
