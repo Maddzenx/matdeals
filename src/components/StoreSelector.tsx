@@ -51,21 +51,21 @@ export const StoreSelector: React.FC<StoreSelectorProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-50 py-1 border border-gray-200">
-          <div className="px-3 py-2 text-sm font-semibold text-gray-700 border-b border-gray-200">
+        <div className="fixed right-4 mt-2 w-64 bg-white rounded-md shadow-lg py-1 border border-gray-200" style={{ zIndex: 100, top: "105px" }}>
+          <div className="px-4 py-3 text-sm font-semibold text-gray-800 border-b border-gray-200">
             Välj butiker
           </div>
           <div className="max-h-60 overflow-y-auto">
             {stores.map((store) => (
-              <div key={store.id} className="px-3 py-2">
-                <label className="flex items-center space-x-2 cursor-pointer">
+              <div key={store.id} className="px-4 py-2.5">
+                <label className="flex items-center space-x-3 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={activeStoreIds.includes(store.id)}
                     onChange={() => onStoreToggle(store.id)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <span className="text-sm text-gray-700">{store.name}</span>
+                  <span className="text-sm font-medium text-gray-700">{store.name}</span>
                 </label>
               </div>
             ))}

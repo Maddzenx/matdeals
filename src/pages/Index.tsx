@@ -53,8 +53,8 @@ const Index = () => {
         href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"
       />
       <div className="min-h-screen w-full bg-white pb-20">
-        <div className="sticky top-0 z-10 bg-white pt-2 pb-1">
-          <div className="flex items-center justify-between px-4 mb-2">
+        <div className="sticky top-0 z-10 bg-white pt-3 pb-0 shadow-sm">
+          <div className="flex items-center justify-between px-4 mb-3">
             <h1 className="text-2xl font-bold text-[#1C1C1C]">Erbjudanden</h1>
             <button 
               onClick={toggleViewMode}
