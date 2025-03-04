@@ -11,6 +11,7 @@ export const snackProducts: Product[] = [
     originalPrice: "25:90 kr/förp",
     store: "Willys Hornsberg",
     offerBadge: "SPARA 8:00",
+    category: "snacks"
   },
   {
     id: "donut1",
@@ -21,6 +22,7 @@ export const snackProducts: Product[] = [
     originalPrice: "7:50 kr/st",
     store: "Willys Hornsberg",
     offerBadge: "4 FÖR 20:00",
+    category: "snacks"
   },
   {
     id: "cashew1",
@@ -31,6 +33,7 @@ export const snackProducts: Product[] = [
     originalPrice: "59:90 kr/förp",
     store: "Willys Hornsberg",
     offerBadge: "SPARA 10:00",
+    category: "snacks"
   },
   {
     id: "chips1",
@@ -41,5 +44,17 @@ export const snackProducts: Product[] = [
     originalPrice: "32:90 kr/st",
     store: "Willys Hornsberg",
     offerBadge: "4 FÖR 48:00",
+    category: "snacks"
   },
+  {
+    id: "choklad1",
+    image: "https://assets.icanet.se/e_sharpen:80,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_127428/cf_259/mjolkchoklad.jpg",
+    name: "Choklad",
+    details: "Marabou, 200g, Olika sorter",
+    currentPrice: "19:90 kr/st",
+    originalPrice: "29:90 kr/st",
+    store: "Hemköp Nordstan",
+    offerBadge: "19:90",
+    category: "snacks"
+  }
 ];
