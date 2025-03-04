@@ -39,6 +39,8 @@ const ShoppingList = () => {
   const handleNavSelect = (id: string) => {
     if (id === "offers") {
       navigate("/");
+    } else if (id === "profile") {
+      navigate("/auth");
     } else {
       console.log("Selected nav:", id);
     }
@@ -81,7 +83,7 @@ const ShoppingList = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-white pb-24">
+    <div className="min-h-screen w-full bg-white pb-28">
       <link
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"

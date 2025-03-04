@@ -32,16 +32,30 @@ export const useStorePriceCalculation = (cartItems: CartItem[]) => {
       }
     });
     
-    return Object.entries(priceMap).map(([name, total]) => ({
-      name,
-      price: `${total.toFixed(2).replace('.', ':')} kr`,
-      rawPrice: total
-    }));
+    return Object.entries(priceMap).map(([name, total]) => {
+      // Format price to Swedish format: XX:YY kr
+      let formattedPrice = '';
+      
+      // Convert to string with 2 decimal places
+      const priceWithDecimals = total.toFixed(2);
+      
+      // Split on the decimal point
+      const [wholePart, decimalPart] = priceWithDecimals.split('.');
+      
+      // Format as XX:YY kr
+      formattedPrice = `${wholePart}:${decimalPart} kr`;
+      
+      return {
+        name,
+        price: formattedPrice,
+        rawPrice: total
+      };
+    });
   }, [cartItems]);
 
   const bestStore = useMemo(() => {
     if (storePrices.length <= 1) {
-      return { name: storePrices[0]?.name || "N/A", savings: "0 kr" };
+      return { name: storePrices[0]?.name || "N/A", savings: "0:00 kr" };
     }
     
     // Find the store with the lowest total price
@@ -60,9 +74,14 @@ export const useStorePriceCalculation = (cartItems: CartItem[]) => {
     // Calculate savings compared to the second lowest price store
     const savings = secondLowestPriceStore.rawPrice - lowestPriceStore.rawPrice;
     
+    // Format savings to Swedish format: XX:YY kr
+    const savingsWithDecimals = savings.toFixed(2);
+    const [wholePart, decimalPart] = savingsWithDecimals.split('.');
+    const formattedSavings = `${wholePart}:${decimalPart} kr`;
+    
     return {
       name: lowestPriceStore.name,
-      savings: `${savings.toFixed(2).replace('.', ':')} kr`
+      savings: formattedSavings
     };
   }, [storePrices]);
 

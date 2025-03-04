@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SearchBar } from "@/components/SearchBar";
 import { BottomNav } from "@/components/BottomNav";
@@ -7,6 +7,7 @@ import { ProductSection } from "@/components/ProductSection";
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { categoriesData, storeTagsData } from "@/data/productData";
 import { Grid2X2, List } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -18,6 +19,16 @@ const Index = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [activeStores, setActiveStores] = useState<string[]>(storeTagsData.map(store => store.id));
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    // Check if the user is logged in when the component mounts
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      console.log("Current user:", data.user);
+    };
+    
+    checkUser();
+  }, []);
 
   const handleRemoveTag = (id: string) => {
     setActiveStores(prev => prev.filter(storeId => storeId !== id));
@@ -36,6 +47,8 @@ const Index = () => {
   const handleNavSelect = (id: string) => {
     if (id === "cart") {
       navigate("/shopping-list");
+    } else if (id === "profile") {
+      navigate("/auth");
     } else {
       console.log("Selected nav:", id);
     }

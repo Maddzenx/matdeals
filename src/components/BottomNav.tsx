@@ -34,7 +34,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ items, onSelect }) => {
   };
 
   return (
-    <nav className="fixed w-full flex justify-around items-center bg-white py-1.5 bottom-0 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] border-t border-gray-200">
+    <nav className="fixed w-full flex justify-around items-center bg-white py-1.5 bottom-0 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] border-t border-gray-200 z-50">
       {items.map((item) => (
         <button
           key={item.id}
