@@ -81,7 +81,7 @@ const ShoppingList = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-white pb-20">
+    <div className="min-h-screen w-full bg-white pb-24">
       <link
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"

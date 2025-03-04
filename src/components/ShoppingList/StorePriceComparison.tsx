@@ -22,7 +22,7 @@ export const StorePriceComparison: React.FC<StorePriceComparisonProps> = ({
         </div>
       ))}
       
-      {stores.length > 0 && (
+      {stores.length > 1 && (
         <div className="flex justify-between mt-3 pt-3 border-t border-gray-300">
           <span className="font-bold">Du sparar mest på</span>
           <span className="font-bold text-[#DB2C17]">{bestStore.name} ({bestStore.savings})</span>
