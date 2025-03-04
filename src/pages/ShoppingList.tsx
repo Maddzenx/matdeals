@@ -82,9 +82,14 @@ const ShoppingList = () => {
       `${item.name} - ${item.quantity} st (${item.price})`
     ).join('\n');
     
+    const totalPrice = storePrices.length > 0 ? storePrices.reduce((acc, store) => acc + store.rawPrice, 0) : 0;
+    const wholePart = Math.floor(totalPrice);
+    const decimalPart = Math.round((totalPrice % 1) * 100).toString().padStart(2, '0');
+    const formattedTotal = `${wholePart}:${decimalPart} kr`;
+    
     const shareData = {
       title: 'Min inköpslista',
-      text: `Kolla in min inköpslista!\n\n${listText}\n\nTotalt: ${storePrices.length > 0 ? storePrices[0].price : '0:00 kr'}`,
+      text: `Kolla in min inköpslista!\n\n${listText}\n\nTotalt: ${formattedTotal}`,
       url: window.location.href
     };
 

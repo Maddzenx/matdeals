@@ -34,17 +34,20 @@ export const useStorePriceCalculation = (cartItems: CartItem[]) => {
     
     return Object.entries(priceMap).map(([name, total]) => {
       // Format price to Swedish format: XX:YY kr
-      // In Swedish pricing, we need to ensure the price is in the format XX:YY
-      const wholePart = Math.floor(total);
-      const decimalPart = Math.round((total % 1) * 100).toString().padStart(2, '0');
+      // Divide by 100 if the value is large (indicating it's in öre instead of kronor)
+      // This handles cases where prices might be stored as "1990" (meaning 19.90)
+      const adjustedTotal = total > 100 ? total / 100 : total;
       
       // Format as XX:YY kr
+      const wholePart = Math.floor(adjustedTotal);
+      const decimalPart = Math.round((adjustedTotal % 1) * 100).toString().padStart(2, '0');
+      
       const formattedPrice = `${wholePart}:${decimalPart} kr`;
       
       return {
         name,
         price: formattedPrice,
-        rawPrice: total
+        rawPrice: adjustedTotal
       };
     });
   }, [cartItems]);
