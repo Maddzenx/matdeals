@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { NavItem } from "@/components/BottomNav";
 
@@ -10,6 +9,7 @@ export interface CartItem {
   price: string;
   checked: boolean;
   image?: string;
+  store?: string;
 }
 
 // Create a singleton instance to share state across components
@@ -71,6 +71,7 @@ export const useNavigationState = (initialCartCount: number = 0) => {
       details: string;
       price: string;
       image?: string;
+      store?: string;
     }
   ) => {
     // Update cart items
@@ -100,7 +101,8 @@ export const useNavigationState = (initialCartCount: number = 0) => {
         quantity: newQuantity,
         price: productDetails.price,
         checked: false,
-        image: productDetails.image
+        image: productDetails.image,
+        store: productDetails.store
       };
       
       updatedCartItems = [...updatedCartItems, newItem];
