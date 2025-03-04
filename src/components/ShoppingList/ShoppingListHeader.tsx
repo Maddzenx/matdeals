@@ -12,7 +12,7 @@ export const ShoppingListHeader: React.FC<ShoppingListHeaderProps> = ({
   onTabChange
 }) => {
   return (
-    <div className="fixed top-0 left-0 right-0 z-20 bg-white">
+    <div className="fixed top-0 left-0 right-0 z-20 bg-white border-b border-gray-200">
       <header className="px-4 pt-6 pb-4">
         <h1 className="text-2xl font-bold text-[#1C1C1C]">Inköpslista</h1>
       </header>

@@ -15,7 +15,12 @@ export const useStoreGrouping = (cartItems: CartItem[]) => {
   }, [cartItems]);
 
   const sortedStoreNames = useMemo(() => {
-    return Object.keys(groupedByStore).sort();
+    // Ensure "Övriga produkter" always appears last
+    return Object.keys(groupedByStore).sort((a, b) => {
+      if (a === "Övriga produkter") return 1;
+      if (b === "Övriga produkter") return -1;
+      return a.localeCompare(b);
+    });
   }, [groupedByStore]);
 
   return { groupedByStore, sortedStoreNames };
