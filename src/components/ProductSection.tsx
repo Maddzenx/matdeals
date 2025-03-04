@@ -19,6 +19,7 @@ interface ProductSectionProps {
       details: string;
       price: string;
       image?: string;
+      store?: string;
     }
   ) => void;
   onRemoveTag: (id: string) => void;
@@ -121,6 +122,9 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
     // Find product details to include when changing quantity
     const product = allProducts.find(p => p.id === productId);
     if (product) {
+      // Make sure to always pass the store information
+      console.log("Product store info:", product.store);
+      
       onProductQuantityChange(
         productId, 
         newQuantity, 
@@ -129,7 +133,8 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
           name: product.name,
           details: product.details,
           price: product.currentPrice,
-          image: product.image
+          image: product.image,
+          store: product.store // Important: Always pass the store property
         }
       );
     } else {

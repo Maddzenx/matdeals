@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { useNavigate } from "react-router-dom";
@@ -28,6 +29,13 @@ const ShoppingList = () => {
     window.scrollTo(0, 0);
   }, []);
 
+  useEffect(() => {
+    // Debug: Check if cart items have store properties
+    console.log("Cart items:", cartItems.map(item => ({ id: item.id, store: item.store })));
+    console.log("Grouped by store:", groupedByStore);
+    console.log("Sorted store names:", sortedStoreNames);
+  }, [cartItems, groupedByStore, sortedStoreNames]);
+
   const handleNavSelect = (id: string) => {
     if (id === "offers") {
       navigate("/");
@@ -48,7 +56,7 @@ const ShoppingList = () => {
           details: item.details,
           price: item.price,
           image: item.image,
-          store: item.store || "Övriga produkter"
+          store: item.store // Pass the exact store value, no fallback
         }
       );
     }
@@ -66,7 +74,7 @@ const ShoppingList = () => {
           details: item.details,
           price: item.price,
           image: item.image,
-          store: item.store || "Övriga produkter"
+          store: item.store // Pass the exact store value, no fallback
         }
       );
     }

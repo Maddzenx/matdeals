@@ -92,14 +92,17 @@ export const useNavigationState = (initialCartCount: number = 0) => {
           ? { 
               ...item, 
               quantity: newQuantity,
-              // Update store information if it's provided and was previously missing
-              store: (productDetails?.store && !item.store) ? productDetails.store : item.store
+              // Always use productDetails.store if available
+              store: productDetails?.store || item.store
             }
           : item
       );
     } 
     // If item is new and we have details, add it to cart
     else if (productDetails && newQuantity > 0) {
+      // Log to debug the store property
+      console.log("Adding new item with store:", productDetails.store);
+      
       const newItem = {
         id: productId,
         name: productDetails.name,
@@ -108,8 +111,8 @@ export const useNavigationState = (initialCartCount: number = 0) => {
         price: productDetails.price,
         checked: false,
         image: productDetails.image,
-        // Ensure store is always included
-        store: productDetails.store || "Övriga produkter"
+        // IMPORTANT: Make sure store is always included and not defaulted unless absolutely necessary
+        store: productDetails.store
       };
       
       updatedCartItems = [...updatedCartItems, newItem];
