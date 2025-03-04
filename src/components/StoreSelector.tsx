@@ -51,11 +51,19 @@ export const StoreSelector: React.FC<StoreSelectorProps> = ({
       </button>
 
       {isOpen && (
-        <div className="fixed right-4 mt-2 w-64 bg-white rounded-md shadow-lg py-1 border border-gray-200" style={{ zIndex: 100, top: "105px" }}>
-          <div className="px-4 py-3 text-sm font-semibold text-gray-800 border-b border-gray-200">
+        <div 
+          className="fixed right-4 bg-white rounded-md shadow-lg py-1 border border-gray-200 w-64" 
+          style={{ 
+            zIndex: 999, 
+            top: "70px",
+            maxHeight: "calc(100vh - 120px)",
+            overflowY: "auto"
+          }}
+        >
+          <div className="px-4 py-3 text-sm font-semibold text-gray-800 border-b border-gray-200 sticky top-0 bg-white">
             Välj butiker
           </div>
-          <div className="max-h-60 overflow-y-auto">
+          <div className="max-h-[calc(100vh-180px)] overflow-y-auto">
             {stores.map((store) => (
               <div key={store.id} className="px-4 py-2.5">
                 <label className="flex items-center space-x-3 cursor-pointer">

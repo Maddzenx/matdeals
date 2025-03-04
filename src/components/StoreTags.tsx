@@ -12,6 +12,8 @@ interface StoreTagsProps {
 }
 
 export const StoreTags: React.FC<StoreTagsProps> = ({ tags, onRemove }) => {
+  if (tags.length === 0) return null;
+  
   return (
     <div className="flex gap-2 overflow-x-auto whitespace-nowrap mb-3 px-4 py-0 no-scrollbar mt-2">
       {tags.map((tag) => (
