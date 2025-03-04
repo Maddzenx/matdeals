@@ -52,11 +52,11 @@ export const StoreSelector: React.FC<StoreSelectorProps> = ({
 
       {isOpen && (
         <div 
-          className="fixed right-4 bg-white rounded-md shadow-lg py-1 border border-gray-200 w-64" 
+          className="absolute right-0 bg-white rounded-md shadow-lg py-1 border border-gray-200 w-64" 
           style={{ 
-            zIndex: 999, 
-            top: "70px",
-            maxHeight: "calc(100vh - 120px)",
+            zIndex: 999,
+            top: "calc(100% + 8px)",
+            maxHeight: "calc(100vh - 180px)",
             overflowY: "auto"
           }}
         >
