@@ -6,10 +6,11 @@ import { BottomNav } from "@/components/BottomNav";
 import { ProductSection } from "@/components/ProductSection";
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { categoriesData, storeTagsData } from "@/data/productData";
-import { Grid2X2, List } from "lucide-react";
+import { Grid2X2, List, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSupabaseProducts } from "@/hooks/useSupabaseProducts";
 import { toast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -21,7 +22,8 @@ const Index = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [activeStores, setActiveStores] = useState<string[]>(storeTagsData.map(store => store.id));
   const [searchQuery, setSearchQuery] = useState("");
-  const { products: supabaseProducts, loading, error } = useSupabaseProducts();
+  const { products: supabaseProducts, loading, error, refetch } = useSupabaseProducts();
+  const [scraping, setScraping] = useState(false);
 
   useEffect(() => {
     // Check if the user is logged in when the component mounts
@@ -44,6 +46,43 @@ const Index = () => {
       console.error("Supabase error:", error);
     }
   }, [error]);
+
+  const handleScrapeIca = async () => {
+    try {
+      setScraping(true);
+      
+      toast({
+        title: "Fetching ICA products",
+        description: "Please wait while we fetch the latest offers...",
+      });
+      
+      // Call the Supabase edge function
+      const { data, error } = await supabase.functions.invoke('scrape-ica');
+      
+      if (error) {
+        throw error;
+      }
+      
+      console.log("Scraping result:", data);
+      
+      // Refresh the products after scraping
+      await refetch();
+      
+      toast({
+        title: "Success!",
+        description: `Updated ${data.products?.length || 0} products from ICA.`,
+      });
+    } catch (err) {
+      console.error("Error scraping ICA:", err);
+      toast({
+        title: "Error",
+        description: "Failed to fetch ICA products. Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setScraping(false);
+    }
+  };
 
   const handleRemoveTag = (id: string) => {
     setActiveStores(prev => prev.filter(storeId => storeId !== id));
@@ -101,13 +140,25 @@ const Index = () => {
         <div className="sticky top-0 z-30 bg-white">
           <div className="flex items-center justify-between px-4 pt-3 pb-1">
             <h1 className="text-2xl font-bold text-[#1C1C1C]">Erbjudanden</h1>
-            <button 
-              onClick={toggleViewMode}
-              className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-              aria-label={viewMode === "grid" ? "Switch to list view" : "Switch to grid view"}
-            >
-              {viewMode === "grid" ? <List size={20} /> : <Grid2X2 size={20} />}
-            </button>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleScrapeIca} 
+                disabled={scraping}
+                className="flex items-center gap-1"
+              >
+                <RefreshCw size={16} className={scraping ? "animate-spin" : ""} />
+                <span className="hidden sm:inline">Uppdatera ICA</span>
+              </Button>
+              <button 
+                onClick={toggleViewMode}
+                className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                aria-label={viewMode === "grid" ? "Switch to list view" : "Switch to grid view"}
+              >
+                {viewMode === "grid" ? <List size={20} /> : <Grid2X2 size={20} />}
+              </button>
+            </div>
           </div>
           <SearchBar 
             activeStoreIds={activeStores}
