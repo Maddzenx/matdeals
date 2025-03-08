@@ -63,3 +63,24 @@ input, select, textarea {
 .transition-fast {
   transition-duration: 150ms;
 }
+
+/* Optimize image display */
+.product-image {
+  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  background-color: #f8f8f8;
+  border-radius: 4px;
+}
+
+/* Add image loading styles */
+.image-loading {
+  background-color: #f0f0f0;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}

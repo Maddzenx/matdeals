@@ -30,6 +30,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const { cartItems } = useNavigationState();
   const [quantity, setQuantity] = useState(0);
+  const [imageLoaded, setImageLoaded] = useState(false);
   
   // Sync with global cart state
   useEffect(() => {
@@ -67,6 +68,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     }
   };
 
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+  };
+
   // For grid view (optimized for mobile)
   if (viewMode === "grid") {
     return (
@@ -75,9 +80,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <img
             src={image}
             alt={name}
-            className="max-w-full max-h-[100px] object-contain"
+            className={`max-w-full max-h-[100px] object-contain transition-opacity duration-200 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
             loading="lazy"
+            onLoad={handleImageLoad}
           />
+          {!imageLoaded && (
+            <div className="absolute inset-0 bg-gray-100 animate-pulse rounded-[5px]"></div>
+          )}
         </div>
         <div className="flex flex-col gap-1">
           <h3 className="text-sm font-bold text-[#1C1C1C] line-clamp-1">{name}</h3>
@@ -136,13 +145,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   return (
     <div className="shadow-sm relative bg-white p-3 rounded-lg flex justify-between items-center border border-neutral-100">
       <div className="flex items-center gap-3 flex-grow pr-2">
-        <div className="w-[60px] h-[60px] flex-shrink-0 flex items-center justify-center rounded-[5px] overflow-hidden bg-neutral-50">
+        <div className="w-[60px] h-[60px] flex-shrink-0 flex items-center justify-center rounded-[5px] overflow-hidden bg-neutral-50 relative">
           <img
             src={image}
             alt={name}
-            className="max-w-full max-h-[60px] object-contain"
+            className={`max-w-full max-h-[60px] object-contain transition-opacity duration-200 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
             loading="lazy"
+            onLoad={handleImageLoad}
           />
+          {!imageLoaded && (
+            <div className="absolute inset-0 bg-gray-100 animate-pulse rounded-[5px]"></div>
+          )}
         </div>
         <div className="flex-grow min-w-0">
           <div className="flex justify-between items-start">
