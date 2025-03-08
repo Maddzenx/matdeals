@@ -24,12 +24,13 @@ export const useSupabaseProducts = () => {
         
         if (data) {
           // Transform Supabase data to match our Product interface
+          // Using a unique ID based on name since the ICA table might not have an id column
           const transformedProducts: Product[] = data.map((item) => ({
-            id: item.id || `ica-${Math.random().toString(36).substring(2, 9)}`,
+            id: `ica-${item.name.replace(/\s+/g, '-').toLowerCase()}-${Math.random().toString(36).substring(2, 9)}`,
             image: item.image_url || 'https://assets.icanet.se/t_product_large_v1,f_auto/7310865085313.jpg', // Default image
             name: item.name || 'Product',
             details: item.description || 'No description available',
-            currentPrice: `${item.price || 0}:00 kr`,
+            currentPrice: `${item.price || 0}:- kr`,
             originalPrice: '',
             store: 'ICA',
             category: 'other'
