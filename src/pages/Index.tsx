@@ -8,6 +8,8 @@ import { useNavigationState } from "@/hooks/useNavigationState";
 import { categoriesData, storeTagsData } from "@/data/productData";
 import { Grid2X2, List } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useSupabaseProducts } from "@/hooks/useSupabaseProducts";
+import { toast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -19,6 +21,7 @@ const Index = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [activeStores, setActiveStores] = useState<string[]>(storeTagsData.map(store => store.id));
   const [searchQuery, setSearchQuery] = useState("");
+  const { products: supabaseProducts, loading, error } = useSupabaseProducts();
 
   useEffect(() => {
     // Check if the user is logged in when the component mounts
@@ -29,6 +32,18 @@ const Index = () => {
     
     checkUser();
   }, []);
+
+  useEffect(() => {
+    // Show error toast if there's an error fetching from Supabase
+    if (error) {
+      toast({
+        title: "Error loading products",
+        description: "Could not load products from Supabase. Using default product data instead.",
+        variant: "destructive"
+      });
+      console.error("Supabase error:", error);
+    }
+  }, [error]);
 
   const handleRemoveTag = (id: string) => {
     setActiveStores(prev => prev.filter(storeId => storeId !== id));
@@ -64,6 +79,18 @@ const Index = () => {
 
   const filteredStoreTags = storeTagsData.filter(store => activeStores.includes(store.id));
 
+  // Add supabase store tag if we have Supabase products
+  useEffect(() => {
+    if (supabaseProducts && supabaseProducts.length > 0) {
+      // Check if ICA store tag already exists
+      const icaTagExists = storeTagsData.some(store => store.id === 'ica');
+      if (!icaTagExists) {
+        // Add ICA store tag to active stores if it doesn't exist
+        setActiveStores(prev => [...prev, 'ica']);
+      }
+    }
+  }, [supabaseProducts]);
+
   return (
     <>
       <link
@@ -89,15 +116,22 @@ const Index = () => {
           />
         </div>
         
-        <ProductSection
-          categories={categoriesData}
-          storeTags={filteredStoreTags}
-          activeStoreIds={activeStores}
-          onProductQuantityChange={handleProductQuantityChange}
-          onRemoveTag={handleRemoveTag}
-          viewMode={viewMode}
-          searchQuery={searchQuery}
-        />
+        {loading ? (
+          <div className="p-4 flex justify-center">
+            <p className="text-gray-500">Loading products from Supabase...</p>
+          </div>
+        ) : (
+          <ProductSection
+            categories={categoriesData}
+            storeTags={filteredStoreTags}
+            activeStoreIds={activeStores}
+            onProductQuantityChange={handleProductQuantityChange}
+            onRemoveTag={handleRemoveTag}
+            viewMode={viewMode}
+            searchQuery={searchQuery}
+            supabaseProducts={supabaseProducts}
+          />
+        )}
         <BottomNav items={navItems} onSelect={handleNavSelect} />
       </div>
     </>

@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { ProductGrid } from "@/components/ProductGrid";
 import { StoreTags } from "@/components/StoreTags";
 import { CategoryTabs } from "@/components/CategoryTabs";
-import { CategoryData } from "@/data/productData";
+import { CategoryData, Product } from "@/data/productData";
 import { useProductUtils } from "@/hooks/useProductUtils";
 
 interface ProductSectionProps {
@@ -25,6 +25,7 @@ interface ProductSectionProps {
   onRemoveTag: (id: string) => void;
   viewMode?: "grid" | "list";
   searchQuery?: string;
+  supabaseProducts?: Product[];
 }
 
 export const ProductSection: React.FC<ProductSectionProps> = ({
@@ -34,7 +35,8 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   onProductQuantityChange,
   onRemoveTag,
   viewMode = "grid",
-  searchQuery = ""
+  searchQuery = "",
+  supabaseProducts = []
 }) => {
   const { 
     getProductsWithCategories, 
@@ -47,7 +49,19 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   const [activeCategory, setActiveCategory] = useState(nonEmptyCategories.length > 0 ? nonEmptyCategories[0].id : "");
   const scrolledToCategoryRef = useRef(false);
   
-  const allProducts = getProductsWithCategories();
+  // Get products from data file
+  const allLocalProducts = getProductsWithCategories();
+  
+  // Combine local products with Supabase products
+  const allProducts = React.useMemo(() => {
+    if (supabaseProducts.length === 0) {
+      return allLocalProducts;
+    }
+    
+    // Add Supabase products 
+    return [...allLocalProducts, ...supabaseProducts];
+  }, [allLocalProducts, supabaseProducts]);
+  
   const allCategoryNames = getAllCategoryNames();
 
   // Set initial active category when non-empty categories change
@@ -100,6 +114,25 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
     const storeTag = storeTags.find(tag => tag.name === product.store);
     const storeMatch = storeTag && activeStoreIds.includes(storeTag.id);
     
+    // Special case for ICA products from Supabase
+    if (product.store === 'ICA') {
+      const icaInActiveStores = activeStoreIds.includes('ica');
+      if (icaInActiveStores) {
+        // If search query is provided, filter by it
+        if (!searchQuery) return true;
+        
+        // Case-insensitive search in product name, details, and category
+        const query = searchQuery.toLowerCase();
+        return (
+          product.name.toLowerCase().includes(query) || 
+          product.details.toLowerCase().includes(query) ||
+          (product.category && product.category.toLowerCase().includes(query))
+        );
+      }
+      return false;
+    }
+    
+    // Regular case for other stores
     // Then filter by search query if provided
     if (!searchQuery) return storeMatch;
     

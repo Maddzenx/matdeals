@@ -1,23 +1,39 @@
 
-import { CategoryData } from "./types";
+interface StoreTag {
+  id: string;
+  name: string;
+}
 
-export const storeTagsData = [
-  { id: "1", name: "Willys Hornsberg" },
-  { id: "2", name: "City Gross" },
-  { id: "3", name: "Hemköp Nordstan" },
+export const storeTagsData: StoreTag[] = [
+  {
+    id: "willys",
+    name: "Willys Hornsberg",
+  },
+  {
+    id: "hemkop",
+    name: "Hemköp Nordstan",
+  },
+  {
+    id: "citygross",
+    name: "City Gross",
+  },
+  {
+    id: "ica",
+    name: "ICA",
+  }
 ];
 
-export const categoriesData: CategoryData[] = [
-  { id: "fruits", name: "Frukt & grönt" },
-  { id: "meat", name: "Kött & fågel" },
-  { id: "dairy", name: "Mejeri & Ägg" },
-  { id: "fish", name: "Fisk & Skaldjur" },
-  { id: "bread", name: "Bröd & Bageri" },
-  { id: "readymeals", name: "Färdigmat" },
-  { id: "drinks", name: "Drycker" },
-  { id: "snacks", name: "Snacks & Godis" },
-  { id: "taco", name: "Tacos" },
-  { id: "pantry", name: "Skafferi" },
-  { id: "household", name: "Hushåll" },
-  { id: "other", name: "Övrigt" },
+export const categoriesData = [
+  { id: "fruits", name: "Fruits & Vegetables" },
+  { id: "meat", name: "Meat" },
+  { id: "dairy", name: "Dairy" },
+  { id: "fish", name: "Fish" },
+  { id: "snacks", name: "Snacks" },
+  { id: "bread", name: "Bread" },
+  { id: "readymeals", name: "Ready Meals" },
+  { id: "drinks", name: "Drinks" },
+  { id: "taco", name: "Taco" },
+  { id: "pantry", name: "Pantry" },
+  { id: "household", name: "Household" },
+  { id: "other", name: "Other" },
 ];
