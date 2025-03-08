@@ -4,7 +4,7 @@ import { Product } from "../types";
 export const snackProducts: Product[] = [
   {
     id: "toffifee1",
-    image: "https://assets.icanet.se/e_sharpen:80,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_237261/cf_259/toffifee.jpg",
+    image: "https://assets.icanet.se/t_product_large_v1,f_auto/4014400900057.jpg",
     name: "Toffifee",
     details: "Toffifee, 125g, Jämförpris 143:20 kr/kg",
     currentPrice: "17:90 kr/förp",
@@ -15,7 +15,7 @@ export const snackProducts: Product[] = [
   },
   {
     id: "donut1",
-    image: "https://assets.icanet.se/e_sharpen:80,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_145756/cf_259/donut%2C_original.jpg",
+    image: "https://assets.icanet.se/t_product_large_v1,f_auto/5413476141059.jpg",
     name: "Donut",
     details: "La Lorraine, 50-58g, Flera olika sorter, Jämförpris 86:21-100:00 kr/kg, Max 3 förp/hushåll",
     currentPrice: "5:00 kr/st",
@@ -26,7 +26,7 @@ export const snackProducts: Product[] = [
   },
   {
     id: "cashew1",
-    image: "https://assets.icanet.se/e_sharpen:80,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_260030/cf_259/cashewnoetter%2C_saltade.jpg",
+    image: "https://assets.icanet.se/t_product_large_v1,f_auto/7393031300317.jpg",
     name: "Cashewnötter",
     details: "Nöttesfabriken, 250g, Jämförpris 199:60 kr/kg",
     currentPrice: "49:90 kr/förp",
@@ -37,7 +37,7 @@ export const snackProducts: Product[] = [
   },
   {
     id: "chips1",
-    image: "https://assets.icanet.se/e_sharpen:80,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_255701/cf_259/olw%2C_naturchips.jpg",
+    image: "https://assets.icanet.se/t_product_large_v1,f_auto/7310532115901.jpg",
     name: "Chips, Ostsnacks",
     details: "OLW, 100-275g, Flera olika sorter, Gäller ej Cheez doodles, grand och dill-chips, Jämförpris 87:27-190:00 kr/kg",
     currentPrice: "12:00 kr/st",
@@ -48,7 +48,7 @@ export const snackProducts: Product[] = [
   },
   {
     id: "choklad1",
-    image: "https://assets.icanet.se/e_sharpen:80,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_127428/cf_259/mjolkchoklad.jpg",
+    image: "https://assets.icanet.se/t_product_large_v1,f_auto/7310511211509.jpg",
     name: "Choklad",
     details: "Marabou, 200g, Olika sorter",
     currentPrice: "19:90 kr/st",

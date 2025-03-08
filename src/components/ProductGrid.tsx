@@ -70,12 +70,12 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
       {Object.entries(groupedProducts).map(([category, categoryProducts]) => (
         <div key={category || "uncategorized"}>
           {showCategoryHeaders && category && categoryProducts.length > 0 && (
-            <h3 id={category} className="text-base font-bold text-[#1C1C1C] mt-6 mb-3 scroll-mt-[160px]">
+            <h3 id={category} className="text-base font-bold text-[#1C1C1C] mt-5 mb-2 scroll-mt-[160px]">
               {category}
             </h3>
           )}
           {categoryProducts.length > 0 && (
-            <div className={`${viewMode === "grid" ? "grid grid-cols-2 gap-2.5" : "flex flex-col gap-2.5"} mb-6`}>
+            <div className={`${viewMode === "grid" ? "grid grid-cols-2 gap-2" : "flex flex-col gap-2"} mb-5`}>
               {categoryProducts.map((product) => (
                 <ProductCard
                   key={product.id}
