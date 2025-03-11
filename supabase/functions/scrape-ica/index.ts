@@ -1,7 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders, fetchAndParse, findOfferContainers, findAllOfferCards } from "./dom-utils.ts";
-import { extractProducts } from "./product-extractor.ts";
+import { extractProducts } from "./products-extractor.ts";
 import { storeProducts } from "./supabase-client.ts";
 
 serve(async (req) => {

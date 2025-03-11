@@ -1,13 +1,11 @@
 
 import { DOMParser } from "https://deno.land/x/deno_dom/deno-dom-wasm.ts";
-import { 
-  extractProductName, 
-  extractProductDescription, 
-  extractProductPrice,
-  extractProductImageUrl,
-  processProductCard,
-  extractProducts
-} from "./product-extractor.ts";
+import { extractProductName } from "./extractors/name-extractor.ts";
+import { extractProductDescription } from "./extractors/description-extractor.ts";
+import { extractProductPrice } from "./extractors/price-extractor.ts";
+import { extractProductImageUrl } from "./extractors/image-extractor.ts";
+import { processProductCard } from "./processors/card-processor.ts";
+import { extractProducts } from "./products-extractor.ts";
 
 // Helper function to create test HTML elements
 function createTestElement(html: string): Element {
