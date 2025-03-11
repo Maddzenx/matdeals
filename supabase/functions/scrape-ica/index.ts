@@ -54,7 +54,12 @@ serve(async (req) => {
       ...document.querySelectorAll('.view--promotion-list'),
       ...document.querySelectorAll('.sv-row-promotional__offers'),
       ...document.querySelectorAll('.sv-text-promotional__block'),
-      ...document.querySelectorAll('.promotion__list')
+      ...document.querySelectorAll('.promotion__list'),
+      ...document.querySelectorAll('.product-list'),
+      ...document.querySelectorAll('.offer-list'),
+      ...document.querySelectorAll('[class*="promotional"]'),
+      ...document.querySelectorAll('[class*="promotion"]'),
+      ...document.querySelectorAll('[class*="offer"]')
     ];
     
     console.log(`Found ${offerContainers.length} offer containers to process`);
@@ -67,7 +72,11 @@ serve(async (req) => {
       ...document.querySelectorAll('.product-card'),
       ...document.querySelectorAll('.offer-card__container'),
       ...document.querySelectorAll('.promotion-item'),
-      ...document.querySelectorAll('.offer-list__item')
+      ...document.querySelectorAll('.offer-list__item'),
+      ...document.querySelectorAll('article[class*="offer"]'),
+      ...document.querySelectorAll('article[class*="product"]'),
+      ...document.querySelectorAll('div[class*="offer-card"]'),
+      ...document.querySelectorAll('div[class*="product-card"]')
     ];
     
     // If no cards found directly, try to find them within the containers
@@ -79,7 +88,10 @@ serve(async (req) => {
           ...container.querySelectorAll('.offer-card'),
           ...container.querySelectorAll('.product-card'),
           ...container.querySelectorAll('.offer-card-v3'),
-          ...container.querySelectorAll('.promotion-item')
+          ...container.querySelectorAll('.promotion-item'),
+          ...container.querySelectorAll('div[class*="offer"]'),
+          ...container.querySelectorAll('div[class*="product"]'),
+          ...container.querySelectorAll('[class*="item"]')
         ];
       }
     }
@@ -89,12 +101,48 @@ serve(async (req) => {
     // If still no offers found, try a more general approach
     if (offerCards.length === 0) {
       // Look for any elements that might contain offer information
-      const possibleOfferElements = document.querySelectorAll('article, .card, [class*="offer"], [class*="product"], [class*="promotion"]');
+      const possibleOfferElements = document.querySelectorAll('article, .card, [class*="offer"], [class*="product"], [class*="promotion"], [class*="item"]');
       console.log(`Trying broader selector, found ${possibleOfferElements.length} possible elements`);
       offerCards = [...possibleOfferElements];
     }
+    
+    // As a fallback, look for specific sections that might contain products
+    if (offerCards.length < 20) {  // If we still don't have enough products
+      console.log("Not enough products found, trying to find sections with products");
+      
+      // Get all sections or divs that might be product containers
+      const sections = document.querySelectorAll('section, div.container, div.content, main > div');
+      
+      for (const section of sections) {
+        // Look for headers or titles that suggest this section contains offers
+        const headers = section.querySelectorAll('h1, h2, h3, h4, .title, .heading');
+        
+        for (const header of headers) {
+          const headerText = header.textContent.toLowerCase();
+          
+          // If the header suggests product offers
+          if (headerText.includes('erbjudanden') || headerText.includes('offer') || 
+              headerText.includes('produkt') || headerText.includes('product') || 
+              headerText.includes('pris') || headerText.includes('price')) {
+            
+            console.log(`Found potential product section with header: ${headerText}`);
+            
+            // Get all divs or articles that might be products in this section
+            const potentialProducts = section.querySelectorAll('div > article, div > div > article, div[class*="item"], div[class*="card"]');
+            
+            if (potentialProducts.length > 0) {
+              console.log(`Found ${potentialProducts.length} potential products in section`);
+              offerCards = [...offerCards, ...potentialProducts];
+            }
+          }
+        }
+      }
+    }
+    
+    console.log(`Total potential product elements to process: ${offerCards.length}`);
 
     const products = [];
+    const processedProductNames = new Set(); // To avoid duplicates
 
     // Process each offer card
     for (const card of offerCards) {
@@ -104,7 +152,8 @@ serve(async (req) => {
         const nameSelectors = [
           'p.offer-card__title', '.offer-card-v3__title', '.product-card__product-name', 
           '.promotion-item__title', 'h2', 'h3', '.title', '[class*="title"]',
-          '[class*="name"]', '.offer-card__heading'
+          '[class*="name"]', '.offer-card__heading', '.product__title', '.item__title',
+          'p.title', 'p.heading', 'div.title', 'div.heading', 'span.title', 'span.heading'
         ];
         
         for (const selector of nameSelectors) {
@@ -117,7 +166,7 @@ serve(async (req) => {
         
         // If still no name, try to find any text that might be a product name
         if (!name) {
-          const possibleNameElements = card.querySelectorAll('p, h1, h2, h3, h4, .text-title, [class*="title"], [class*="name"]');
+          const possibleNameElements = card.querySelectorAll('p, h1, h2, h3, h4, .text-title, [class*="title"], [class*="name"], strong, b');
           for (const element of possibleNameElements) {
             const text = element.textContent.trim();
             if (text && text.length > 3 && text.length < 100) {
@@ -127,12 +176,27 @@ serve(async (req) => {
           }
         }
         
+        // Last resort: use any prominent text in the card as a potential name
+        if (!name) {
+          const allTextElements = card.querySelectorAll('*');
+          for (const element of allTextElements) {
+            if (element.children.length === 0 && element.textContent) {
+              const text = element.textContent.trim();
+              if (text && text.length > 3 && text.length < 100) {
+                name = text;
+                break;
+              }
+            }
+          }
+        }
+        
         // Extract product description using multiple possible selectors
         let description = null;
         const descSelectors = [
           'p.offer-card__text', '.offer-card-v3__description', '.product-card__product-subtitle',
           '.promotion-item__description', '.details', '.description', '[class*="description"]', 
-          '[class*="subtitle"]', '[class*="text"]', '.offer-card__preamble'
+          '[class*="subtitle"]', '[class*="text"]', '.offer-card__preamble',
+          '.product__description', '.item__description', '.product-details', '.product-info'
         ];
         
         for (const selector of descSelectors) {
@@ -140,6 +204,18 @@ serve(async (req) => {
           if (element && element.textContent.trim()) {
             description = element.textContent.trim();
             break;
+          }
+        }
+        
+        // If no description found yet, look for secondary text elements
+        if (!description && name) {
+          const allParagraphs = card.querySelectorAll('p, div.text, span.text');
+          for (const para of allParagraphs) {
+            const text = para.textContent.trim();
+            if (text && text !== name && text.length > 5) {
+              description = text;
+              break;
+            }
           }
         }
         
@@ -151,7 +227,8 @@ serve(async (req) => {
         const priceSelectors = [
           'div.price-splash__text', '.product-price', '.offer-card-v3__price-value',
           '.price-standard__value', '.price', '[class*="price"]', '.promotion-item__price',
-          '.offer-card__price'
+          '.offer-card__price', '.product__price', '.item__price', 
+          'span[class*="price"]', 'div[class*="price"]', 'p[class*="price"]'
         ];
         
         for (const selector of priceSelectors) {
@@ -174,15 +251,15 @@ serve(async (req) => {
         
         // If still no price found, try to find any text that looks like a price
         if (!price) {
-          const allTexts = [];
+          const allTextNodes = [];
           const textNodes = card.querySelectorAll('*');
           textNodes.forEach(node => {
             if (node.textContent) {
-              allTexts.push(node.textContent.trim());
+              allTextNodes.push(node.textContent.trim());
             }
           });
           
-          for (const text of allTexts) {
+          for (const text of allTextNodes) {
             // Look for patterns like "25:-", "25.90:-", "25,90 kr", etc.
             const priceMatches = text.match(/(\d+[.,]?\d*)(?:\s*(?::-|kr|SEK|:-\s*kr))/i);
             if (priceMatches && priceMatches[1]) {
@@ -197,7 +274,8 @@ serve(async (req) => {
         let imageUrl = null;
         const imageSelectors = [
           'img.offer-card__image-inner', '.product-image img', '.product-card__product-image img',
-          '.offer-card-v3__image', 'img', '[class*="image"] img', '.promotion-item__image img'
+          '.offer-card-v3__image', 'img', '[class*="image"] img', '.promotion-item__image img',
+          '.product__image img', '.item__image img', 'picture img', 'figure img'
         ];
         
         for (const selector of imageSelectors) {
@@ -214,8 +292,26 @@ serve(async (req) => {
           }
         }
         
+        // Check for <picture> element with srcset if no direct image found
+        if (!imageUrl) {
+          const picture = card.querySelector('picture');
+          if (picture) {
+            const source = picture.querySelector('source');
+            if (source) {
+              const srcset = source.getAttribute('srcset');
+              if (srcset) {
+                const firstSrc = srcset.split(',')[0].trim().split(' ')[0];
+                if (firstSrc) {
+                  imageUrl = firstSrc.startsWith('http') ? firstSrc : new URL(firstSrc, url).href;
+                }
+              }
+            }
+          }
+        }
+        
         // If we at least have a name, consider it a valid product
-        if (name) {
+        if (name && !processedProductNames.has(name)) {
+          processedProductNames.add(name); // Prevent duplicates
           products.push({
             name,
             description,
@@ -262,7 +358,7 @@ serve(async (req) => {
       throw insertError;
     }
     
-    console.log(`Successfully inserted ${products.length} new products`);
+    console.log(`Successfully inserted ${products.length} new offers`);
 
     return new Response(
       JSON.stringify({
