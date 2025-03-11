@@ -1,6 +1,7 @@
 
 {
   "tasks": {
-    "start": "deno run --allow-net --allow-env index.ts"
+    "start": "deno run --allow-net --allow-env index.ts",
+    "test": "deno test --allow-net --allow-env"
   }
 }
