@@ -56,15 +56,21 @@ const Index = () => {
         description: "Please wait while we fetch the latest offers...",
       });
       
-      // Call the Supabase edge function with a timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 90000); // 90-second timeout
-      
-      const { data, error } = await supabase.functions.invoke('scrape-ica', {
-        signal: controller.signal,
+      // Set up a timeout for the request
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Request timeout after 90 seconds')), 90000);
       });
       
-      clearTimeout(timeoutId);
+      // Create the invocation promise
+      const invocationPromise = supabase.functions.invoke('scrape-ica');
+      
+      // Race between timeout and invocation
+      const { data, error } = await Promise.race([
+        invocationPromise,
+        timeoutPromise.then(() => { 
+          throw new Error('Request timeout after 90 seconds');
+        })
+      ]);
       
       if (error) {
         console.error("Function invocation error:", error);
@@ -86,7 +92,8 @@ const Index = () => {
       // More user-friendly error message
       let errorMessage = "Failed to fetch ICA products. Please try again later.";
       
-      if (err.name === "AbortError") {
+      if (err.name === "AbortError" || 
+          (err.message && err.message.includes("timeout"))) {
         errorMessage = "The request took too long and was cancelled. The ICA website might be slow or unavailable.";
       } else if (err.message && typeof err.message === 'string') {
         // Only show the error message if it's appropriate for users
