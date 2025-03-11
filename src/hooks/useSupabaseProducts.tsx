@@ -14,16 +14,22 @@ export const useSupabaseProducts = () => {
       setLoading(true);
       setError(null);
       
+      console.log("Fetching products from Supabase ICA table...");
+      
       // Fetch products from Supabase ICA table
       const { data, error } = await supabase
         .from('ICA')
         .select('*');
       
       if (error) {
+        console.error("Supabase query error:", error);
         throw error;
       }
       
-      if (data) {
+      console.log("Raw Supabase data:", data);
+      console.log("Number of items returned:", data?.length || 0);
+      
+      if (data && data.length > 0) {
         // Transform Supabase data to match our Product interface
         const transformedProducts: Product[] = data.map((item) => {
           // Extract detailed information from the combined description field
@@ -54,8 +60,14 @@ export const useSupabaseProducts = () => {
             category = 'Drinks';
           }
           
-          return {
-            id: `ica-${item.name.replace(/\s+/g, '-').toLowerCase()}-${Math.random().toString(36).substring(2, 9)}`,
+          // Make sure the category exists in the app's category list
+          // This ensures products will show up in the UI
+          if (!['Fruits & Vegetables', 'Meat', 'Fish', 'Dairy', 'Snacks', 'Bread', 'Drinks', 'Other'].includes(category)) {
+            category = 'Other';
+          }
+          
+          const product = {
+            id: `ica-${item.name?.replace(/\s+/g, '-').toLowerCase() || 'product'}-${Math.random().toString(36).substring(2, 9)}`,
             image: item.image_url || 'https://assets.icanet.se/t_product_large_v1,f_auto/7310865085313.jpg',
             name: item.name || 'Product',
             details: baseDescription,
@@ -64,10 +76,16 @@ export const useSupabaseProducts = () => {
             store: 'ICA',
             category: category
           };
+          
+          console.log(`Transformed product: ${product.name}, Category: ${product.category}`);
+          return product;
         });
         
         console.log('Fetched and transformed ICA products:', transformedProducts);
         setProducts(transformedProducts);
+      } else {
+        console.log('No ICA products found in Supabase.');
+        setProducts([]);
       }
     } catch (err) {
       console.error('Error fetching products from Supabase:', err);
