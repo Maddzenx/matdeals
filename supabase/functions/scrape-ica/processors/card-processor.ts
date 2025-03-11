@@ -17,26 +17,42 @@ export function processProductCard(
     // Extract product name
     const name = extractProductName(card);
     
-    // Skip if no name or already processed
-    if (!name || processedProductNames.has(name)) {
+    // Skip if no name
+    if (!name) {
+      return null;
+    }
+    
+    // Create a normalized key for deduplication
+    const normalizedName = name.toLowerCase().trim().replace(/\s+/g, ' ');
+    
+    // Skip if already processed a similar name
+    if (processedProductNames.has(normalizedName)) {
+      console.log(`Skipping duplicate product: ${name}`);
       return null;
     }
     
     // Extract other product details
-    const description = extractProductDescription(card, name);
-    const { price, priceStr } = extractProductPrice(card);
+    const { description, quantityInfo } = extractProductDescription(card, name);
+    const { price, priceStr, originalPrice, comparisonPrice, offerDetails } = extractProductPrice(card);
     const imageUrl = extractProductImageUrl(card, baseUrl);
     
     // Add to processed names to prevent duplicates
-    processedProductNames.add(name);
+    processedProductNames.add(normalizedName);
     
     console.log(`Processed product: ${name} with price: ${price || 'unknown'} (${priceStr || 'no price found'})`);
+    if (originalPrice) console.log(`  Original price: ${originalPrice}`);
+    if (comparisonPrice) console.log(`  Comparison price: ${comparisonPrice}`);
+    if (offerDetails) console.log(`  Offer details: ${offerDetails}`);
     
     return {
       name,
       description,
       price,
-      image_url: imageUrl
+      image_url: imageUrl,
+      original_price: originalPrice,
+      comparison_price: comparisonPrice,
+      offer_details: offerDetails,
+      quantity_info: quantityInfo
     };
   } catch (cardError) {
     console.error("Error processing a card:", cardError);

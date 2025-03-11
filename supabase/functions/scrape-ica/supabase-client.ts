@@ -1,6 +1,6 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { Product } from "./product-extractor.ts";
+import { Product } from "./types/product.ts";
 
 /**
  * Creates and returns a Supabase client
@@ -36,10 +36,24 @@ export async function storeProducts(products: Product[]) {
   
   console.log("Successfully cleared existing products. Inserting new products...");
 
+  // Map products to the database schema
+  const dbProducts = products.map(product => ({
+    name: product.name,
+    description: [
+      product.description,
+      product.quantity_info,
+      product.offer_details,
+      product.comparison_price,
+      product.original_price
+    ].filter(Boolean).join(' | '),
+    price: product.price,
+    image_url: product.image_url
+  }));
+
   // Insert all new products
   const { error: insertError } = await supabase
     .from('ICA')
-    .insert(products);
+    .insert(dbProducts);
   
   if (insertError) {
     console.error("Error inserting new products:", insertError);

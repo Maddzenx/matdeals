@@ -25,17 +25,28 @@ export const useSupabaseProducts = () => {
       
       if (data) {
         // Transform Supabase data to match our Product interface
-        // Using a unique ID based on name since the ICA table might not have an id column
-        const transformedProducts: Product[] = data.map((item) => ({
-          id: `ica-${item.name.replace(/\s+/g, '-').toLowerCase()}-${Math.random().toString(36).substring(2, 9)}`,
-          image: item.image_url || 'https://assets.icanet.se/t_product_large_v1,f_auto/7310865085313.jpg', // Default image
-          name: item.name || 'Product',
-          details: item.description || 'No description available',
-          currentPrice: `${item.price || 0}:- kr`,
-          originalPrice: '',
-          store: 'ICA',
-          category: 'other'
-        }));
+        const transformedProducts: Product[] = data.map((item) => {
+          // Extract detailed information from the combined description field
+          const descriptionParts = item.description ? item.description.split(' | ') : [];
+          const baseDescription = descriptionParts[0] || 'No description available';
+          
+          // Create a rich details string from the product info parts
+          let details = baseDescription;
+          if (descriptionParts.length > 1) {
+            details = descriptionParts.join('\n');
+          }
+          
+          return {
+            id: `ica-${item.name.replace(/\s+/g, '-').toLowerCase()}-${Math.random().toString(36).substring(2, 9)}`,
+            image: item.image_url || 'https://assets.icanet.se/t_product_large_v1,f_auto/7310865085313.jpg', // Default image
+            name: item.name || 'Product',
+            details: details,
+            currentPrice: `${item.price || 0}:- kr`,
+            originalPrice: '',
+            store: 'ICA',
+            category: 'other'
+          };
+        });
         
         console.log('Fetched products from Supabase:', transformedProducts);
         setProducts(transformedProducts);
