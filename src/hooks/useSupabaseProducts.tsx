@@ -30,25 +30,43 @@ export const useSupabaseProducts = () => {
           const descriptionParts = item.description ? item.description.split(' | ') : [];
           const baseDescription = descriptionParts[0] || 'No description available';
           
-          // Create a rich details string from the product info parts
-          let details = baseDescription;
-          if (descriptionParts.length > 1) {
-            details = descriptionParts.join('\n');
+          // Parse the price string to get the numeric value
+          const priceString = item.price?.toString() || '0';
+          const formattedPrice = `${priceString}:- kr`;
+          
+          // Categorize products based on description keywords
+          let category = 'other';
+          const lowerDesc = (item.description || '').toLowerCase();
+          
+          if (lowerDesc.includes('grönsak') || lowerDesc.includes('frukt')) {
+            category = 'Fruits & Vegetables';
+          } else if (lowerDesc.includes('kött') || lowerDesc.includes('fläsk') || lowerDesc.includes('nöt')) {
+            category = 'Meat';
+          } else if (lowerDesc.includes('fisk') || lowerDesc.includes('lax')) {
+            category = 'Fish';
+          } else if (lowerDesc.includes('mjölk') || lowerDesc.includes('ost')) {
+            category = 'Dairy';
+          } else if (lowerDesc.includes('snack') || lowerDesc.includes('chips') || lowerDesc.includes('godis')) {
+            category = 'Snacks';
+          } else if (lowerDesc.includes('bröd')) {
+            category = 'Bread';
+          } else if (lowerDesc.includes('dryck') || lowerDesc.includes('läsk')) {
+            category = 'Drinks';
           }
           
           return {
             id: `ica-${item.name.replace(/\s+/g, '-').toLowerCase()}-${Math.random().toString(36).substring(2, 9)}`,
-            image: item.image_url || 'https://assets.icanet.se/t_product_large_v1,f_auto/7310865085313.jpg', // Default image
+            image: item.image_url || 'https://assets.icanet.se/t_product_large_v1,f_auto/7310865085313.jpg',
             name: item.name || 'Product',
-            details: details,
-            currentPrice: `${item.price || 0}:- kr`,
+            details: baseDescription,
+            currentPrice: formattedPrice,
             originalPrice: '',
             store: 'ICA',
-            category: 'other'
+            category: category
           };
         });
         
-        console.log('Fetched products from Supabase:', transformedProducts);
+        console.log('Fetched and transformed ICA products:', transformedProducts);
         setProducts(transformedProducts);
       }
     } catch (err) {
