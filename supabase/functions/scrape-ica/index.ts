@@ -86,53 +86,36 @@ serve(async (req) => {
       }
     }
 
-    // Update or insert products in the ICA table
-    for (const product of products) {
-      // First check if the product already exists
-      const { data: existingProducts, error: queryError } = await supabase
-        .from('ICA')
-        .select('*')
-        .eq('name', product.name);
-
-      if (queryError) {
-        console.error(`Error querying product ${product.name}:`, queryError);
-        continue;
-      }
-
-      if (existingProducts && existingProducts.length > 0) {
-        // Update existing product
-        const { error: updateError } = await supabase
-          .from('ICA')
-          .update({
-            description: product.description,
-            price: product.price,
-            image_url: product.image_url
-          })
-          .eq('name', product.name);
-
-        if (updateError) {
-          console.error(`Error updating product ${product.name}:`, updateError);
-        } else {
-          console.log(`Updated product: ${product.name}`);
-        }
-      } else {
-        // Insert new product
-        const { error: insertError } = await supabase
-          .from('ICA')
-          .insert(product);
-
-        if (insertError) {
-          console.error(`Error inserting product ${product.name}:`, insertError);
-        } else {
-          console.log(`Inserted new product: ${product.name}`);
-        }
-      }
+    // Clear all existing products first
+    console.log("Clearing all existing ICA products...");
+    const { error: deleteError } = await supabase
+      .from('ICA')
+      .delete()
+      .neq('name', ''); // Delete all rows
+    
+    if (deleteError) {
+      console.error("Error clearing existing products:", deleteError);
+      throw deleteError;
     }
+    
+    console.log("Successfully cleared existing products. Inserting new products...");
+
+    // Insert all new products
+    const { error: insertError } = await supabase
+      .from('ICA')
+      .insert(products);
+    
+    if (insertError) {
+      console.error("Error inserting new products:", insertError);
+      throw insertError;
+    }
+    
+    console.log(`Successfully inserted ${products.length} new products`);
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: `Processed ${products.length} products from ICA website`,
+        message: `Refreshed all products from ICA website. Inserted ${products.length} new offers.`,
         products
       }),
       {
