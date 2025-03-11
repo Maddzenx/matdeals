@@ -14,7 +14,8 @@ export function extractProductPrice(card: Element): {
     'div.price-splash__text', '.product-price', '.offer-card-v3__price-value',
     '.price-standard__value', '.price', '[class*="price"]', '.promotion-item__price',
     '.offer-card__price', '.product__price', '.item__price', 
-    'span[class*="price"]', 'div[class*="price"]', 'p[class*="price"]'
+    'span[class*="price"]', 'div[class*="price"]', 'p[class*="price"]',
+    '.pricebox', '.price-amount', '.offer-price'
   ];
   
   let price: number | null = null;
@@ -46,7 +47,8 @@ export function extractProductPrice(card: Element): {
   const originalPriceSelectors = [
     '.original-price', '.regular-price', '.was-price', '[class*="original"]', 
     '[class*="regular"]', '.price-was', '.old-price', '.strikethrough-price',
-    '.price-regular', '.price__original', '[data-price-original]'
+    '.price-regular', '.price__original', '[data-price-original]', '.pre-price',
+    'del', '.price-before', '.full-price'
   ];
   
   for (const selector of originalPriceSelectors) {
@@ -57,11 +59,17 @@ export function extractProductPrice(card: Element): {
     }
   }
   
-  // If not found yet, look for text with "Ord.pris"
+  // If not found yet, look for text with "Ord.pris" or similar
   if (!originalPrice) {
     const allText = Array.from(card.querySelectorAll('*'))
       .map(el => el.textContent?.trim())
-      .filter(text => text && text.includes('Ord.pris'));
+      .filter(Boolean)
+      .filter(text => 
+        text.includes('Ord.pris') || 
+        text.includes('Ordinarie') || 
+        text.includes('Tidigare') ||
+        text.match(/\d+[.,]\d+\s*kr\s*\/\s*\d+[.,]\d+\s*kr/)
+      );
       
     if (allText.length > 0) {
       originalPrice = allText[0];
@@ -71,7 +79,8 @@ export function extractProductPrice(card: Element): {
   // Look for comparison price (jmfpris)
   const comparisonPriceSelectors = [
     '.comparison-price', '.unit-price', '.price-per-unit', '[class*="comparison"]',
-    '[class*="jmfpris"]', '.price-comparison', '.per-unit-price'
+    '[class*="jmfpris"]', '.price-comparison', '.per-unit-price', '.price-per',
+    '.price-per-kg', '.price-per-unit'
   ];
   
   for (const selector of comparisonPriceSelectors) {
@@ -82,39 +91,71 @@ export function extractProductPrice(card: Element): {
     }
   }
   
-  // If not found yet, look for text with "Jmfpris"
+  // If not found yet, look for text with "Jmfpris" or similar patterns
   if (!comparisonPrice) {
     const allText = Array.from(card.querySelectorAll('*'))
       .map(el => el.textContent?.trim())
-      .filter(text => text && text.includes('Jmfpris'));
+      .filter(Boolean)
+      .filter(text => 
+        text.includes('Jmfpris') || 
+        text.match(/\d+[.,]\d+\s*kr\s*\/\s*kg/) ||
+        text.match(/\d+[.,]\d+\s*kr\s*\/\s*liter/) ||
+        text.match(/\d+[.,]\d+\s*\/\s*\w+/)
+      );
       
     if (allText.length > 0) {
       comparisonPrice = allText[0];
     }
   }
   
-  // Look for offer details (like "2 för 69 kr")
+  // Look for offer details (like "2 för 69 kr" or "Max 1 köp/hushåll")
   const offerDetailsSelectors = [
     '.offer-details', '.promotion-details', '.deal-text', '[class*="offer"]',
-    '[class*="promotion"]', '.price-deal', '.special-offer'
+    '[class*="promotion"]', '.price-deal', '.special-offer', '.offer-terms',
+    '.limitation', '.campaign-text', '.banner-text'
   ];
   
+  // First look for dedicated offer details elements
   for (const selector of offerDetailsSelectors) {
     const element = card.querySelector(selector);
     if (element && element.textContent) {
-      offerDetails = element.textContent.trim();
-      break;
+      const text = element.textContent.trim();
+      if (text.length > 3 && text.length < 50) { // Reasonable length for offer details
+        offerDetails = text;
+        break;
+      }
     }
   }
   
-  // If not found yet, look for text with "för" or "max" in price elements
+  // If not found yet, look for specific patterns in the text
   if (!offerDetails) {
-    const allText = Array.from(card.querySelectorAll('[class*="price"], [class*="offer"], p, span'))
+    const offerPatterns = [
+      /(\d+)\s*för\s*(\d+[.,]?\d*)/i,  // "3 för 70"
+      /Max\s*(\d+)\s*köp/i,            // "Max 1 köp"
+      /(\d+[.,]?\d*)\s*kr\s*\/\s*st/i, // "25 kr/st"
+      /köp\s*(\d+)\s*betala\s*för\s*(\d+)/i // "Köp 3 betala för 2"
+    ];
+    
+    const allText = Array.from(card.querySelectorAll('*'))
       .map(el => el.textContent?.trim())
-      .filter(text => text && (text.includes('för') || text.includes('Max') || text.includes('per')));
+      .filter(Boolean);
+    
+    for (const text of allText) {
+      for (const pattern of offerPatterns) {
+        if (pattern.test(text) && text.length < 50) {
+          offerDetails = text;
+          break;
+        }
+      }
       
-    if (allText.length > 0) {
-      offerDetails = allText[0];
+      if (offerDetails) break;
+      
+      // Also look for text with "för" or "max" in price elements
+      if ((text.includes('för') || text.includes('Max') || text.includes('per') || 
+           text.includes('köp') || text.includes('st')) && text.length < 50) {
+        offerDetails = text;
+        break;
+      }
     }
   }
   

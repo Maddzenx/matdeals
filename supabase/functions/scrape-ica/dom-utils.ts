@@ -51,7 +51,11 @@ export function findOfferContainers(document: Document): Element[] {
     ...document.querySelectorAll('.offer-list'),
     ...document.querySelectorAll('[class*="promotional"]'),
     ...document.querySelectorAll('[class*="promotion"]'),
-    ...document.querySelectorAll('[class*="offer"]')
+    ...document.querySelectorAll('[class*="offer"]'),
+    ...document.querySelectorAll('.price-table'),
+    ...document.querySelectorAll('.offer-grid'),
+    ...document.querySelectorAll('.product-grid'),
+    ...document.querySelectorAll('.deal-section')
   ];
   
   console.log(`Found ${offerContainers.length} offer containers to process`);
@@ -74,7 +78,10 @@ export function findAllOfferCards(document: Document, offerContainers: Element[]
     ...document.querySelectorAll('article[class*="offer"]'),
     ...document.querySelectorAll('article[class*="product"]'),
     ...document.querySelectorAll('div[class*="offer-card"]'),
-    ...document.querySelectorAll('div[class*="product-card"]')
+    ...document.querySelectorAll('div[class*="product-card"]'),
+    ...document.querySelectorAll('.price-item'),
+    ...document.querySelectorAll('.deal-item'),
+    ...document.querySelectorAll('.offer__item')
   ];
   
   // If no cards found directly, try to find them within the containers
@@ -89,7 +96,11 @@ export function findAllOfferCards(document: Document, offerContainers: Element[]
         ...container.querySelectorAll('.promotion-item'),
         ...container.querySelectorAll('div[class*="offer"]'),
         ...container.querySelectorAll('div[class*="product"]'),
-        ...container.querySelectorAll('[class*="item"]')
+        ...container.querySelectorAll('[class*="item"]'),
+        ...container.querySelectorAll('.price-item'),
+        ...container.querySelectorAll('.deal-item'),
+        ...container.querySelectorAll('li'), // Some offers might be in list items
+        ...container.querySelectorAll('.product-tile')
       ];
     }
   }
@@ -99,7 +110,7 @@ export function findAllOfferCards(document: Document, offerContainers: Element[]
   // If still no offers found, try a more general approach
   if (offerCards.length === 0) {
     // Look for any elements that might contain offer information
-    const possibleOfferElements = document.querySelectorAll('article, .card, [class*="offer"], [class*="product"], [class*="promotion"], [class*="item"]');
+    const possibleOfferElements = document.querySelectorAll('article, .card, [class*="offer"], [class*="product"], [class*="promotion"], [class*="item"], [class*="price-"], [class*="deal-"]');
     console.log(`Trying broader selector, found ${possibleOfferElements.length} possible elements`);
     offerCards = [...possibleOfferElements];
   }
@@ -121,12 +132,13 @@ export function findAllOfferCards(document: Document, offerContainers: Element[]
         // If the header suggests product offers
         if (headerText.includes('erbjudanden') || headerText.includes('offer') || 
             headerText.includes('produkt') || headerText.includes('product') || 
-            headerText.includes('pris') || headerText.includes('price')) {
+            headerText.includes('pris') || headerText.includes('price') ||
+            headerText.includes('kampanj') || headerText.includes('deal')) {
           
           console.log(`Found potential product section with header: ${headerText}`);
           
           // Get all divs or articles that might be products in this section
-          const potentialProducts = section.querySelectorAll('div > article, div > div > article, div[class*="item"], div[class*="card"]');
+          const potentialProducts = section.querySelectorAll('div > article, div > div > article, div[class*="item"], div[class*="card"], li, .product-row, .price-row');
           
           if (potentialProducts.length > 0) {
             console.log(`Found ${potentialProducts.length} potential products in section`);

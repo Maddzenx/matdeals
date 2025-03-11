@@ -23,11 +23,34 @@ export function processProductCard(
     }
     
     // Create a normalized key for deduplication
-    const normalizedName = name.toLowerCase().trim().replace(/\s+/g, ' ');
+    // Only consider the main product name for deduplication (remove numbers and special formatting)
+    const normalizedName = name.toLowerCase()
+      .trim()
+      .replace(/\s+/g, ' ')
+      .replace(/\d+\s*(för|st|kr|pack|kg|g)/gi, '') // Remove quantity indicators
+      .replace(/^(ca\.|ca)\s+/i, '')  // Remove "ca." prefix
+      .trim();
     
-    // Skip if already processed a similar name
-    if (processedProductNames.has(normalizedName)) {
-      console.log(`Skipping duplicate product: ${name}`);
+    // Skip if empty name after normalization
+    if (!normalizedName) {
+      return null;
+    }
+    
+    // Skip if already processed a similar name, but be careful not to skip too much
+    // Only skip exact matches or very similar products
+    const isDuplicate = Array.from(processedProductNames).some(existingName => {
+      // Check for exact match
+      if (existingName === normalizedName) return true;
+      
+      // Check for high similarity (one is contained completely in the other)
+      if (existingName.includes(normalizedName) && normalizedName.length > 5) return true;
+      if (normalizedName.includes(existingName) && existingName.length > 5) return true;
+      
+      return false;
+    });
+    
+    if (isDuplicate) {
+      console.log(`Skipping duplicate product: ${name} (normalized: ${normalizedName})`);
       return null;
     }
     
@@ -36,13 +59,17 @@ export function processProductCard(
     const { price, priceStr, originalPrice, comparisonPrice, offerDetails } = extractProductPrice(card);
     const imageUrl = extractProductImageUrl(card, baseUrl);
     
-    // Add to processed names to prevent duplicates
-    processedProductNames.add(normalizedName);
+    // Only add to processed names if we got a valid price
+    // This allows different variants of the same product to be included if they have different prices
+    if (price !== null) {
+      processedProductNames.add(normalizedName);
+    }
     
     console.log(`Processed product: ${name} with price: ${price || 'unknown'} (${priceStr || 'no price found'})`);
     if (originalPrice) console.log(`  Original price: ${originalPrice}`);
     if (comparisonPrice) console.log(`  Comparison price: ${comparisonPrice}`);
     if (offerDetails) console.log(`  Offer details: ${offerDetails}`);
+    if (quantityInfo) console.log(`  Quantity info: ${quantityInfo}`);
     
     return {
       name,
