@@ -26,7 +26,18 @@ serve(async (req) => {
 
     console.log("Fetching ICA website data from:", url);
     // Fetch the webpage content
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch with status: ${response.status}`);
+    }
+    
     const html = await response.text();
 
     // Parse the HTML
@@ -37,39 +48,99 @@ serve(async (req) => {
       throw new Error("Failed to parse HTML document");
     }
 
+    // Extract all possible containers that might contain product offers
+    // Try multiple different selectors to capture all types of product cards
+    const offerContainers = [
+      ...document.querySelectorAll('.view--promotion-list'),
+      ...document.querySelectorAll('.sv-row-promotional__offers'),
+      ...document.querySelectorAll('.sv-text-promotional__block'),
+      ...document.querySelectorAll('.promotion__list')
+    ];
+    
+    console.log(`Found ${offerContainers.length} offer containers to process`);
+    
     // Looking for all offer containers which might contain multiple formats of offer cards
-    const offerCards = [
+    let offerCards = [
       ...document.querySelectorAll('article.offer-card'),
       ...document.querySelectorAll('.offer-card-v3'),
       ...document.querySelectorAll('.offer-card-banner'),
-      ...document.querySelectorAll('.product-card')
+      ...document.querySelectorAll('.product-card'),
+      ...document.querySelectorAll('.offer-card__container'),
+      ...document.querySelectorAll('.promotion-item'),
+      ...document.querySelectorAll('.offer-list__item')
     ];
     
+    // If no cards found directly, try to find them within the containers
+    if (offerCards.length === 0 && offerContainers.length > 0) {
+      for (const container of offerContainers) {
+        offerCards = [
+          ...offerCards,
+          ...container.querySelectorAll('article'),
+          ...container.querySelectorAll('.offer-card'),
+          ...container.querySelectorAll('.product-card'),
+          ...container.querySelectorAll('.offer-card-v3'),
+          ...container.querySelectorAll('.promotion-item')
+        ];
+      }
+    }
+    
     console.log(`Found ${offerCards.length} offer elements to process`);
+
+    // If still no offers found, try a more general approach
+    if (offerCards.length === 0) {
+      // Look for any elements that might contain offer information
+      const possibleOfferElements = document.querySelectorAll('article, .card, [class*="offer"], [class*="product"], [class*="promotion"]');
+      console.log(`Trying broader selector, found ${possibleOfferElements.length} possible elements`);
+      offerCards = [...possibleOfferElements];
+    }
 
     const products = [];
 
     // Process each offer card
     for (const card of offerCards) {
       try {
-        // Extract product name
+        // Extract product name using multiple possible selectors
         let name = null;
-        const nameElement = card.querySelector('p.offer-card__title') || 
-                            card.querySelector('.product-card__product-name') ||
-                            card.querySelector('.offer-card-v3__title');
+        const nameSelectors = [
+          'p.offer-card__title', '.offer-card-v3__title', '.product-card__product-name', 
+          '.promotion-item__title', 'h2', 'h3', '.title', '[class*="title"]',
+          '[class*="name"]', '.offer-card__heading'
+        ];
         
-        if (nameElement) {
-          name = nameElement.textContent.trim();
+        for (const selector of nameSelectors) {
+          const element = card.querySelector(selector);
+          if (element && element.textContent.trim()) {
+            name = element.textContent.trim();
+            break;
+          }
         }
         
-        // Extract product description
-        let description = null;
-        const descriptionElement = card.querySelector('p.offer-card__text') || 
-                                  card.querySelector('.product-card__product-subtitle') ||
-                                  card.querySelector('.offer-card-v3__description');
+        // If still no name, try to find any text that might be a product name
+        if (!name) {
+          const possibleNameElements = card.querySelectorAll('p, h1, h2, h3, h4, .text-title, [class*="title"], [class*="name"]');
+          for (const element of possibleNameElements) {
+            const text = element.textContent.trim();
+            if (text && text.length > 3 && text.length < 100) {
+              name = text;
+              break;
+            }
+          }
+        }
         
-        if (descriptionElement) {
-          description = descriptionElement.textContent.trim();
+        // Extract product description using multiple possible selectors
+        let description = null;
+        const descSelectors = [
+          'p.offer-card__text', '.offer-card-v3__description', '.product-card__product-subtitle',
+          '.promotion-item__description', '.details', '.description', '[class*="description"]', 
+          '[class*="subtitle"]', '[class*="text"]', '.offer-card__preamble'
+        ];
+        
+        for (const selector of descSelectors) {
+          const element = card.querySelector(selector);
+          if (element && element.textContent.trim()) {
+            description = element.textContent.trim();
+            break;
+          }
         }
         
         // Extract product price
@@ -77,40 +148,73 @@ serve(async (req) => {
         let priceStr = null;
         
         // Try multiple price element selectors
-        const priceElement = card.querySelector('div.price-splash__text') || 
-                            card.querySelector('.product-price') ||
-                            card.querySelector('.offer-card-v3__price-value') ||
-                            card.querySelector('.price-standard__value');
+        const priceSelectors = [
+          'div.price-splash__text', '.product-price', '.offer-card-v3__price-value',
+          '.price-standard__value', '.price', '[class*="price"]', '.promotion-item__price',
+          '.offer-card__price'
+        ];
         
-        if (priceElement) {
-          const priceValue = priceElement.querySelector('span.price-splash__text__firstValue') ||
-                            priceElement.querySelector('.price-standard__value') ||
-                            priceElement;
+        for (const selector of priceSelectors) {
+          const element = card.querySelector(selector);
+          if (element) {
+            // Look for specific price value within the price element
+            const valueElement = element.querySelector('span.price-splash__text__firstValue') || 
+                                 element.querySelector('.price-standard__value') ||
+                                 element;
+                                 
+            if (valueElement) {
+              priceStr = valueElement.textContent.trim();
+              // Extract numeric part of the price, removing non-numeric characters except decimal point
+              const numericPrice = priceStr.replace(/[^\d,.]/g, '').replace(',', '.');
+              price = numericPrice ? parseFloat(numericPrice) : null;
+              break;
+            }
+          }
+        }
+        
+        // If still no price found, try to find any text that looks like a price
+        if (!price) {
+          const allTexts = [];
+          const textNodes = card.querySelectorAll('*');
+          textNodes.forEach(node => {
+            if (node.textContent) {
+              allTexts.push(node.textContent.trim());
+            }
+          });
           
-          if (priceValue) {
-            // Extract numeric part of the price, removing non-numeric characters except decimal point
-            priceStr = priceValue.textContent.trim();
-            const numericPrice = priceStr.replace(/[^\d,.]/g, '').replace(',', '.');
-            price = numericPrice ? parseFloat(numericPrice) : null;
+          for (const text of allTexts) {
+            // Look for patterns like "25:-", "25.90:-", "25,90 kr", etc.
+            const priceMatches = text.match(/(\d+[.,]?\d*)(?:\s*(?::-|kr|SEK|:-\s*kr))/i);
+            if (priceMatches && priceMatches[1]) {
+              priceStr = text;
+              price = parseFloat(priceMatches[1].replace(',', '.'));
+              break;
+            }
           }
         }
         
         // Extract product image URL
         let imageUrl = null;
-        const imageElement = card.querySelector('img.offer-card__image-inner') || 
-                            card.querySelector('.product-image img') ||
-                            card.querySelector('.product-card__product-image img') ||
-                            card.querySelector('.offer-card-v3__image');
+        const imageSelectors = [
+          'img.offer-card__image-inner', '.product-image img', '.product-card__product-image img',
+          '.offer-card-v3__image', 'img', '[class*="image"] img', '.promotion-item__image img'
+        ];
         
-        if (imageElement) {
-          imageUrl = imageElement.getAttribute('src') || imageElement.getAttribute('data-src');
-          
-          // Make sure the URL is absolute
-          if (imageUrl && !imageUrl.startsWith('http')) {
-            imageUrl = new URL(imageUrl, url).href;
+        for (const selector of imageSelectors) {
+          const element = card.querySelector(selector);
+          if (element) {
+            imageUrl = element.getAttribute('src') || element.getAttribute('data-src');
+            
+            // Make sure the URL is absolute
+            if (imageUrl && !imageUrl.startsWith('http')) {
+              imageUrl = new URL(imageUrl, url).href;
+            }
+            
+            if (imageUrl) break;
           }
         }
         
+        // If we at least have a name, consider it a valid product
         if (name) {
           products.push({
             name,
