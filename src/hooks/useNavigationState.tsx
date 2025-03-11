@@ -1,8 +1,9 @@
 
-import { useCartState, CartItem } from "./useCartState";
+import { useCartState } from "./useCartState";
 import { useNavItems } from "./useNavItems";
 
-export { CartItem };
+// Re-export CartItem type using 'export type'
+export type { CartItem } from "./useCartState";
 
 export const useNavigationState = (initialCartCount: number = 0) => {
   const {
