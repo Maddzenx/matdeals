@@ -6,35 +6,32 @@ import { BottomNav } from "@/components/BottomNav";
 import { ProductSection } from "@/components/ProductSection";
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { categoriesData, storeTagsData } from "@/data/productData";
-import { Grid2X2, List, RefreshCw } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useSupabaseProducts } from "@/hooks/useSupabaseProducts";
 import { toast } from "@/components/ui/use-toast";
-import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/PageHeader";
+import { LoadingIndicator } from "@/components/LoadingIndicator";
+import { useAuthCheck } from "@/hooks/useAuthCheck";
+import { useViewMode } from "@/hooks/useViewMode";
+import { useStoreFilters } from "@/hooks/useStoreFilters";
+import { useScrapeIca } from "@/hooks/useScrapeIca";
 
 const Index = () => {
   const navigate = useNavigate();
   const { 
     navItems, 
     handleProductQuantityChange,
-    cartItems
   } = useNavigationState();
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [activeStores, setActiveStores] = useState<string[]>(storeTagsData.map(store => store.id));
+  
+  const { viewMode, toggleViewMode } = useViewMode("grid");
+  const { activeStores, handleRemoveTag, handleStoreToggle, addIcaStoreIfNeeded } = useStoreFilters(storeTagsData.map(store => store.id));
   const [searchQuery, setSearchQuery] = useState("");
   const { products: supabaseProducts, loading, error, refetch } = useSupabaseProducts();
-  const [scraping, setScraping] = useState(false);
+  const { scraping, handleScrapeIca } = useScrapeIca(refetch);
+  
+  // Check authentication status
+  useAuthCheck();
 
-  useEffect(() => {
-    // Check if the user is logged in when the component mounts
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      console.log("Current user:", data.user);
-    };
-    
-    checkUser();
-  }, []);
-
+  // Error handling for Supabase fetch
   useEffect(() => {
     // Show error toast if there's an error fetching from Supabase
     if (error) {
@@ -47,85 +44,13 @@ const Index = () => {
     }
   }, [error]);
 
-  const handleScrapeIca = async () => {
-    try {
-      setScraping(true);
-      
-      toast({
-        title: "Fetching ICA products",
-        description: "Please wait while we fetch the latest offers...",
-      });
-      
-      // Set up a timeout for the request
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Request timeout after 90 seconds')), 90000);
-      });
-      
-      // Create the invocation promise
-      const invocationPromise = supabase.functions.invoke('scrape-ica');
-      
-      // Race between timeout and invocation
-      const { data, error } = await Promise.race([
-        invocationPromise,
-        timeoutPromise.then(() => { 
-          throw new Error('Request timeout after 90 seconds');
-        })
-      ]);
-      
-      if (error) {
-        console.error("Function invocation error:", error);
-        throw error;
-      }
-      
-      console.log("Scraping result:", data);
-      
-      // Refresh the products after scraping
-      await refetch();
-      
-      toast({
-        title: "Success!",
-        description: `Updated ${data.products?.length || 0} products from ICA.`,
-      });
-    } catch (err) {
-      console.error("Error scraping ICA:", err);
-      
-      // More user-friendly error message
-      let errorMessage = "Failed to fetch ICA products. Please try again later.";
-      
-      if (err.name === "AbortError" || 
-          (err.message && err.message.includes("timeout"))) {
-        errorMessage = "The request took too long and was cancelled. The ICA website might be slow or unavailable.";
-      } else if (err.message && typeof err.message === 'string') {
-        // Only show the error message if it's appropriate for users
-        if (!err.message.includes("token") && 
-            !err.message.includes("auth") && 
-            !err.message.includes("key")) {
-          errorMessage = `Error: ${err.message}`;
-        }
-      }
-      
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive"
-      });
-    } finally {
-      setScraping(false);
-    }
-  };
+  // Add ICA store tag if we have Supabase products
+  useEffect(() => {
+    addIcaStoreIfNeeded(supabaseProducts, storeTagsData);
+  }, [supabaseProducts]);
 
-  const handleRemoveTag = (id: string) => {
-    setActiveStores(prev => prev.filter(storeId => storeId !== id));
-  };
-
-  const handleStoreToggle = (storeId: string) => {
-    setActiveStores(prev => {
-      if (prev.includes(storeId)) {
-        return prev.filter(id => id !== storeId);
-      } else {
-        return [...prev, storeId];
-      }
-    });
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
   };
 
   const handleNavSelect = (id: string) => {
@@ -138,27 +63,7 @@ const Index = () => {
     }
   };
 
-  const toggleViewMode = () => {
-    setViewMode(prev => prev === "grid" ? "list" : "grid");
-  };
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-  };
-
   const filteredStoreTags = storeTagsData.filter(store => activeStores.includes(store.id));
-
-  // Add supabase store tag if we have Supabase products
-  useEffect(() => {
-    if (supabaseProducts && supabaseProducts.length > 0) {
-      // Check if ICA store tag already exists
-      const icaTagExists = storeTagsData.some(store => store.id === 'ica');
-      if (!icaTagExists) {
-        // Add ICA store tag to active stores if it doesn't exist
-        setActiveStores(prev => [...prev, 'ica']);
-      }
-    }
-  }, [supabaseProducts]);
 
   return (
     <>
@@ -168,28 +73,13 @@ const Index = () => {
       />
       <div className="min-h-screen w-full bg-white pb-20">
         <div className="sticky top-0 z-30 bg-white">
-          <div className="flex items-center justify-between px-4 pt-3 pb-1">
-            <h1 className="text-2xl font-bold text-[#1C1C1C]">Erbjudanden</h1>
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleScrapeIca} 
-                disabled={scraping}
-                className="flex items-center gap-1"
-              >
-                <RefreshCw size={16} className={scraping ? "animate-spin" : ""} />
-                <span className="hidden sm:inline">Uppdatera ICA</span>
-              </Button>
-              <button 
-                onClick={toggleViewMode}
-                className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-                aria-label={viewMode === "grid" ? "Switch to list view" : "Switch to grid view"}
-              >
-                {viewMode === "grid" ? <List size={20} /> : <Grid2X2 size={20} />}
-              </button>
-            </div>
-          </div>
+          <PageHeader 
+            title="Erbjudanden"
+            onRefresh={handleScrapeIca}
+            isRefreshing={scraping}
+            viewMode={viewMode}
+            onToggleViewMode={toggleViewMode}
+          />
           <SearchBar 
             activeStoreIds={activeStores}
             onStoreToggle={handleStoreToggle}
@@ -198,9 +88,7 @@ const Index = () => {
         </div>
         
         {loading ? (
-          <div className="p-4 flex justify-center">
-            <p className="text-gray-500">Loading products from Supabase...</p>
-          </div>
+          <LoadingIndicator />
         ) : (
           <ProductSection
             categories={categoriesData}
