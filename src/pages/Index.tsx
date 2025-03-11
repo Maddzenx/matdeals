@@ -56,10 +56,18 @@ const Index = () => {
         description: "Please wait while we fetch the latest offers...",
       });
       
-      // Call the Supabase edge function
-      const { data, error } = await supabase.functions.invoke('scrape-ica');
+      // Call the Supabase edge function with a timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 90000); // 90-second timeout
+      
+      const { data, error } = await supabase.functions.invoke('scrape-ica', {
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
       
       if (error) {
+        console.error("Function invocation error:", error);
         throw error;
       }
       
@@ -74,9 +82,24 @@ const Index = () => {
       });
     } catch (err) {
       console.error("Error scraping ICA:", err);
+      
+      // More user-friendly error message
+      let errorMessage = "Failed to fetch ICA products. Please try again later.";
+      
+      if (err.name === "AbortError") {
+        errorMessage = "The request took too long and was cancelled. The ICA website might be slow or unavailable.";
+      } else if (err.message && typeof err.message === 'string') {
+        // Only show the error message if it's appropriate for users
+        if (!err.message.includes("token") && 
+            !err.message.includes("auth") && 
+            !err.message.includes("key")) {
+          errorMessage = `Error: ${err.message}`;
+        }
+      }
+      
       toast({
         title: "Error",
-        description: "Failed to fetch ICA products. Please try again later.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
