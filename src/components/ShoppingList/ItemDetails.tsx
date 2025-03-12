@@ -18,11 +18,11 @@ export const ItemDetails: React.FC<ItemDetailsProps> = ({
   return (
     <div className="flex items-start">
       {image && (
-        <div className="w-10 h-10 rounded-md mr-2 bg-gray-50 flex-shrink-0 overflow-hidden">
+        <div className="w-12 h-12 mr-2 flex-shrink-0 overflow-hidden">
           <ProductImage 
             src={image} 
             alt={name} 
-            height={40}
+            height={48}
             className="w-full h-full"
           />
         </div>

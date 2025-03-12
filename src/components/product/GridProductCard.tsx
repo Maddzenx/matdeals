@@ -36,8 +36,8 @@ export const GridProductCard: React.FC<GridProductCardProps> = ({
       <ProductImage 
         src={image} 
         alt={name} 
-        height={100}
-        className="w-full h-[100px] mb-2"
+        height={120}
+        className="w-full h-[120px] mb-3"
       />
       <div className="flex flex-col gap-1">
         <h3 className="text-sm font-bold text-[#1C1C1C] line-clamp-1">{name}</h3>

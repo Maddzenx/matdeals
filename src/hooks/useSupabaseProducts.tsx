@@ -39,7 +39,7 @@ export const useSupabaseProducts = () => {
           
           // Extract detailed information from the combined description field
           const descriptionParts = item.description ? item.description.split(' | ') : [];
-          const baseDescription = descriptionParts[0] || 'No description available';
+          const baseDescription = descriptionParts[0] || 'Ingen beskrivning tillgänglig';
           
           // Parse the price string to get the numeric value
           let formattedPrice = 'N/A';
@@ -95,7 +95,7 @@ export const useSupabaseProducts = () => {
             originalPrice: '',
             store: 'ICA',
             category: category,
-            offerBadge: 'Erbjudande'
+            offerBadge: 'Erbjudande' // Swedish offer badge
           };
           
           console.log(`Transformed product: ${product.name}, Category: ${product.category}`);
@@ -114,8 +114,8 @@ export const useSupabaseProducts = () => {
       setError(err instanceof Error ? err : new Error('Unknown error occurred'));
       
       toast({
-        title: "Error loading products",
-        description: "Could not load products from Supabase. Please try again later.",
+        title: "Fel vid laddning av produkter",
+        description: "Kunde inte ladda produkter från Supabase. Försök igen senare.",
         variant: "destructive"
       });
     } finally {

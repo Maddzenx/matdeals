@@ -6,6 +6,23 @@ interface Category {
   name: string;
 }
 
+// Swedish translations for common category names
+const translateCategory = (name: string): string => {
+  const translations: Record<string, string> = {
+    "All": "Alla",
+    "Fruits & Vegetables": "Frukt & Grönt",
+    "Meat": "Kött",
+    "Fish": "Fisk",
+    "Dairy": "Mejeri",
+    "Snacks": "Snacks",
+    "Bread": "Bröd",
+    "Drinks": "Drycker",
+    "Other": "Övrigt"
+  };
+
+  return translations[name] || name;
+};
+
 interface CategoryTabsProps {
   categories: Category[];
   activeCategory: string;
@@ -58,7 +75,7 @@ export const CategoryTabs: React.FC<CategoryTabsProps> = ({
               : "text-[#6E6E6E] hover:text-[#4a4a4a]"
           }`}
         >
-          {category.name}
+          {translateCategory(category.name)}
         </button>
       ))}
     </div>

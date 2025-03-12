@@ -37,8 +37,8 @@ export const ListProductCard: React.FC<ListProductCardProps> = ({
         <ProductImage 
           src={image} 
           alt={name} 
-          height={60} 
-          className="w-[60px] h-[60px] flex-shrink-0"
+          height={70} 
+          className="w-[70px] h-[70px] flex-shrink-0"
         />
         <div className="flex-grow min-w-0">
           <div className="flex justify-between items-start">
