@@ -38,8 +38,25 @@ export const useScrapeIca = (refetchProducts: () => Promise<{ success: boolean; 
       
       console.log("Scraping result:", data);
       
+      if (!data.success) {
+        throw new Error(data.error || "Unknown error in scraping function");
+      }
+      
+      if (!data.products || data.products.length === 0) {
+        toast({
+          title: "No products found",
+          description: "The scraper couldn't find any valid products. Please try again later.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       // Refresh the products after scraping
-      await refetchProducts();
+      const refreshResult = await refetchProducts();
+      
+      if (!refreshResult.success) {
+        throw new Error("Failed to refresh products after scraping");
+      }
       
       toast({
         title: "Success!",

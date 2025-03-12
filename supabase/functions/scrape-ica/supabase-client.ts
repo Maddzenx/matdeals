@@ -75,16 +75,21 @@ export async function storeProducts(products: Product[]) {
       // Join all parts with a separator
       const fullDescription = descriptionParts.filter(Boolean).join(' | ');
       
+      // Check that product name is not null or undefined
+      if (!product.name || product.name.toLowerCase().includes("lägg i inköpslista")) {
+        return null; // Skip invalid products
+      }
+      
       return {
         name: product.name,
         description: fullDescription || null,
         price: product.price,
         image_url: product.image_url
       };
-    });
+    }).filter(Boolean); // Remove null items
 
-    // To avoid hitting query size limits, insert in batches of 50
-    const batchSize = 50;
+    // To avoid hitting query size limits, insert in batches of 20
+    const batchSize = 20;
     const batches = [];
     
     for (let i = 0; i < dbProducts.length; i += batchSize) {
@@ -106,7 +111,7 @@ export async function storeProducts(products: Product[]) {
       }
     }
     
-    console.log(`Successfully inserted ${successCount} of ${products.length} products`);
+    console.log(`Successfully inserted ${successCount} of ${dbProducts.length} products`);
     return successCount;
   } catch (error) {
     console.error("Error storing products in Supabase:", error);

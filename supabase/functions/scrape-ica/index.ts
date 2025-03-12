@@ -13,10 +13,11 @@ serve(async (req) => {
   try {
     console.log("Starting ICA scraper function...");
     
-    // URL of the webpage to scrape - you may want to try different ICA stores if one fails
+    // URL of the webpage to scrape - try multiple ICA stores for redundancy
     const urls = [
       'https://www.ica.se/erbjudanden/ica-kvantum-sannegarden-1004293/',
-      'https://www.ica.se/butiker/kvantum/goteborg/ica-kvantum-sannegarden-1004293/erbjudanden/'
+      'https://www.ica.se/butiker/kvantum/goteborg/ica-kvantum-sannegarden-1004293/erbjudanden/',
+      'https://www.ica.se/butiker/nara/goteborg/ica-nara-masthugget-1004251/erbjudanden/'
     ];
     
     let document = null;
@@ -57,13 +58,24 @@ serve(async (req) => {
     console.log(`Extracting products from ${offerCards.length} offer cards...`);
     const products = extractProducts(offerCards, urls[0]);
     
+    console.log(`Extracted ${products.length} products. First product: `, products[0]);
+    
     if (products.length === 0) {
       throw new Error("No products could be extracted from the offer cards.");
     }
     
+    // Filter out invalid products
+    const validProducts = products.filter(p => 
+      p.name && 
+      p.price && 
+      !p.name.toLowerCase().includes("lägg i inköpslista")
+    );
+    
+    console.log(`Filtered to ${validProducts.length} valid products from ${products.length} total`);
+    
     // Store products in Supabase
-    console.log(`Storing ${products.length} products in Supabase...`);
-    const insertedCount = await storeProducts(products);
+    console.log(`Storing ${validProducts.length} products in Supabase...`);
+    const insertedCount = await storeProducts(validProducts);
 
     // Return success response
     console.log("Scraping completed successfully.");
@@ -71,7 +83,7 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         message: `Refreshed all products from ICA website. Inserted ${insertedCount} new offers.`,
-        products
+        products: validProducts.slice(0, 10) // Only send first 10 for response size
       }),
       {
         headers: {

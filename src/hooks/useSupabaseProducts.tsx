@@ -32,31 +32,51 @@ export const useSupabaseProducts = () => {
       if (data && data.length > 0) {
         // Transform Supabase data to match our Product interface
         const transformedProducts: Product[] = data.map((item) => {
+          if (!item.name) {
+            console.warn("Skipping item without name:", item);
+            return null;
+          }
+          
           // Extract detailed information from the combined description field
           const descriptionParts = item.description ? item.description.split(' | ') : [];
           const baseDescription = descriptionParts[0] || 'No description available';
           
           // Parse the price string to get the numeric value
-          const priceString = item.price?.toString() || '0';
-          const formattedPrice = `${priceString}:- kr`;
+          let formattedPrice = 'N/A';
+          if (item.price !== null && item.price !== undefined) {
+            formattedPrice = `${item.price}:- kr`;
+          }
           
           // Categorize products based on description keywords
-          let category = 'other';
+          let category = 'Other';
           const lowerDesc = (item.description || '').toLowerCase();
+          const lowerName = (item.name || '').toLowerCase();
           
-          if (lowerDesc.includes('grönsak') || lowerDesc.includes('frukt')) {
+          // Combined check of name and description for better categorization
+          const combined = lowerName + ' ' + lowerDesc;
+          
+          if (combined.includes('grönsak') || combined.includes('frukt') || 
+              combined.includes('äpple') || combined.includes('banan') ||
+              combined.includes('mango')) {
             category = 'Fruits & Vegetables';
-          } else if (lowerDesc.includes('kött') || lowerDesc.includes('fläsk') || lowerDesc.includes('nöt')) {
+          } else if (combined.includes('kött') || combined.includes('fläsk') || 
+                     combined.includes('nöt') || combined.includes('bacon')) {
             category = 'Meat';
-          } else if (lowerDesc.includes('fisk') || lowerDesc.includes('lax')) {
+          } else if (combined.includes('fisk') || combined.includes('lax') ||
+                     combined.includes('torsk') || combined.includes('skaldjur')) {
             category = 'Fish';
-          } else if (lowerDesc.includes('mjölk') || lowerDesc.includes('ost')) {
+          } else if (combined.includes('mjölk') || combined.includes('ost') || 
+                     combined.includes('grädde') || combined.includes('yoghurt') ||
+                     combined.includes('gräddfil')) {
             category = 'Dairy';
-          } else if (lowerDesc.includes('snack') || lowerDesc.includes('chips') || lowerDesc.includes('godis')) {
+          } else if (combined.includes('snack') || combined.includes('chips') || 
+                     combined.includes('godis') || combined.includes('choklad')) {
             category = 'Snacks';
-          } else if (lowerDesc.includes('bröd')) {
+          } else if (combined.includes('bröd') || combined.includes('bulle') ||
+                     combined.includes('kaka')) {
             category = 'Bread';
-          } else if (lowerDesc.includes('dryck') || lowerDesc.includes('läsk')) {
+          } else if (combined.includes('dryck') || combined.includes('läsk') ||
+                     combined.includes('juice') || combined.includes('vatten')) {
             category = 'Drinks';
           }
           
@@ -67,21 +87,23 @@ export const useSupabaseProducts = () => {
           }
           
           const product = {
-            id: `ica-${item.name?.replace(/\s+/g, '-').toLowerCase() || 'product'}-${Math.random().toString(36).substring(2, 9)}`,
-            image: item.image_url || 'https://assets.icanet.se/t_product_large_v1,f_auto/7310865085313.jpg',
-            name: item.name || 'Product',
+            id: `ica-${item.name.replace(/\s+/g, '-').toLowerCase()}-${Math.random().toString(36).substring(2, 9)}`,
+            image: item.image_url || 'https://assets.icanet.se/t_product_large_v1,f_auto/7310865085313.jpg', // Default image
+            name: item.name,
             details: baseDescription,
             currentPrice: formattedPrice,
             originalPrice: '',
             store: 'ICA',
-            category: category
+            category: category,
+            offerBadge: 'Erbjudande'
           };
           
           console.log(`Transformed product: ${product.name}, Category: ${product.category}`);
           return product;
-        });
+        }).filter(Boolean) as Product[]; // Remove null items
         
         console.log('Fetched and transformed ICA products:', transformedProducts);
+        console.log('Number of valid transformed products:', transformedProducts.length);
         setProducts(transformedProducts);
       } else {
         console.log('No ICA products found in Supabase.');
@@ -107,10 +129,13 @@ export const useSupabaseProducts = () => {
 
   const refetch = useCallback(async () => {
     try {
+      setLoading(true);
       await fetchProducts();
       return { success: true };
     } catch (err) {
       return { success: false, error: err };
+    } finally {
+      setLoading(false);
     }
   }, [fetchProducts]);
 
