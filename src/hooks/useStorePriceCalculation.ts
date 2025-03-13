@@ -34,11 +34,10 @@ export const useStorePriceCalculation = (cartItems: CartItem[]) => {
     
     return Object.entries(priceMap).map(([name, total]) => {
       // Format price to Swedish format: XX:YY kr
-      // Divide by 100 if the value is large (indicating it's in öre instead of kronor)
-      // This handles cases where prices might be stored as "1990" (meaning 19.90)
-      const adjustedTotal = total > 100 ? total / 100 : total;
+      // No longer divide by 100 as that was causing the issue
+      const adjustedTotal = total;
       
-      // Format as XX:YY kr
+      // Format as XX:YY kr - ensuring proper handling of large numbers
       const wholePart = Math.floor(adjustedTotal);
       const decimalPart = Math.round((adjustedTotal % 1) * 100).toString().padStart(2, '0');
       
