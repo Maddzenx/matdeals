@@ -33,27 +33,31 @@ export const useStorePriceCalculation = (cartItems: CartItem[]) => {
     });
     
     return Object.entries(priceMap).map(([name, total]) => {
-      // Format price to Swedish format: XX:YY kr
-      // No longer divide by 100 as that was causing the issue
-      const adjustedTotal = total;
+      // Format price to Swedish format (using comma as decimal separator)
+      const wholePart = Math.floor(total);
       
-      // Format as XX:YY kr - ensuring proper handling of large numbers
-      const wholePart = Math.floor(adjustedTotal);
-      const decimalPart = Math.round((adjustedTotal % 1) * 100).toString().padStart(2, '0');
-      
-      const formattedPrice = `${wholePart}:${decimalPart} kr`;
+      // Format as "XX kr" for whole numbers or "XX,YY kr" for decimal amounts
+      let formattedPrice;
+      if (total % 1 === 0) {
+        // For whole numbers, use "XX:- kr" format
+        formattedPrice = `${wholePart}:- kr`;
+      } else {
+        // For decimal numbers, use "XX,YY kr" format
+        const decimalPart = Math.round((total % 1) * 100).toString().padStart(2, '0');
+        formattedPrice = `${wholePart},${decimalPart} kr`;
+      }
       
       return {
         name,
         price: formattedPrice,
-        rawPrice: adjustedTotal
+        rawPrice: total
       };
     });
   }, [cartItems]);
 
   const bestStore = useMemo(() => {
     if (storePrices.length <= 1) {
-      return { name: storePrices[0]?.name || "N/A", savings: "0:00 kr" };
+      return { name: storePrices[0]?.name || "N/A", savings: "0:- kr" };
     }
     
     // Find the store with the highest discount compared to others
@@ -74,13 +78,22 @@ export const useStorePriceCalculation = (cartItems: CartItem[]) => {
       }
     }
     
-    // Format savings to Swedish format: XX:YY kr
+    // Format savings according to Swedish format
     const wholePart = Math.floor(highestSavings);
-    const decimalPart = Math.round((highestSavings % 1) * 100).toString().padStart(2, '0');
+    
+    let formattedSavings;
+    if (highestSavings % 1 === 0) {
+      // For whole numbers, use "XX:- kr" format
+      formattedSavings = `${wholePart}:- kr`;
+    } else {
+      // For decimal numbers, use "XX,YY kr" format
+      const decimalPart = Math.round((highestSavings % 1) * 100).toString().padStart(2, '0');
+      formattedSavings = `${wholePart},${decimalPart} kr`;
+    }
     
     return {
       name: highestSavingsStore.name,
-      savings: `${wholePart}:${decimalPart} kr`
+      savings: formattedSavings
     };
   }, [storePrices]);
 
