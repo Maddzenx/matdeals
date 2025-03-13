@@ -19,11 +19,37 @@ export const useStorePriceCalculation = (cartItems: CartItem[]) => {
     
     cartItems.forEach(item => {
       const store = item.store && item.store.trim() !== "" ? item.store : "Övriga produkter";
-      // Extract numeric price from string like "10:00 kr" or "9:90 kr/st"
-      const priceString = item.price.replace(/[^0-9,.]/g, '').replace(',', '.').replace(':', '.');
-      const priceValue = parseFloat(priceString);
       
-      if (!isNaN(priceValue)) {
+      // Improved price parsing for Swedish format like "10:00 kr" or "9:90 kr/st"
+      let priceValue = 0;
+      const priceString = item.price;
+      
+      // Log the price string to debug
+      console.log(`Parsing price: ${priceString} for ${item.name}`);
+      
+      if (priceString.includes(':')) {
+        // Handle "XX:YY kr" format
+        const parts = priceString.split(':');
+        if (parts.length >= 2) {
+          const wholePart = parseInt(parts[0], 10) || 0;
+          // Handle formats like "19:-" or "19:00"
+          const decimalPart = parts[1].includes('-') ? 0 : (parseInt(parts[1].replace(/[^\d]/g, ''), 10) || 0);
+          priceValue = wholePart + (decimalPart / 100);
+        }
+      } else if (priceString.includes(',')) {
+        // Handle "XX,YY kr" format
+        const cleaned = priceString.replace(/[^0-9,]/g, '').replace(',', '.');
+        priceValue = parseFloat(cleaned) || 0;
+      } else {
+        // Handle just numbers or other formats
+        const cleaned = priceString.replace(/[^0-9.]/g, '');
+        priceValue = parseFloat(cleaned) || 0;
+      }
+      
+      // Log the parsed value to debug
+      console.log(`Parsed value for ${item.name}: ${priceValue}`);
+      
+      if (!isNaN(priceValue) && priceValue > 0) {
         if (!priceMap[store]) {
           priceMap[store] = 0;
         }
@@ -31,6 +57,9 @@ export const useStorePriceCalculation = (cartItems: CartItem[]) => {
         priceMap[store] += priceValue * item.quantity;
       }
     });
+    
+    // Log the price map to debug
+    console.log("Final price map:", priceMap);
     
     return Object.entries(priceMap).map(([name, total]) => {
       // Format price to Swedish format (using comma as decimal separator)
