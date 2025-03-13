@@ -3,7 +3,7 @@ import React from "react";
 import { CartItem } from "@/hooks/useNavigationState";
 import { CheckboxButton } from "./CheckboxButton";
 import { ItemDetails } from "./ItemDetails";
-import { ItemQuantityControls } from "./ItemQuantityControls";
+import { TapToEditQuantity } from "./TapToEditQuantity";
 
 interface ShoppingListItemProps {
   item: CartItem;
@@ -18,6 +18,21 @@ export const ShoppingListItem: React.FC<ShoppingListItemProps> = ({
   onIncrement,
   onDecrement,
 }) => {
+  // Combined function to handle quantity changes directly
+  const handleQuantityChange = (newQuantity: number) => {
+    if (newQuantity > item.quantity) {
+      // Increment as needed
+      for (let i = item.quantity; i < newQuantity; i++) {
+        onIncrement(item.id);
+      }
+    } else if (newQuantity < item.quantity) {
+      // Decrement as needed
+      for (let i = item.quantity; i > newQuantity; i--) {
+        onDecrement(item.id);
+      }
+    }
+  };
+
   return (
     <div className="flex items-center py-3 border-b border-gray-200">
       <CheckboxButton
@@ -34,12 +49,11 @@ export const ShoppingListItem: React.FC<ShoppingListItemProps> = ({
         />
       </div>
       
-      <div className="flex items-center gap-2 ml-auto">
-        <ItemQuantityControls
+      <div className="flex items-center gap-3 ml-auto">
+        <TapToEditQuantity
           quantity={item.quantity}
           isChecked={item.checked}
-          onIncrement={() => onIncrement(item.id)}
-          onDecrement={() => onDecrement(item.id)}
+          onQuantityChange={handleQuantityChange}
         />
         <span className={`font-medium text-sm min-w-[50px] text-right ${item.checked ? 'text-gray-500' : 'text-[#1C1C1C]'}`}>
           {item.price}
