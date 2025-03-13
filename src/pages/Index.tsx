@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SearchBar } from "@/components/SearchBar";
@@ -28,12 +27,9 @@ const Index = () => {
   const { products: supabaseProducts, loading, error, refetch } = useSupabaseProducts();
   const { scraping, handleScrapeIca } = useScrapeIca(refetch);
   
-  // Check authentication status
   useAuthCheck();
 
-  // Error handling for Supabase fetch
   useEffect(() => {
-    // Show error toast if there's an error fetching from Supabase
     if (error) {
       toast({
         title: "Error loading products",
@@ -44,7 +40,6 @@ const Index = () => {
     }
   }, [error]);
 
-  // Add ICA store tag if we have Supabase products
   useEffect(() => {
     addIcaStoreIfNeeded(supabaseProducts, storeTagsData);
   }, [supabaseProducts]);
@@ -58,6 +53,8 @@ const Index = () => {
       navigate("/shopping-list");
     } else if (id === "profile") {
       navigate("/auth");
+    } else if (id === "recipes") {
+      navigate("/recipes");
     } else {
       console.log("Selected nav:", id);
     }
