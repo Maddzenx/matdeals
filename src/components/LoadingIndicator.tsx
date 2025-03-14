@@ -6,7 +6,7 @@ interface LoadingIndicatorProps {
 }
 
 export const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({ 
-  message = "Loading products from Supabase..." 
+  message = "Laddar produkter från Supabase..." 
 }) => {
   return (
     <div className="p-4 flex justify-center">

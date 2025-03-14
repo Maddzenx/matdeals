@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SearchBar } from "@/components/SearchBar";
@@ -32,8 +33,8 @@ const Index = () => {
   useEffect(() => {
     if (error) {
       toast({
-        title: "Error loading products",
-        description: "Could not load products from Supabase. Using default product data instead.",
+        title: "Fel vid laddning av produkter",
+        description: "Kunde inte ladda produkter från Supabase. Använder förvald produktdata istället.",
         variant: "destructive"
       });
       console.error("Supabase error:", error);

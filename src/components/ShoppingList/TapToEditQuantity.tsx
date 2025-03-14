@@ -114,7 +114,7 @@ export const TapToEditQuantity: React.FC<TapToEditQuantityProps> = ({
             }`}
             role="button"
             tabIndex={0}
-            aria-label="Edit quantity"
+            aria-label="Redigera antal"
           >
             <span className={`font-medium ${isChecked ? 'text-gray-500' : ''}`}>
               {quantity}
@@ -126,14 +126,14 @@ export const TapToEditQuantity: React.FC<TapToEditQuantityProps> = ({
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove item</AlertDialogTitle>
+            <AlertDialogTitle>Ta bort vara</AlertDialogTitle>
             <AlertDialogDescription>
-              Setting the quantity to 0 will remove this item from your shopping list. Are you sure?
+              Om du sätter antalet till 0 kommer varan att tas bort från din inköpslista. Är du säker?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={cancelRemoval}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmRemoval}>Remove</AlertDialogAction>
+            <AlertDialogCancel onClick={cancelRemoval}>Avbryt</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRemoval}>Ta bort</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -60,10 +60,10 @@ const Auth = () => {
         if (error) throw error;
         
         // Show success message for registration
-        setError('Registration successful! Please check your email to confirm your account.');
+        setError('Registrering lyckades! Kontrollera din e-post för att bekräfta ditt konto.');
       }
     } catch (error: any) {
-      setError(error.message || 'An error occurred during authentication.');
+      setError(error.message || 'Ett fel uppstod vid autentiseringen.');
     } finally {
       setLoading(false);
     }
