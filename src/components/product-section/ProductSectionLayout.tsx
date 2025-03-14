@@ -28,6 +28,27 @@ export const ProductSectionLayout: React.FC<ProductSectionLayoutProps> = ({
   onQuantityChange,
   viewMode
 }) => {
+  // Helper function to translate category names if needed
+  const translateCategory = (name: string): string => {
+    const translations: Record<string, string> = {
+      "All": "Alla",
+      "Fruits & Vegetables": "Frukt & Grönt",
+      "Meat": "Kött",
+      "Fish": "Fisk",
+      "Dairy": "Mejeri",
+      "Snacks": "Snacks",
+      "Bread": "Bröd",
+      "Drinks": "Drycker",
+      "Other": "Övrigt"
+    };
+
+    return translations[name] || name;
+  };
+
+  // Get the active category name (translated if needed)
+  const activeCategoryName = categories.find(c => c.id === activeCategory)?.name || "";
+  const translatedCategoryName = translateCategory(activeCategoryName);
+
   return (
     <>
       <div className="px-4 pt-2">
@@ -41,9 +62,13 @@ export const ProductSectionLayout: React.FC<ProductSectionLayoutProps> = ({
         />
       </div>
       <main className="p-4">
+        {/* Display the active category name as a heading if it's not "All" */}
+        {activeCategory !== "all" && activeCategoryName && (
+          <h2 className="text-xl font-bold text-[#1C1C1C] mb-4">{translatedCategoryName}</h2>
+        )}
         <ProductGrid
           products={products}
-          showCategoryHeaders={true}
+          showCategoryHeaders={activeCategory === "all"} // Only show category headers in "All" view
           onQuantityChange={onQuantityChange}
           viewMode={viewMode}
           allCategoryNames={allCategoryNames}
