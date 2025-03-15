@@ -105,6 +105,24 @@ export const useProductSection = (
       return false;
     }
     
+    // Special case for Willys products from Supabase
+    if (product.store === 'Willys') {
+      const willysInActiveStores = activeStoreIds.includes('willys');
+      if (willysInActiveStores) {
+        // If search query is provided, filter by it
+        if (!searchQuery) return true;
+        
+        // Case-insensitive search in product name, details, and category
+        const query = searchQuery.toLowerCase();
+        return (
+          product.name.toLowerCase().includes(query) || 
+          product.details.toLowerCase().includes(query) ||
+          (product.category && product.category.toLowerCase().includes(query))
+        );
+      }
+      return false;
+    }
+    
     // Regular case for other stores
     // Then filter by search query if provided
     if (!searchQuery) return storeMatch;

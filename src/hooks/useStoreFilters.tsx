@@ -18,15 +18,24 @@ export const useStoreFilters = (initialStores: string[]) => {
     });
   };
   
-  // Add ICA store tag if needed
-  const addIcaStoreIfNeeded = (products: any[], storeTagsData: any[]) => {
-    if (products && products.length > 0) {
-      // Check if ICA store tag already exists
-      const icaTagExists = storeTagsData.some(store => store.id === 'ica');
-      if (!icaTagExists) {
-        // Add ICA store tag to active stores if it doesn't exist
-        setActiveStores(prev => [...prev, 'ica']);
-      }
+  // Add store tag if needed
+  const addStoreIfNeeded = (storeId: string, storeName: string, storeTagsData: any[]) => {
+    // Check if store tag already exists
+    const tagExists = storeTagsData.some(store => store.id === storeId);
+    if (!tagExists) {
+      // Add new store to storeTagsData
+      storeTagsData.push({
+        id: storeId,
+        name: storeName
+      });
+      
+      // Add to active stores if it doesn't exist
+      setActiveStores(prev => {
+        if (!prev.includes(storeId)) {
+          return [...prev, storeId];
+        }
+        return prev;
+      });
     }
   };
   
@@ -34,6 +43,6 @@ export const useStoreFilters = (initialStores: string[]) => {
     activeStores, 
     handleRemoveTag, 
     handleStoreToggle,
-    addIcaStoreIfNeeded
+    addStoreIfNeeded
   };
 };

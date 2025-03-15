@@ -14,6 +14,7 @@ import { useAuthCheck } from "@/hooks/useAuthCheck";
 import { useViewMode } from "@/hooks/useViewMode";
 import { useStoreFilters } from "@/hooks/useStoreFilters";
 import { useScrapeIca } from "@/hooks/useScrapeIca";
+import { useScrapeWillys } from "@/hooks/useScrapeWillys";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -23,10 +24,12 @@ const Index = () => {
   } = useNavigationState();
   
   const { viewMode, toggleViewMode } = useViewMode("grid");
-  const { activeStores, handleRemoveTag, handleStoreToggle, addIcaStoreIfNeeded } = useStoreFilters(storeTagsData.map(store => store.id));
+  const { activeStores, handleRemoveTag, handleStoreToggle, addStoreIfNeeded } = useStoreFilters(storeTagsData.map(store => store.id));
   const [searchQuery, setSearchQuery] = useState("");
   const { products: supabaseProducts, loading, error, refetch } = useSupabaseProducts();
-  const { scraping, handleScrapeIca } = useScrapeIca(refetch);
+  const { scraping: scrapingIca, handleScrapeIca } = useScrapeIca(refetch);
+  const { scraping: scrapingWillys, handleScrapeWillys } = useScrapeWillys(refetch);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   useAuthCheck();
 
@@ -42,7 +45,18 @@ const Index = () => {
   }, [error]);
 
   useEffect(() => {
-    addIcaStoreIfNeeded(supabaseProducts, storeTagsData);
+    // Add ICA and Willys store tags if needed
+    if (supabaseProducts && supabaseProducts.length > 0) {
+      const stores = supabaseProducts.map(product => product.store);
+      
+      if (stores.includes('ICA')) {
+        addStoreIfNeeded('ica', 'ICA', storeTagsData);
+      }
+      
+      if (stores.includes('Willys')) {
+        addStoreIfNeeded('willys', 'Willys', storeTagsData);
+      }
+    }
   }, [supabaseProducts]);
 
   const handleSearch = (query: string) => {
@@ -61,6 +75,20 @@ const Index = () => {
     }
   };
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    
+    try {
+      // Scrape both ICA and Willys
+      await Promise.all([
+        handleScrapeIca(),
+        handleScrapeWillys()
+      ]);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   const filteredStoreTags = storeTagsData.filter(store => activeStores.includes(store.id));
 
   return (
@@ -73,8 +101,8 @@ const Index = () => {
         <div className="sticky top-0 z-30 bg-white">
           <PageHeader 
             title="Erbjudanden"
-            onRefresh={handleScrapeIca}
-            isRefreshing={scraping}
+            onRefresh={handleRefresh}
+            isRefreshing={isRefreshing || scrapingIca || scrapingWillys}
             viewMode={viewMode}
             onToggleViewMode={toggleViewMode}
           />
