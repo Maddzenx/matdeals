@@ -128,10 +128,10 @@ export const useRecipes = (initialCategory: string = "Middag") => {
       
       console.log("Invoking scrape-recipes edge function...");
       
-      // Call the Supabase Edge Function with correct payload format
+      // Call the Supabase Edge Function with empty body
       const { data, error: functionError } = await supabase.functions.invoke("scrape-recipes", {
         method: 'POST',
-        body: {} // Empty object for POST request
+        body: {} // Required for POST
       });
       
       console.log("Edge function response:", data);
