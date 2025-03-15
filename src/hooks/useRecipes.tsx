@@ -44,11 +44,11 @@ export const useRecipes = (initialCategory: string = "Matlådevänligt") => {
         query = query.or(`category.eq.${category},tags.cs.{"${category}"}`);
       }
       
-      const { data, error } = await query;
+      const { data, error: queryError } = await query;
       
-      if (error) {
-        console.error("Supabase query error:", error);
-        throw error;
+      if (queryError) {
+        console.error("Supabase query error:", queryError);
+        throw queryError;
       }
       
       console.log(`Fetched ${data?.length || 0} recipes`);
@@ -72,20 +72,24 @@ export const useRecipes = (initialCategory: string = "Matlådevänligt") => {
 
   const fetchCategories = useCallback(async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error: queryError } = await supabase
         .from('recipes')
-        .select('tags');
+        .select('tags, category');
         
-      if (error) {
-        console.error("Error fetching categories:", error);
-        throw error;
+      if (queryError) {
+        console.error("Error fetching categories:", queryError);
+        throw queryError;
       }
       
       if (data) {
         // Extract all tags from all recipes
         const allTags = data.flatMap(recipe => recipe.tags || []);
-        // Get unique tags
-        const uniqueCategories = [...new Set(allTags)];
+        // Get categories from the category field
+        const categoryValues = data.map(recipe => recipe.category).filter(Boolean);
+        
+        // Combine all unique category values
+        const allCategories = [...allTags, ...categoryValues];
+        const uniqueCategories = [...new Set(allCategories)];
         
         // Sort categories alphabetically
         uniqueCategories.sort();
@@ -106,11 +110,17 @@ export const useRecipes = (initialCategory: string = "Matlådevänligt") => {
         
         setCategories(availableCategories);
         console.log("Available categories:", availableCategories);
+        
+        // If the current active category is not in the available categories,
+        // and there are available categories, set the first one as active
+        if (availableCategories.length > 0 && !availableCategories.includes(activeCategory)) {
+          setActiveCategory(availableCategories[0]);
+        }
       }
     } catch (err) {
       console.error("Error loading categories:", err);
     }
-  }, []);
+  }, [activeCategory]);
 
   const scrapeRecipes = useCallback(async () => {
     try {
@@ -124,8 +134,14 @@ export const useRecipes = (initialCategory: string = "Matlådevänligt") => {
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to scrape recipes');
+        const text = await response.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(text);
+        } catch (e) {
+          errorData = { error: `Server returned status ${response.status}: ${text}` };
+        }
+        throw new Error(errorData.error || `Failed to scrape recipes: ${response.statusText}`);
       }
       
       const result = await response.json();
@@ -149,7 +165,7 @@ export const useRecipes = (initialCategory: string = "Matlådevänligt") => {
         variant: "destructive"
       });
       
-      return { success: false, error: err };
+      return { success: false, error: err instanceof Error ? err.message : 'Unknown error' };
     } finally {
       setLoading(false);
     }

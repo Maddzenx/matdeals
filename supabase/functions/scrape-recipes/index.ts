@@ -83,7 +83,10 @@ async function scrapeRecipes() {
       
       const category = getCategoryFromUrl(categoryUrl);
       
-      for (let i = 0; i < Math.min(recipeCards.length, 8); i++) {
+      // Limit to 5 recipes per category to avoid timeouts
+      const limit = Math.min(recipeCards.length, 5);
+      
+      for (let i = 0; i < limit; i++) {
         const card = recipeCards[i];
         
         // Extract basic recipe info from card
@@ -91,17 +94,21 @@ async function scrapeRecipes() {
         const linkElement = card.querySelector("a.recipe-card__link");
         const imageElement = card.querySelector("img");
         
-        if (!titleElement || !linkElement) continue;
+        if (!titleElement || !linkElement) {
+          console.log("Missing title or link element, skipping recipe");
+          continue;
+        }
         
         const title = titleElement.textContent.trim();
-        const recipeUrl = baseUrl + linkElement.getAttribute("href");
+        const recipeUrl = linkElement.getAttribute("href");
+        const fullRecipeUrl = recipeUrl.startsWith("http") ? recipeUrl : baseUrl + recipeUrl;
         const imageUrl = imageElement?.getAttribute("src") || "";
         
-        console.log(`Processing recipe: ${title} at ${recipeUrl}`);
+        console.log(`Processing recipe: ${title} at ${fullRecipeUrl}`);
         
         try {
           // Fetch detailed recipe page
-          const recipeDoc = await fetchAndParse(recipeUrl);
+          const recipeDoc = await fetchAndParse(fullRecipeUrl);
           
           // Extract recipe details
           const timeElement = recipeDoc.querySelector(".recipe-meta__item--time");
@@ -140,7 +147,7 @@ async function scrapeRecipes() {
           
           // Create price data (simulated)
           const basePrice = Math.floor(Math.random() * 50) + 50;
-          const originalPrice = basePrice * 1.2;
+          const originalPrice = Math.round(basePrice * 1.2);
           
           // Determine tags based on categories and recipe content
           const tags = [category];
@@ -170,7 +177,7 @@ async function scrapeRecipes() {
             ingredients,
             instructions,
             tags: [...new Set(tags)], // Remove duplicates
-            source_url: recipeUrl,
+            source_url: fullRecipeUrl,
             category,
             price: basePrice,
             original_price: originalPrice
@@ -209,32 +216,25 @@ async function storeRecipes(recipes: any[]) {
     const { error: deleteError } = await supabase
       .from('recipes')
       .delete()
-      .neq('title', '');
+      .neq('id', '00000000-0000-0000-0000-000000000000');
       
     if (deleteError) {
       console.error("Error clearing existing recipes:", deleteError);
       throw deleteError;
     }
     
-    // Insert new recipes in batches to avoid query size limits
-    const batchSize = 5;
-    const batches = [];
-    
-    for (let i = 0; i < recipes.length; i += batchSize) {
-      batches.push(recipes.slice(i, i + batchSize));
-    }
-    
+    // Insert new recipes one by one to avoid timeouts
     let successCount = 0;
     
-    for (const batch of batches) {
+    for (const recipe of recipes) {
       const { error: insertError } = await supabase
         .from('recipes')
-        .insert(batch);
+        .insert([recipe]);
         
       if (insertError) {
-        console.error("Error inserting batch of recipes:", insertError);
+        console.error(`Error inserting recipe ${recipe.title}:`, insertError);
       } else {
-        successCount += batch.length;
+        successCount++;
       }
     }
     

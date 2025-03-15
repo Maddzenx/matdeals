@@ -9,10 +9,12 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { useRecipes } from "@/hooks/useRecipes";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
+import { useToast } from "@/components/ui/use-toast";
 
 const Recipes = () => {
   const navigate = useNavigate();
-  const { navItems, handleProductQuantityChange } = useNavigationState();
+  const { toast } = useToast();
+  const { navItems } = useNavigationState();
   const [isRefreshing, setIsRefreshing] = useState(false);
   
   const {
@@ -38,9 +40,27 @@ const Recipes = () => {
   };
 
   const handleRefresh = async () => {
-    setIsRefreshing(true);
-    await scrapeRecipes();
-    setIsRefreshing(false);
+    try {
+      setIsRefreshing(true);
+      const result = await scrapeRecipes();
+      
+      if (!result.success) {
+        toast({
+          title: "Fel vid hämtning av recept",
+          description: result.error || "Ett okänt fel inträffade",
+          variant: "destructive"
+        });
+      }
+    } catch (err) {
+      console.error("Error refreshing recipes:", err);
+      toast({
+        title: "Fel vid hämtning av recept",
+        description: "Kunde inte ansluta till servern. Försök igen senare.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const formatPrice = (price: number | null) => {
@@ -109,10 +129,13 @@ const Recipes = () => {
           <div className="text-center py-8 text-red-500">
             <p>Ett fel inträffade vid laddning av recept.</p>
             <p className="text-sm">{error.message}</p>
+            <Button onClick={handleRefresh} className="mt-4" variant="destructive">
+              Försök igen
+            </Button>
           </div>
         ) : recipes.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            <p>Inga recept hittades i den här kategorin.</p>
+            <p>Inga recept hittades. Ladda in recept genom att klicka på knappen nedan.</p>
             <Button onClick={handleRefresh} className="mt-4">
               Läs in recept från godare.se
             </Button>
@@ -132,6 +155,9 @@ const Recipes = () => {
                       src={recipe.image_url || '/placeholder.svg'}
                       alt={recipe.title}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = '/placeholder.svg';
+                      }}
                     />
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
                       <h3 className="text-xl font-bold text-white">{recipe.title}</h3>
