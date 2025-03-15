@@ -49,6 +49,14 @@ export const ProductSectionLayout: React.FC<ProductSectionLayoutProps> = ({
   const activeCategoryName = categories.find(c => c.id === activeCategory)?.name || "";
   const translatedCategoryName = translateCategory(activeCategoryName);
 
+  // Filter products for the active category or show all if "all" is selected
+  const filteredCategoryProducts = activeCategory === "all" 
+    ? products 
+    : products.filter(product => {
+        const categoryData = categories.find(c => c.id === activeCategory);
+        return categoryData && product.category === categoryData.name;
+      });
+
   return (
     <>
       <div className="px-4 pt-2">
@@ -67,7 +75,7 @@ export const ProductSectionLayout: React.FC<ProductSectionLayoutProps> = ({
           <h2 className="text-xl font-bold text-[#1C1C1C] mb-4">{translatedCategoryName}</h2>
         )}
         <ProductGrid
-          products={products}
+          products={filteredCategoryProducts}
           showCategoryHeaders={activeCategory === "all"} // Only show category headers in "All" view
           onQuantityChange={onQuantityChange}
           viewMode={viewMode}

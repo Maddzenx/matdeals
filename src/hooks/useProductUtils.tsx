@@ -47,11 +47,9 @@ export const useProductUtils = (categories: CategoryData[]) => {
       const offsetPosition = elementPosition - headerHeight - 8; // Slightly less spacing (8px) for better visual balance
       
       // Scroll to the element with the offset - use requestAnimationFrame for smoother transition
-      requestAnimationFrame(() => {
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
       });
     }
   }, [categories]);

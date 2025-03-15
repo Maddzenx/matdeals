@@ -20,6 +20,7 @@ export const useProductSection = (
   const nonEmptyCategories = getNonEmptyCategories();
   const [activeCategory, setActiveCategory] = useState(nonEmptyCategories.length > 0 ? nonEmptyCategories[0].id : "");
   const scrolledToCategoryRef = useRef(false);
+  const initialScrollRef = useRef(false);
   
   const allCategoryNames = getAllCategoryNames();
 
@@ -29,6 +30,19 @@ export const useProductSection = (
       setActiveCategory(nonEmptyCategories[0].id);
     }
   }, [nonEmptyCategories, activeCategory]);
+
+  // Initial scroll to active category
+  useEffect(() => {
+    if (!initialScrollRef.current && activeCategory && nonEmptyCategories.length > 0) {
+      // Set timeout to ensure DOM is ready
+      const timer = setTimeout(() => {
+        scrollToCategory(activeCategory);
+        initialScrollRef.current = true;
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [activeCategory, nonEmptyCategories, scrollToCategory]);
 
   // Setup scroll event to update active category based on scroll position
   useEffect(() => {
@@ -55,7 +69,7 @@ export const useProductSection = (
 
       // Find the element closest to the top of the viewport (after the header)
       const closestElement = validElements
-        .filter(el => el.position <= headerHeight + 50) // Add some threshold
+        .filter(el => el.position <= headerHeight + 100) // Add more threshold for better detection
         .sort((a, b) => b.position - a.position)[0];
 
       if (closestElement && closestElement.id !== activeCategory) {

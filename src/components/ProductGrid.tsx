@@ -80,38 +80,48 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
     );
   }, [products, showCategoryHeaders, allCategoryNames]);
 
+  // Count total products
+  const totalProducts = products.length;
+
   return (
     <div className={className}>
       {title && <h2 className="text-base font-bold text-[#1C1C1C] mb-3">{title}</h2>}
       
-      {Object.entries(groupedProducts).map(([category, categoryProducts]) => (
-        <div key={category || "uncategorized"}>
-          {showCategoryHeaders && category && categoryProducts.length > 0 && (
-            <h3 id={category} className="text-xl font-bold text-[#1C1C1C] mt-5 mb-4 scroll-mt-[160px]">
-              {translateCategory(category)}
-            </h3>
-          )}
-          {categoryProducts.length > 0 && (
-            <div className={`${viewMode === "grid" ? "grid grid-cols-2 gap-2" : "flex flex-col gap-2"} mb-5`}>
-              {categoryProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  id={product.id}
-                  image={product.image}
-                  name={product.name}
-                  details={product.details}
-                  currentPrice={product.currentPrice}
-                  originalPrice={product.originalPrice}
-                  store={product.store}
-                  offerBadge={product.offerBadge}
-                  onQuantityChange={onQuantityChange}
-                  viewMode={viewMode}
-                />
-              ))}
-            </div>
-          )}
+      {totalProducts === 0 ? (
+        <div className="text-center py-10 text-gray-500">
+          <i className="ti ti-shopping-cart text-3xl mb-3"></i>
+          <p>Inga produkter hittades</p>
         </div>
-      ))}
+      ) : (
+        Object.entries(groupedProducts).map(([category, categoryProducts]) => (
+          <div key={category || "uncategorized"}>
+            {showCategoryHeaders && category && categoryProducts.length > 0 && (
+              <h3 id={category} className="text-xl font-bold text-[#1C1C1C] mt-5 mb-4 scroll-mt-[160px]">
+                {translateCategory(category)}
+              </h3>
+            )}
+            {categoryProducts.length > 0 && (
+              <div className={`${viewMode === "grid" ? "grid grid-cols-2 gap-2" : "flex flex-col gap-2"} mb-5`}>
+                {categoryProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    id={product.id}
+                    image={product.image}
+                    name={product.name}
+                    details={product.details}
+                    currentPrice={product.currentPrice}
+                    originalPrice={product.originalPrice}
+                    store={product.store}
+                    offerBadge={product.offerBadge}
+                    onQuantityChange={onQuantityChange}
+                    viewMode={viewMode}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        ))
+      )}
     </div>
   );
 };
