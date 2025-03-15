@@ -59,7 +59,7 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
       });
       
       return data;
-    } catch (err) {
+    } catch (err: any) {
       console.error("Fel vid skrapning av Willys:", err);
       
       // Check if we need to refresh products even after error
@@ -74,14 +74,16 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
       // More user-friendly error message
       let errorMessage = "Kunde inte hämta Willys-produkter. Försök igen senare.";
       
-      if (err.name === "AbortError" || 
-          (err.message && err.message.includes("timeout") || err.message.includes("tid"))) {
-        errorMessage = "Förfrågan tog för lång tid och avbröts. Willys-webbplatsen kan vara långsam eller otillgänglig.";
-      } else if (err.message && typeof err.message === 'string') {
-        if (!err.message.includes("token") && 
-            !err.message.includes("auth") && 
-            !err.message.includes("key")) {
-          errorMessage = `Fel: ${err.message}`;
+      if (err instanceof Error) {
+        if (err.name === "AbortError" || 
+            (err.message && (err.message.includes("timeout") || err.message.includes("tid")))) {
+          errorMessage = "Förfrågan tog för lång tid och avbröts. Willys-webbplatsen kan vara långsam eller otillgänglig.";
+        } else if (err.message && typeof err.message === 'string') {
+          if (!err.message.includes("token") && 
+              !err.message.includes("auth") && 
+              !err.message.includes("key")) {
+            errorMessage = `Fel: ${err.message}`;
+          }
         }
       }
       

@@ -1,4 +1,3 @@
-
 import { processProductCard } from "./processors/card-processor.ts";
 
 /**
@@ -14,6 +13,8 @@ export function extractProducts(document: Document, baseUrl: string) {
     ...extractByDataAttributes(document, baseUrl),
     ...extractByArticleElements(document, baseUrl),
     ...extractByImageAndPriceProximity(document, baseUrl),
+    ...extractFromSearchResults(document, baseUrl),  // New method
+    ...extractFromOfferElements(document, baseUrl),  // New method
   ];
   
   // Remove duplicates based on name
@@ -23,7 +24,7 @@ export function extractProducts(document: Document, baseUrl: string) {
   return uniqueProducts;
 }
 
-// New strategy: Extract by analyzing patterns in the DOM that might indicate products
+// Strategy 0: Extracting by analyzing DOM patterns
 function extractByDynamicPatterns(document: Document, baseUrl: string) {
   console.log("Strategy 0: Extracting by analyzing DOM patterns");
   
@@ -226,6 +227,85 @@ function extractByImageAndPriceProximity(document: Document, baseUrl: string) {
   }
   
   console.log(`Extracted ${products.length} products using image and price proximity`);
+  return products;
+}
+
+// Strategy 5: Extract from search results layout
+function extractFromSearchResults(document: Document, baseUrl: string) {
+  console.log("Strategy 5: Extracting from search results layout");
+  
+  const searchResultsElements = [
+    ...document.querySelectorAll('[data-testid*="product-search-result"]'),
+    ...document.querySelectorAll('[data-testid*="search-result"]'),
+    ...document.querySelectorAll('[class*="search-result"]'),
+    ...document.querySelectorAll('[class*="product-list"]'),
+    ...document.querySelectorAll('[class*="result-item"]'),
+  ];
+  
+  console.log(`Found ${searchResultsElements.length} potential search result elements`);
+  
+  const processedProductNames = new Set<string>();
+  const products = [];
+  
+  for (const element of searchResultsElements) {
+    try {
+      const product = processProductCard(element, baseUrl, processedProductNames);
+      if (product && product.name) {
+        products.push(product);
+      }
+    } catch (error) {
+      // Just continue to next element
+    }
+  }
+  
+  console.log(`Extracted ${products.length} products from search results`);
+  return products;
+}
+
+// Strategy 6: Extract from offer elements
+function extractFromOfferElements(document: Document, baseUrl: string) {
+  console.log("Strategy 6: Extracting from offer elements");
+  
+  // Look for elements that might indicate offers
+  const offerElements = [
+    ...document.querySelectorAll('[class*="offer"]'),
+    ...document.querySelectorAll('[class*="campaign"]'),
+    ...document.querySelectorAll('[class*="deal"]'),
+    ...document.querySelectorAll('[class*="promotion"]'),
+    ...document.querySelectorAll('[class*="discount"]'),
+    ...document.querySelectorAll('[data-testid*="offer"]'),
+    ...document.querySelectorAll('[data-testid*="campaign"]'),
+  ];
+  
+  console.log(`Found ${offerElements.length} potential offer elements`);
+  
+  // Extract direct products from offer elements
+  const processedProductNames = new Set<string>();
+  const products = [];
+  
+  for (const element of offerElements) {
+    try {
+      // Try to process the element directly
+      const product = processProductCard(element, baseUrl, processedProductNames);
+      if (product && product.name) {
+        products.push(product);
+        continue;
+      }
+      
+      // If direct processing failed, look for child elements that might be products
+      const childElements = element.querySelectorAll('div, article, li');
+      for (const child of childElements) {
+        const childProduct = processProductCard(child, baseUrl, processedProductNames);
+        if (childProduct && childProduct.name) {
+          products.push(childProduct);
+        }
+      }
+    } catch (error) {
+      // Just continue to next element
+    }
+  }
+  
+  console.log(`Extracted ${products.length} products from offer elements`);
   return products;
 }
 

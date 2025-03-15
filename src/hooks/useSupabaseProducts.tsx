@@ -36,11 +36,16 @@ export const useSupabaseProducts = () => {
         // Don't throw, we'll still use ICA data if available
       }
       
-      console.log("Raw ICA data:", icaData);
-      console.log("Number of ICA items returned:", icaData?.length || 0);
+      console.log("Raw ICA data:", icaData?.length || 0, "items");
+      console.log("Raw Willys data:", willysData?.length || 0, "items");
       
-      console.log("Raw Willys data:", willysData);
-      console.log("Number of Willys items returned:", willysData?.length || 0);
+      if (icaData?.length > 0) {
+        console.log("Sample ICA item:", icaData[0]);
+      }
+      
+      if (willysData?.length > 0) {
+        console.log("Sample Willys item:", willysData[0]);
+      }
       
       // Transform ICA data
       const icaProducts: Product[] = (icaData || []).map((item) => {
@@ -99,7 +104,7 @@ export const useSupabaseProducts = () => {
           details: baseDescription,
           currentPrice: formattedPrice,
           originalPrice: '',
-          store: 'ICA',
+          store: 'ica',  // Lowercase to match store filter
           category: category,
           offerBadge: 'Erbjudande' // Swedish offer badge
         };
@@ -168,7 +173,7 @@ export const useSupabaseProducts = () => {
           details: item.description || 'Ingen beskrivning tillgänglig',
           currentPrice: formattedPrice,
           originalPrice: originalPriceFormatted,
-          store: 'Willys',
+          store: 'willys',  // Lowercase to match store filter
           category: category,
           offerBadge: item.offer_details || 'Erbjudande' // Swedish offer badge
         };
@@ -178,8 +183,9 @@ export const useSupabaseProducts = () => {
       
       // Combine all products
       const allProducts = [...icaProducts, ...willysProducts];
-      console.log('All Supabase products:', allProducts);
       console.log('Total number of products:', allProducts.length);
+      console.log('ICA products:', icaProducts.length);
+      console.log('Willys products:', willysProducts.length);
       
       setProducts(allProducts);
     } catch (err) {
