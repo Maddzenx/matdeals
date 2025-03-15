@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { CategoryData, Product } from "@/data/types";
 import { useProductUtils } from "@/hooks/useProductUtils";
 import { useProductSection } from "@/hooks/useProductSection";
@@ -40,11 +40,17 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   const { getProductsWithCategories } = useProductUtils(categories);
   const allLocalProducts = getProductsWithCategories();
   
+  // Log to help debug visibility issues
+  useEffect(() => {
+    console.log("ProductSection rendered with supabaseProducts:", supabaseProducts.length);
+    if (supabaseProducts.length > 0) {
+      console.log("Supabase products first few:", supabaseProducts.slice(0, 3));
+    }
+  }, [supabaseProducts]);
+  
   // Combine local products with Supabase products
   const allProducts = React.useMemo(() => {
-    if (supabaseProducts.length === 0) {
-      return allLocalProducts;
-    }
+    console.log("Combining products - local:", allLocalProducts.length, "supabase:", supabaseProducts.length);
     return [...allLocalProducts, ...supabaseProducts];
   }, [allLocalProducts, supabaseProducts]);
   
@@ -61,6 +67,11 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
     storeTags,
     searchQuery
   );
+
+  useEffect(() => {
+    console.log("After filtering - products to display:", filteredProducts.length);
+    console.log("Active stores:", activeStoreIds);
+  }, [filteredProducts, activeStoreIds]);
 
   const handleQuantityChange = (productId: string, newQuantity: number, previousQuantity: number) => {
     // Find product details to include when changing quantity

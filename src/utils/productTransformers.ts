@@ -1,15 +1,23 @@
-
 import { Product } from "@/data/types";
 
 /**
  * Transforms raw ICA data into standardized product format
  */
 export const transformIcaProducts = (icaData: any[]): Product[] => {
-  return (icaData || []).map((item) => {
+  console.log("Transforming ICA data:", icaData?.length || 0, "items");
+  
+  if (!icaData || icaData.length === 0) {
+    console.warn("No ICA data to transform");
+    return [];
+  }
+  
+  const transformedProducts = (icaData || []).map((item) => {
     if (!item.name) {
       console.warn("Skipping ICA item without name:", item);
       return null;
     }
+    
+    console.log("Processing ICA item:", item.name);
     
     // Extract detailed information from the combined description field
     const descriptionParts = item.description ? item.description.split(' | ') : [];
@@ -24,7 +32,7 @@ export const transformIcaProducts = (icaData: any[]): Product[] => {
     // Determine product category based on keywords
     const category = determineProductCategory(item.name, item.description || '');
     
-    return {
+    const product = {
       id: `ica-${item.name.replace(/\s+/g, '-').toLowerCase()}-${Math.random().toString(36).substring(2, 9)}`,
       image: item.image_url || 'https://assets.icanet.se/t_product_large_v1,f_auto/7310865085313.jpg', // Default image
       name: item.name,
@@ -35,7 +43,16 @@ export const transformIcaProducts = (icaData: any[]): Product[] => {
       category: category,
       offerBadge: 'Erbjudande' // Swedish offer badge
     };
+    
+    return product;
   }).filter(Boolean) as Product[];
+  
+  console.log("Transformed ICA products:", transformedProducts.length);
+  if (transformedProducts.length > 0) {
+    console.log("Sample transformed ICA product:", transformedProducts[0]);
+  }
+  
+  return transformedProducts;
 };
 
 /**

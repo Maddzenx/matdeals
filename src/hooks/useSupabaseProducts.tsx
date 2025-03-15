@@ -21,9 +21,13 @@ export const useSupabaseProducts = () => {
       setLoading(true);
       setError(null);
       
+      console.log("Starting to fetch products in useSupabaseProducts");
+      
       // Fetch from both sources
       const icaData = await fetchIcaProducts();
       const willysData = await fetchWillysProducts();
+      
+      console.log("Fetching completed, starting transformation");
       
       // Transform products using our utility functions
       const icaProducts = transformIcaProducts(icaData);
@@ -33,6 +37,8 @@ export const useSupabaseProducts = () => {
       console.log('ICA products transformed:', icaProducts.length);
       if (icaProducts.length > 0) {
         console.log("First few ICA products:", icaProducts.slice(0, 3));
+      } else {
+        console.warn("No ICA products after transformation!");
       }
       
       // Combine all products - put ICA first
@@ -41,15 +47,16 @@ export const useSupabaseProducts = () => {
       console.log('ICA products:', icaProducts.length);
       console.log('Willys products:', willysProducts.length);
       
-      // If we have ICA products, display them
-      if (icaProducts.length > 0) {
-        setProducts(allProducts);
-      } else {
+      // Always set products, even if empty, to avoid stale state
+      setProducts(allProducts);
+      
+      // If we have no ICA products, show a warning
+      if (icaProducts.length === 0) {
         showNoIcaProductsWarning();
-        setProducts(allProducts); // Still set whatever products we have
       }
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Unknown error occurred'));
+      console.error("Error in fetchProducts:", err);
       showFetchErrorNotification(err);
     } finally {
       setLoading(false);
@@ -57,15 +64,18 @@ export const useSupabaseProducts = () => {
   }, [fetchIcaProducts, fetchWillysProducts, setLoading, setError]);
 
   useEffect(() => {
+    console.log("useSupabaseProducts useEffect running, calling fetchProducts");
     fetchProducts();
   }, [fetchProducts]);
 
   const refetch = useCallback(async () => {
+    console.log("Refetching products");
     try {
       setLoading(true);
       await fetchProducts();
       return { success: true };
     } catch (err) {
+      console.error("Error refetching products:", err);
       return { success: false, error: err };
     } finally {
       setLoading(false);

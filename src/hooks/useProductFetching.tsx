@@ -11,31 +11,47 @@ export const useProductFetching = () => {
   const fetchIcaProducts = useCallback(async () => {
     console.log("Fetching products from Supabase ICA table...");
     
-    const { data: icaData, error: icaError } = await supabase
-      .from('ICA')
-      .select('*');
-    
-    if (icaError) {
-      console.error("Supabase ICA query error:", icaError);
-      throw icaError;
+    try {
+      const { data: icaData, error: icaError } = await supabase
+        .from('ICA')
+        .select('*');
+      
+      if (icaError) {
+        console.error("Supabase ICA query error:", icaError);
+        throw icaError;
+      }
+      
+      console.log("Raw ICA data:", icaData?.length || 0, "items");
+      if (icaData && icaData.length > 0) {
+        console.log("Sample ICA item:", icaData[0]);
+      } else {
+        console.warn("No ICA data found in database");
+      }
+      
+      return icaData || [];
+    } catch (error) {
+      console.error("Error in fetchIcaProducts:", error);
+      throw error;
     }
-    
-    console.log("Raw ICA data:", icaData?.length || 0, "items");
-    return icaData || [];
   }, []);
 
   const fetchWillysProducts = useCallback(async () => {
-    const { data: willysData, error: willysError } = await supabase
-      .from('Willys')
-      .select('*');
+    try {
+      const { data: willysData, error: willysError } = await supabase
+        .from('Willys')
+        .select('*');
+        
+      if (willysError) {
+        console.error("Supabase Willys query error:", willysError);
+        // Don't throw, we'll still use ICA data if available
+      }
       
-    if (willysError) {
-      console.error("Supabase Willys query error:", willysError);
-      // Don't throw, we'll still use ICA data if available
+      console.log("Raw Willys data:", willysData?.length || 0, "items");
+      return willysData || [];
+    } catch (error) {
+      console.error("Error in fetchWillysProducts:", error);
+      return [];
     }
-    
-    console.log("Raw Willys data:", willysData?.length || 0, "items");
-    return willysData || [];
   }, []);
 
   return {
