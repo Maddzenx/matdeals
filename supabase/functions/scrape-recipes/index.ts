@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -172,33 +171,23 @@ async function storeRecipes(recipes: any[]) {
     
     // Insert new recipes
     let successCount = 0;
-    
-    // Insert recipes in smaller batches to avoid timeouts
-    const batchSize = 1;
+    const batchSize = 5; // Increased batch size from 1 to 5
     
     for (let i = 0; i < recipes.length; i += batchSize) {
       const batch = recipes.slice(i, i + batchSize);
+      console.log(`Processing batch ${i/batchSize + 1}/${Math.ceil(recipes.length/batchSize)}`);
       
-      for (const recipe of batch) {
-        console.log(`Inserting recipe: ${recipe.title}`);
+      const { data, error: insertError } = await supabase
+        .from('recipes')
+        .insert(batch)
+        .select();
         
-        // Ensure id is a valid UUID
-        if (!recipe.id) {
-          recipe.id = crypto.randomUUID();
-        }
-        
-        const { data, error: insertError } = await supabase
-          .from('recipes')
-          .insert([recipe])
-          .select();
-          
-        if (insertError) {
-          console.error(`Error inserting recipe ${recipe.title}:`, insertError);
-          console.error("Error details:", JSON.stringify(insertError));
-        } else {
-          console.log(`Successfully inserted recipe: ${recipe.title}`);
-          successCount++;
-        }
+      if (insertError) {
+        console.error(`Error inserting batch of recipes:`, insertError);
+        console.error("Error details:", JSON.stringify(insertError));
+      } else {
+        console.log(`Successfully inserted batch of ${data?.length || 0} recipes`);
+        successCount += data?.length || 0;
       }
     }
     
@@ -214,7 +203,6 @@ async function storeRecipes(recipes: any[]) {
 serve(async (req) => {
   console.log("Request received for scrape-recipes function");
   console.log("Request method:", req.method);
-  console.log("Request headers:", JSON.stringify(Array.from(req.headers.entries()).reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {})));
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -224,10 +212,8 @@ serve(async (req) => {
   try {
     console.log("Starting recipe scraper function...");
     
-    // Skip scraping for now and use mock data
-    console.log("Using mock recipe data");
+    // For now, use mock data to ensure we have something to show
     const recipes = createMockRecipes();
-    
     console.log(`Generated ${recipes.length} mock recipes`);
     
     // Store recipes in Supabase
