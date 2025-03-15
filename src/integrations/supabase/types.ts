@@ -87,6 +87,45 @@ export type Database = {
         }
         Relationships: []
       }
+      Willys: {
+        Row: {
+          comparison_price: string | null
+          created_at: string
+          description: string | null
+          id: number
+          image_url: string | null
+          name: string
+          offer_details: string | null
+          original_price: number | null
+          price: number | null
+          quantity_info: string | null
+        }
+        Insert: {
+          comparison_price?: string | null
+          created_at?: string
+          description?: string | null
+          id?: number
+          image_url?: string | null
+          name: string
+          offer_details?: string | null
+          original_price?: number | null
+          price?: number | null
+          quantity_info?: string | null
+        }
+        Update: {
+          comparison_price?: string | null
+          created_at?: string
+          description?: string | null
+          id?: number
+          image_url?: string | null
+          name?: string
+          offer_details?: string | null
+          original_price?: number | null
+          price?: number | null
+          quantity_info?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
