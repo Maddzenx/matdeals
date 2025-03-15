@@ -22,7 +22,7 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
         setTimeout(() => reject(new Error('Förfrågan tog för lång tid (120 sekunder)')), 120000);
       });
       
-      // Create the invocation promise
+      // Create the invocation promise with forceRefresh flag
       const invocationPromise = supabase.functions.invoke('scrape-willys', {
         body: { forceRefresh: true }
       });

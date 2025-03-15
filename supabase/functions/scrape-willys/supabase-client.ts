@@ -38,6 +38,9 @@ export async function storeProducts(products: any[]): Promise<number> {
     
     // Validate and prepare products for storage
     const validProducts = products.map(product => {
+      // Log the raw product for debugging
+      console.log("Processing product:", JSON.stringify(product, null, 2));
+      
       // Create a new product object with only the fields needed for the table
       return {
         name: product.name || 'Unnamed Product',
@@ -51,9 +54,10 @@ export async function storeProducts(products: any[]): Promise<number> {
     });
     
     console.log(`Prepared ${validProducts.length} valid products to store`);
+    console.log("First valid product:", JSON.stringify(validProducts[0], null, 2));
     
     // Insert products in batches to avoid hitting statement size limits
-    const batchSize = 10;
+    const batchSize = 5;
     let insertedCount = 0;
     
     for (let i = 0; i < validProducts.length; i += batchSize) {
