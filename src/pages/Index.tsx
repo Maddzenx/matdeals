@@ -23,7 +23,7 @@ const Index = () => {
   } = useNavigationState();
   
   const { viewMode, toggleViewMode } = useViewMode("grid");
-  const { activeStores, handleRemoveTag, handleStoreToggle, addStoreIfNeeded } = useStoreFilters(storeTagsData.map(store => store.id));
+  const { activeStores, handleRemoveTag, handleStoreToggle, addStoreIfNeeded } = useStoreFilters(['ica']); // Start with ICA as default store
   const [searchQuery, setSearchQuery] = useState("");
   const { products: supabaseProducts, loading, error, refetch } = useSupabaseProducts();
   const { scraping: scrapingIca, handleScrapeIca } = useScrapeIca(refetch);
@@ -43,26 +43,26 @@ const Index = () => {
     }
   }, [error]);
 
+  // Ensure ICA is added as a store and selected by default
+  useEffect(() => {
+    // Always make sure ICA is available as a store
+    addStoreIfNeeded('ica', 'ICA', storeTagsData);
+    
+    // Make sure ICA store is selected by default
+    if (!activeStores.includes('ica')) {
+      handleStoreToggle('ica');
+    }
+    
+    console.log("Active stores after ICA initialization:", activeStores);
+  }, []);
+  
+  // Additional effect to make sure Willys is added when products are available
   useEffect(() => {
     if (supabaseProducts && supabaseProducts.length > 0) {
-      addStoreIfNeeded('ica', 'ICA', storeTagsData);
       addStoreIfNeeded('willys', 'Willys', storeTagsData);
-      
       console.log("Stores after adding ICA and Willys:", storeTagsData);
-      console.log("Active stores:", activeStores);
     }
   }, [supabaseProducts, addStoreIfNeeded]);
-
-  useEffect(() => {
-    const defaultStores = ['ica', 'willys'];
-    defaultStores.forEach(storeId => {
-      if (!activeStores.includes(storeId)) {
-        handleStoreToggle(storeId);
-      }
-    });
-    
-    console.log("Active stores after initialization:", activeStores);
-  }, []);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
