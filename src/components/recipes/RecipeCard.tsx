@@ -4,12 +4,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Clock, Users, ChefHat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Recipe } from "@/hooks/useRecipes";
+import { useNavigate } from "react-router-dom";
 
 interface RecipeCardProps {
   recipe: Recipe;
 }
 
 export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
+  const navigate = useNavigate();
+  
   // Format price helper
   const formatPrice = (price: number | null) => {
     if (price === null) return "";
@@ -30,8 +33,21 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
 
   const difficultyProps = getDifficultyProps(recipe.difficulty);
   
+  const handleCardClick = () => {
+    navigate(`/recipe/${recipe.id}`);
+  };
+  
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click when button is clicked
+    // Add to cart functionality here
+    console.log("Add to cart:", recipe.title);
+  };
+  
   return (
-    <Card className="overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+    <Card 
+      className="overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+      onClick={handleCardClick}
+    >
       <div className="h-48 bg-gray-200 relative">
         <img 
           src={recipe.image_url || '/placeholder.svg'}
@@ -93,7 +109,10 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
               {formatPrice(recipe.price)}
             </span>
           </div>
-          <Button className="bg-[#DB2C17] hover:bg-[#c02615]">
+          <Button 
+            className="bg-[#DB2C17] hover:bg-[#c02615]"
+            onClick={handleAddToCart}
+          >
             Lägg till
           </Button>
         </div>
