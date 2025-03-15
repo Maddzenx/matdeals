@@ -1,5 +1,6 @@
+
 import { useMemo } from "react";
-import { CartItem } from "@/hooks/useNavigationState";
+import { CartItem } from "@/hooks/useCartState";
 
 export interface StorePrice {
   name: string;

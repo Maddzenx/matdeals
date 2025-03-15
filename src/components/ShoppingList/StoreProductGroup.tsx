@@ -1,6 +1,6 @@
 
 import React from "react";
-import { CartItem } from "@/hooks/useNavigationState";
+import { CartItem } from "@/hooks/useCartState";
 import { ShoppingListItem } from "./ShoppingListItem";
 import { ShoppingBag } from "lucide-react";
 

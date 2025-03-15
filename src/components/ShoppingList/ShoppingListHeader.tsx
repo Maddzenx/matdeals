@@ -1,6 +1,6 @@
 
 import React from "react";
-import { CartItem } from "@/hooks/useNavigationState";
+import { CartItem } from "@/hooks/useCartState";
 import { ShoppingListTabs } from "./ShoppingListTabs";
 
 interface ShoppingListHeaderProps {

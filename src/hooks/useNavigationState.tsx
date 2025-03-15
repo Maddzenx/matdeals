@@ -1,11 +1,31 @@
 
 import { useEffect } from "react";
 import { useNavItems } from "./useNavItems";
-import { useCartState } from "./useCartState";
+import { useCartState, CartItem } from "./useCartState";
 
 export const useNavigationState = () => {
-  const { cartItems } = useCartState();
+  const { 
+    cartItems, 
+    cartCount, 
+    setCartCount,
+    setCartItems,
+    handleProductQuantityChange,
+    handleItemCheck
+  } = useCartState();
+  
   const { navItems, setNavItems } = useNavItems(cartItems.length);
 
-  return { navItems, setNavItems };
+  return { 
+    navItems, 
+    setNavItems,
+    cartItems,
+    cartCount,
+    setCartCount,
+    setCartItems,
+    handleProductQuantityChange,
+    handleItemCheck
+  };
 };
+
+// Re-export CartItem type for convenience
+export type { CartItem } from "./useCartState";

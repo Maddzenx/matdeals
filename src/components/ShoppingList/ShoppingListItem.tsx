@@ -1,6 +1,6 @@
 
 import React from "react";
-import { CartItem } from "@/hooks/useNavigationState";
+import { CartItem } from "@/hooks/useCartState";
 import { CheckboxButton } from "./CheckboxButton";
 import { ItemDetails } from "./ItemDetails";
 import { TapToEditQuantity } from "./TapToEditQuantity";
