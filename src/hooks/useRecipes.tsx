@@ -20,7 +20,7 @@ export interface Recipe {
   original_price: number | null;
 }
 
-export const useRecipes = (initialCategory: string = "Matlådevänligt") => {
+export const useRecipes = (initialCategory: string = "Middag") => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -39,6 +39,7 @@ export const useRecipes = (initialCategory: string = "Matlådevänligt") => {
         .select('*');
         
       if (category) {
+        // Using proper filter syntax
         query = query.or(`category.eq.${category},tags.cs.{"${category}"}`);
       }
       
@@ -88,22 +89,30 @@ export const useRecipes = (initialCategory: string = "Matlådevänligt") => {
         
         uniqueCategories.sort();
         
-        const priorityCategories = ["Matlådevänligt", "Budget", "Veganskt", "Vegetariskt", "Middag"];
+        // Default categories to show even if no recipes yet
+        const priorityCategories = ["Middag", "Vegetariskt", "Budget", "Veganskt", "Matlådevänligt"];
         
         const regularCategories = uniqueCategories.filter(
           cat => !priorityCategories.includes(cat)
         );
         
+        // Combine priority categories that exist with other categories
         const availableCategories = [
-          ...priorityCategories.filter(cat => uniqueCategories.includes(cat)),
+          ...priorityCategories.filter(cat => uniqueCategories.includes(cat) || data.length === 0),
           ...regularCategories
         ];
         
-        setCategories(availableCategories.length > 0 ? availableCategories : ["Middag", "Vegetariskt"]);
-        console.log("Available categories:", availableCategories.length > 0 ? availableCategories : ["Middag", "Vegetariskt"]);
+        // If no categories are found, use default categories
+        const finalCategories = availableCategories.length > 0 
+          ? availableCategories 
+          : ["Middag", "Vegetariskt"];
         
-        if (availableCategories.length > 0 && !availableCategories.includes(activeCategory)) {
-          setActiveCategory(availableCategories[0]);
+        setCategories(finalCategories);
+        console.log("Available categories:", finalCategories);
+        
+        // If current active category is not in the available categories, select the first one
+        if (finalCategories.length > 0 && !finalCategories.includes(activeCategory)) {
+          setActiveCategory(finalCategories[0]);
         }
       }
     } catch (err) {
@@ -119,23 +128,31 @@ export const useRecipes = (initialCategory: string = "Matlådevänligt") => {
       
       console.log("Invoking scrape-recipes edge function...");
       
+      // Call the Supabase Edge Function with correct payload format
       const { data, error: functionError } = await supabase.functions.invoke("scrape-recipes", {
         method: 'POST',
-        body: {} // Empty body for POST request
+        body: {} // Empty object for POST request
       });
+      
+      console.log("Edge function response:", data);
       
       if (functionError) {
         console.error("Edge function error:", functionError);
         throw new Error(functionError.message || 'Failed to scrape recipes');
       }
       
-      console.log("Edge function response:", data);
+      if (!data || !data.success) {
+        const errorMsg = data?.error || 'Unknown error occurred';
+        console.error("Edge function failed:", errorMsg);
+        throw new Error(errorMsg);
+      }
       
       toast({
         title: "Recept uppdaterade",
-        description: `${data.recipesCount} recept har hämtats från godare.se`,
+        description: `${data.recipesCount} recept har hämtats`,
       });
       
+      // Refresh categories and recipes after scraping
       await fetchCategories();
       await fetchRecipes(activeCategory);
       
