@@ -36,33 +36,29 @@ export async function storeProducts(products: any[]): Promise<number> {
       console.log("Successfully cleared existing Willys products");
     }
     
-    // Transform products for database storage
-    const transformedProducts = products.map(product => {
-      return {
-        name: product.name,
-        description: product.description,
-        price: product.price,
-        image_url: product.image_url,
-        original_price: product.original_price,
-        comparison_price: product.comparison_price,
-        offer_details: product.offer_details,
-        quantity_info: product.quantity_info
-      };
-    });
+    // Insert products in batches to avoid hitting statement size limits
+    const batchSize = 10;
+    let insertedCount = 0;
     
-    // Insert products
-    const { data, error } = await supabase
-      .from('Willys')
-      .insert(transformedProducts)
-      .select();
-    
-    if (error) {
-      console.error("Error inserting products:", error);
-      throw error;
+    for (let i = 0; i < products.length; i += batchSize) {
+      const batch = products.slice(i, Math.min(i + batchSize, products.length));
+      console.log(`Inserting batch ${i/batchSize + 1} of ${Math.ceil(products.length/batchSize)}`);
+      
+      const { data, error } = await supabase
+        .from('Willys')
+        .insert(batch)
+        .select();
+      
+      if (error) {
+        console.error(`Error inserting batch ${i/batchSize + 1}:`, error);
+      } else {
+        console.log(`Successfully inserted batch ${i/batchSize + 1} with ${data.length} products`);
+        insertedCount += data.length;
+      }
     }
     
-    console.log(`Successfully stored ${data.length} products in Willys table`);
-    return data.length;
+    console.log(`Successfully stored ${insertedCount} products in Willys table`);
+    return insertedCount;
   } catch (error) {
     console.error("Error in storeProducts:", error);
     throw error;

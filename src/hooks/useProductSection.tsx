@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { CategoryData, Product } from "@/data/types";
 import { useProductUtils } from "@/hooks/useProductUtils";
@@ -72,48 +73,43 @@ export const useProductSection = (
   }, [allCategoryNames, nonEmptyCategories, activeCategory]);
 
   const filteredProducts = allProducts.filter(product => {
-    const storeTag = storeTags.find(tag => tag.name === product.store);
-    const storeMatch = storeTag && activeStoreIds.includes(storeTag.id);
+    console.log(`Checking product: ${product.name}, store: ${product.store}, activeStoreIds: ${activeStoreIds}`);
+    // Match based on store ID
+    const storeMatch = activeStoreIds.some(storeId => {
+      if (product.store === 'ICA' && storeId === 'ica') return true;
+      if (product.store === 'Willys' && storeId === 'willys') return true;
+      
+      // Find matching store tag
+      const storeTag = storeTags.find(tag => tag.name === product.store);
+      return storeTag && storeId === storeTag.id;
+    });
     
-    if (product.store === 'ICA') {
-      const icaInActiveStores = activeStoreIds.includes('ica');
-      if (icaInActiveStores) {
-        if (!searchQuery) return true;
-        
-        const query = searchQuery.toLowerCase();
-        return (
-          product.name.toLowerCase().includes(query) || 
-          product.details.toLowerCase().includes(query) ||
-          (product.category && product.category.toLowerCase().includes(query))
-        );
-      }
+    if (!storeMatch) {
+      console.log(`Filtered out product ${product.name} - store ${product.store} not in active stores`);
       return false;
     }
     
-    if (product.store === 'Willys') {
-      const willysInActiveStores = activeStoreIds.includes('willys');
-      if (willysInActiveStores) {
-        if (!searchQuery) return true;
-        
-        const query = searchQuery.toLowerCase();
-        return (
-          product.name.toLowerCase().includes(query) || 
-          product.details.toLowerCase().includes(query) ||
-          (product.category && product.category.toLowerCase().includes(query))
-        );
+    // If we have a search query, filter by it
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchesSearch = 
+        product.name.toLowerCase().includes(query) || 
+        product.details.toLowerCase().includes(query) ||
+        (product.category && product.category.toLowerCase().includes(query));
+      
+      if (!matchesSearch) {
+        console.log(`Filtered out product ${product.name} - doesn't match search query "${searchQuery}"`);
       }
-      return false;
+      
+      return matchesSearch;
     }
     
-    if (!searchQuery) return storeMatch;
-    
-    const query = searchQuery.toLowerCase();
-    return storeMatch && (
-      product.name.toLowerCase().includes(query) || 
-      product.details.toLowerCase().includes(query) ||
-      (product.category && product.category.toLowerCase().includes(query))
-    );
+    // If no search query and store matches, include product
+    console.log(`Including product ${product.name} from store ${product.store}`);
+    return true;
   });
+
+  console.log(`Found ${filteredProducts.length} products after filtering from ${allProducts.length} total products`);
 
   const handleCategorySelect = (categoryId: string) => {
     setActiveCategory(categoryId);

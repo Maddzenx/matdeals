@@ -139,7 +139,8 @@ export const useSupabaseProducts = () => {
             combined.includes('mango')) {
           category = 'fruits';
         } else if (combined.includes('kött') || combined.includes('fläsk') || 
-                   combined.includes('nöt') || combined.includes('bacon')) {
+                   combined.includes('nöt') || combined.includes('bacon') ||
+                   combined.includes('kyckl')) {
           category = 'meat';
         } else if (combined.includes('fisk') || combined.includes('lax') ||
                    combined.includes('torsk') || combined.includes('skaldjur')) {
@@ -155,7 +156,8 @@ export const useSupabaseProducts = () => {
                    combined.includes('kaka')) {
           category = 'bread';
         } else if (combined.includes('dryck') || combined.includes('läsk') ||
-                   combined.includes('juice') || combined.includes('vatten')) {
+                   combined.includes('juice') || combined.includes('vatten') ||
+                   combined.includes('kaffe')) {
           category = 'drinks';
         }
         

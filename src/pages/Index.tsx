@@ -57,7 +57,17 @@ const Index = () => {
         addStoreIfNeeded('willys', 'Willys', storeTagsData);
       }
     }
-  }, [supabaseProducts]);
+  }, [supabaseProducts, addStoreIfNeeded]);
+
+  // Always include ICA and Willys in activeStores initially
+  useEffect(() => {
+    const defaultStores = ['ica', 'willys'];
+    defaultStores.forEach(storeId => {
+      if (!activeStores.includes(storeId)) {
+        handleStoreToggle(storeId);
+      }
+    });
+  }, []);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -84,6 +94,13 @@ const Index = () => {
         handleScrapeIca(),
         handleScrapeWillys()
       ]);
+    } catch (error) {
+      console.error("Error during refresh:", error);
+      toast({
+        title: "Refresheringsfel",
+        description: "Ett fel inträffade vid uppdatering av erbjudanden.",
+        variant: "destructive"
+      });
     } finally {
       setIsRefreshing(false);
     }
