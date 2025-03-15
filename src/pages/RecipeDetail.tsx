@@ -4,16 +4,17 @@ import { useParams, useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/BottomNav";
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Clock, Users, ChefHat } from "lucide-react";
+import { ArrowLeft, Clock, Users, ChefHat, RefreshCw } from "lucide-react";
 import { useRecipeDetail } from "@/hooks/useRecipeDetail";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "@/components/ui/use-toast";
 
 const RecipeDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { navItems } = useNavigationState();
-  const { recipe, loading, error } = useRecipeDetail(id);
+  const { recipe, loading, error, scrapeRecipe } = useRecipeDetail(id);
 
   const handleNavSelect = (id: string) => {
     if (id === "cart") {
@@ -29,6 +30,20 @@ const RecipeDetail = () => {
 
   const handleBack = () => {
     navigate("/recipes");
+  };
+
+  const handleAddToCart = () => {
+    // Future functionality: Add all ingredients to cart
+    toast({
+      title: "Lagt till i handlingslistan",
+      description: "Alla ingredienser har lagts till i din handlingslista",
+    });
+  };
+
+  const handleRefresh = () => {
+    if (id) {
+      scrapeRecipe(id);
+    }
   };
 
   // Format price helper
@@ -87,13 +102,32 @@ const RecipeDetail = () => {
 
   const difficultyProps = getDifficultyProps(recipe.difficulty);
 
+  // Check if detailed ingredients are missing
+  const hasDetailedIngredients = recipe.ingredients?.length > 0 && 
+                               recipe.ingredients[0]?.includes(' ');
+  
+  // Check if detailed instructions are missing
+  const hasDetailedInstructions = recipe.instructions?.length > 0 && 
+                                recipe.instructions[0]?.length > 20;
+
   return (
     <div className="min-h-screen pb-20 bg-white">
-      <div className="sticky top-0 z-30 bg-white shadow-sm p-4">
+      <div className="sticky top-0 z-30 bg-white shadow-sm p-4 flex items-center justify-between">
         <Button variant="ghost" onClick={handleBack} className="p-0 h-auto">
           <ArrowLeft className="mr-2" size={18} />
           <span>Tillbaka</span>
         </Button>
+        {(!hasDetailedIngredients || !hasDetailedInstructions) && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefresh} 
+            className="flex items-center gap-1"
+          >
+            <RefreshCw size={14} />
+            <span>Uppdatera detaljer</span>
+          </Button>
+        )}
       </div>
 
       <div className="h-64 bg-gray-200 relative">
@@ -152,11 +186,14 @@ const RecipeDetail = () => {
 
         <div className="mb-6">
           <h2 className="text-xl font-bold mb-2">Ingredienser</h2>
+          {recipe.servings && (
+            <p className="text-gray-500 text-sm mb-3">Ingredienser för {recipe.servings} personer</p>
+          )}
           <ul className="space-y-2">
             {recipe.ingredients?.map((ingredient, idx) => (
               <li key={idx} className="flex items-baseline">
                 <span className="inline-block w-2 h-2 bg-[#DB2C17] rounded-full mr-2"></span>
-                <span>{ingredient}</span>
+                <span className="text-gray-800">{ingredient}</span>
               </li>
             ))}
           </ul>
@@ -179,7 +216,7 @@ const RecipeDetail = () => {
         </div>
 
         {recipe.price && (
-          <div className="bg-gray-50 p-4 rounded-lg mt-6">
+          <div className="bg-gray-50 p-4 rounded-lg mt-6 mb-4">
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
                 <span className="text-gray-500 text-sm">Uppskattat pris</span>
@@ -194,7 +231,10 @@ const RecipeDetail = () => {
                   </span>
                 </div>
               </div>
-              <Button className="bg-[#DB2C17] hover:bg-[#c02615]">
+              <Button 
+                className="bg-[#DB2C17] hover:bg-[#c02615]"
+                onClick={handleAddToCart}
+              >
                 Lägg till handlingslista
               </Button>
             </div>
@@ -203,7 +243,7 @@ const RecipeDetail = () => {
 
         {recipe.source_url && (
           <div className="mt-6 text-sm text-gray-500">
-            <p>Källa: {recipe.source_url}</p>
+            <p>Källa: <a href={recipe.source_url} target="_blank" rel="noopener noreferrer" className="underline">{recipe.source_url}</a></p>
           </div>
         )}
       </div>

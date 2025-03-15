@@ -1,167 +1,220 @@
 
-// Create mock recipe data with valid UUIDs
+// Generate mock recipe data for testing and fallback
+
 export function createMockRecipes() {
-  console.log("Creating mock recipes as fallback");
-  return [
-    {
-      id: crypto.randomUUID(),
-      title: "Vegetarisk Lasagne",
-      description: "En krämig och läcker vegetarisk lasagne med spenat och svamp.",
-      image_url: "https://images.unsplash.com/photo-1574894709920-11b28e7367e3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-      time_minutes: 60,
-      servings: 4,
-      difficulty: "Medel",
-      ingredients: ["Lasagneplattor", "Spenat", "Svamp", "Ricotta", "Tomatsås", "Ost"],
-      instructions: ["Förbered grönsakerna", "Varva lasagneplattor med fyllning", "Grädda i ugn"],
-      tags: ["Vegetariskt", "Matlådevänligt", "Budget"],
-      source_url: "https://www.godare.se/recept/vegetarisk-lasagne",
-      category: "Vegetariskt",
-      price: 65,
-      original_price: 78
-    },
-    {
-      id: crypto.randomUUID(),
-      title: "Kycklinggryta med curry",
-      description: "En smakrik kycklinggryta med härlig currysås och grönsaker.",
-      image_url: "https://images.unsplash.com/photo-1574653853027-5382a3d23a15?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-      time_minutes: 45,
-      servings: 4,
-      difficulty: "Lätt",
-      ingredients: ["Kycklingfilé", "Curry", "Kokosmjölk", "Paprika", "Lök", "Ris"],
-      instructions: ["Stek kycklingen", "Tillsätt grönsaker och kryddor", "Häll i kokosmjölk", "Låt sjuda"],
-      tags: ["Kyckling", "Snabbt", "Matlådevänligt"],
-      source_url: "https://www.godare.se/recept/kycklinggryta-med-curry",
-      category: "Middag",
-      price: 75,
-      original_price: 90
-    },
-    {
-      id: crypto.randomUUID(),
-      title: "Köttbullar med potatismos",
-      description: "Klassiska svenska köttbullar med krämigt potatismos och lingonsylt.",
-      image_url: "https://images.unsplash.com/photo-1598511757337-fe2cafc51144?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-      time_minutes: 50,
-      servings: 4,
-      difficulty: "Medel",
-      ingredients: ["Köttfärs", "Lök", "Ströbröd", "Potatis", "Mjölk", "Lingonsylt"],
-      instructions: ["Blanda köttfärssmeten", "Rulla köttbullar", "Stek köttbullar", "Koka potatis och gör potatismos"],
-      tags: ["Klassiskt", "Matlådevänligt", "Budget"],
-      source_url: "https://www.godare.se/recept/kottbullar-med-potatismos",
-      category: "Middag",
-      price: 70,
-      original_price: 85
-    },
-    {
-      id: crypto.randomUUID(),
-      title: "Lax med rostad potatis",
-      description: "Saftig ugnsbakad lax med krispig rostad potatis och citronaioli.",
-      image_url: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-      time_minutes: 40,
-      servings: 4,
-      difficulty: "Lätt",
-      ingredients: ["Laxfilé", "Potatis", "Citron", "Dill", "Vitlök", "Olivolja"],
-      instructions: ["Förbered potatis och krydda", "Rosta potatis i ugn", "Tillaga laxen", "Servera med citronaioli"],
-      tags: ["Fisk", "Hälsosamt", "Snabbt"],
-      source_url: "https://www.godare.se/recept/lax-med-rostad-potatis",
-      category: "Fisk & skaldjur",
-      price: 85,
-      original_price: 98
-    },
-    {
-      id: crypto.randomUUID(),
-      title: "Pasta Carbonara",
-      description: "Krämig pasta carbonara med ost, ägg och bacon. En klassisk italiensk favorit.",
-      image_url: "https://images.unsplash.com/photo-1588013273468-315fd88ea34c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-      time_minutes: 25,
-      servings: 4,
-      difficulty: "Lätt",
-      ingredients: ["Pasta", "Bacon", "Parmesan", "Ägg", "Vitlök", "Svartpeppar"],
-      instructions: ["Koka pastan", "Stek bacon", "Vispa ihop ägg och ost", "Blanda allt"],
-      tags: ["Snabbt", "Budget", "Pasta"],
-      source_url: "https://www.godare.se/recept/pasta-carbonara",
-      category: "Middag",
-      price: 55,
-      original_price: 65
-    },
-    {
-      id: crypto.randomUUID(),
-      title: "Vegansk Chili sin Carne",
-      description: "Fyllig och smakrik vegansk chili med bönor, svamp och grönsaker.",
-      image_url: "https://images.unsplash.com/photo-1506102383123-c8ef1e872756?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-      time_minutes: 35,
-      servings: 6,
-      difficulty: "Lätt",
-      ingredients: ["Svarta bönor", "Kidneybönor", "Svamp", "Paprika", "Lök", "Tomater", "Kryddor"],
-      instructions: ["Stek grönsaker", "Tillsätt kryddor", "Tillsätt bönor och tomater", "Låt sjuda"],
-      tags: ["Veganskt", "Matlådevänligt", "Budget"],
-      source_url: "https://www.godare.se/recept/vegansk-chili-sin-carne",
-      category: "Veganskt",
-      price: 60,
-      original_price: 70
-    },
-    {
-      id: crypto.randomUUID(),
-      title: "Halloumisallad med quinoa",
-      description: "Fräsch sallad med stekt halloumi, quinoa, avokado och rostade nötter.",
-      image_url: "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-      time_minutes: 30,
-      servings: 2,
-      difficulty: "Lätt",
-      ingredients: ["Halloumi", "Quinoa", "Avokado", "Rödlök", "Gurka", "Tomat", "Valnötter"],
-      instructions: ["Koka quinoa", "Stek halloumi", "Blanda alla ingredienser", "Toppa med dressing"],
-      tags: ["Vegetariskt", "Sallad", "Hälsosamt"],
-      source_url: "https://www.godare.se/recept/halloumisallad-med-quinoa",
-      category: "Vegetariskt",
-      price: 75,
-      original_price: 85
-    },
-    {
-      id: crypto.randomUUID(),
-      title: "Ugnsbakad kyckling med rotfrukter",
-      description: "Saftig ugnsbakad kyckling med härliga rotfrukter och örtkryddor.",
-      image_url: "https://images.unsplash.com/photo-1518492104633-130d0cc84637?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-      time_minutes: 65,
-      servings: 4,
-      difficulty: "Medel",
-      ingredients: ["Kycklinglår", "Morot", "Palsternacka", "Potatis", "Rosmarin", "Timjan", "Vitlök"],
-      instructions: ["Förbered kycklingen och rotfrukterna", "Krydda generöst", "Ugnsbaka tills gyllene"],
-      tags: ["Kyckling", "Matlådevänligt", "Helgmat"],
-      source_url: "https://www.godare.se/recept/ugnsbakad-kyckling-med-rotfrukter",
-      category: "Kyckling",
-      price: 80,
-      original_price: 95
-    },
-    {
-      id: crypto.randomUUID(),
-      title: "Pannkakor med bär",
-      description: "Fluffiga pannkakor serverade med färska bär och lönnsirap.",
-      image_url: "https://images.unsplash.com/photo-1528207776546-365bb710ee93?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-      time_minutes: 20,
-      servings: 4,
-      difficulty: "Lätt",
-      ingredients: ["Vetemjöl", "Ägg", "Mjölk", "Smör", "Jordgubbar", "Blåbär", "Lönnsirap"],
-      instructions: ["Vispa smeten", "Stek pannkakor", "Servera med bär och sirap"],
-      tags: ["Efterrätt", "Snabbt", "Vegetariskt"],
-      source_url: "https://www.godare.se/recept/pannkakor-med-bar",
-      category: "Efterrätt",
-      price: 45,
-      original_price: 55
-    },
-    {
-      id: crypto.randomUUID(),
-      title: "Morotsoppa med ingefära",
-      description: "Len och värmande morotsoppa med en kick av ingefära.",
-      image_url: "https://images.unsplash.com/photo-1503146234398-4b5beba2fb22?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-      time_minutes: 30,
-      servings: 4,
-      difficulty: "Lätt",
-      ingredients: ["Morötter", "Lök", "Ingefära", "Kokosmjölk", "Buljong", "Örter"],
-      instructions: ["Stek lök och ingefära", "Tillsätt morötter och buljong", "Sjud tills morötterna är mjuka", "Mixa slät"],
-      tags: ["Soppa", "Vegetariskt", "Hälsosamt"],
-      source_url: "https://www.godare.se/recept/morotsoppa-med-ingefara",
-      category: "Vegetariskt",
-      price: 50,
-      original_price: 60
-    }
-  ];
+  const recipes = [];
+  
+  // Pasta Carbonara recipe
+  recipes.push({
+    id: crypto.randomUUID(),
+    title: "Pasta Carbonara",
+    description: "En klassisk italiensk pasta med krämig ägg- och ostsås och krispigt stekt fläsk.",
+    image_url: "https://assets.icanet.se/e_sharpen:80,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_226493/cf_259/pasta_med_kramig_svamp-_och_baconsas.jpg",
+    time_minutes: 25,
+    servings: 4,
+    difficulty: "Lätt",
+    ingredients: [
+      "400 g spaghetti",
+      "150 g pancetta eller bacon",
+      "4 st äggulor",
+      "50 g riven parmesanost",
+      "2 st vitlöksklyftor",
+      "2 msk olivolja",
+      "Salt och svartpeppar efter smak",
+      "1 dl riven pecorino-ost"
+    ],
+    instructions: [
+      "Koka spagettin enligt anvisningarna på förpackningen i saltat vatten.",
+      "Under tiden, tärna pancettan eller bacon och stek i olivolja tills den är krispig.",
+      "Pressa vitlöken och tillsätt i pannan, stek i 30 sekunder.",
+      "I en skål, vispa äggulorna med den rivna parmesanosten.",
+      "När pastan är klar, häll av vattnet men spara cirka 1 dl av kokvattnet.",
+      "Blanda den varma pastan med fläskblandningen i pannan (på låg värme).",
+      "Ta bort pannan från värmen och rör snabbt ned ägg- och ostblandningen.",
+      "Tillsätt lite av pastavattnet om såsen är för tjock.",
+      "Smaka av med salt och rikligt med svartpeppar.",
+      "Servera omedelbart med extra riven ost på toppen."
+    ],
+    tags: ["Italienskt", "Middag", "Pasta", "Budget"],
+    source_url: "https://www.ica.se/recept/pasta-carbonara-klassisk-722474/",
+    category: "Middag",
+    price: 65,
+    original_price: 85
+  });
+
+  // Kycklinggryta med curry
+  recipes.push({
+    id: crypto.randomUUID(),
+    title: "Kycklinggryta med curry",
+    description: "En smakrik och krämig kycklinggryta med curry och kokosmjölk, perfekt serverad med ris.",
+    image_url: "https://assets.icanet.se/e_sharpen:80,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_65609/cf_259/kycklinggryta_med_curry.jpg",
+    time_minutes: 35,
+    servings: 4,
+    difficulty: "Lätt",
+    ingredients: [
+      "600 g kycklingfilé",
+      "1 st gul lök",
+      "2 st vitlöksklyftor",
+      "2 msk curry",
+      "2 msk olja till stekning",
+      "400 ml kokosmjölk",
+      "2 dl vatten",
+      "2 st hönsbuljongtärningar",
+      "1 st röd paprika",
+      "1 st gul paprika",
+      "1 burk kidneybönor (400 g)",
+      "Salt och peppar efter smak",
+      "4 portioner ris"
+    ],
+    instructions: [
+      "Skär kycklingen i bitar. Hacka löken och vitlöken fint.",
+      "Hetta upp olja i en gryta och bryn kycklingen.",
+      "Tillsätt lök, vitlök och curry. Stek under omrörning i 2-3 minuter.",
+      "Häll i kokosmjölk, vatten och buljongtärningar. Låt sjuda i 10 minuter.",
+      "Skär paprikorna i bitar och skölj av bönorna.",
+      "Tillsätt paprika och bönor i grytan och låt sjuda ytterligare 5-7 minuter.",
+      "Smaka av med salt och peppar.",
+      "Koka riset enligt anvisningarna på förpackningen.",
+      "Servera grytan med ris."
+    ],
+    tags: ["Kyckling", "Middag", "Curry", "Matlådevänligt"],
+    source_url: "https://www.ica.se/recept/kycklinggryta-med-curry-712978/",
+    category: "Kyckling",
+    price: 75,
+    original_price: 95
+  });
+
+  // Vegetarisk lasagne
+  recipes.push({
+    id: crypto.randomUUID(),
+    title: "Vegetarisk lasagne med linser",
+    description: "En smakrik vegetarisk lasagne med linser, tomatsås och bechamelsås.",
+    image_url: "https://assets.icanet.se/e_sharpen:80,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_108896/cf_259/vegetarisk_lasagne_med_linser.jpg",
+    time_minutes: 60,
+    servings: 6,
+    difficulty: "Medel",
+    ingredients: [
+      "2 st morötter",
+      "1 st gul lök",
+      "2 st vitlöksklyftor",
+      "1 st zucchini",
+      "2 dl röda linser",
+      "2 burkar krossade tomater (à 400 g)",
+      "2 msk tomatpuré",
+      "2 tsk torkad oregano",
+      "1 tsk torkad timjan",
+      "1 st grönsaksbuljongtärning",
+      "Salt och peppar efter smak",
+      "50 g smör",
+      "5 msk vetemjöl",
+      "7 dl mjölk",
+      "2 dl riven ost",
+      "12 st lasagneplattor",
+      "1 dl riven ost (till gratineringen)"
+    ],
+    instructions: [
+      "Sätt ugnen på 225°C.",
+      "Skala och finhacka lök, vitlök och morötter. Fintärna zucchinin.",
+      "Fräs grönsakerna i olja i en stor kastrull tills de mjuknat.",
+      "Tillsätt linser, krossade tomater, tomatpuré, örter och buljongtärning.",
+      "Låt koka på medelvärme i 15-20 minuter. Smaka av med salt och peppar.",
+      "Gör under tiden bechamelsås: Smält smöret i en kastrull. Tillsätt mjölet och rör till en jämn redning.",
+      "Tillsätt mjölken lite i taget under vispning. Låt sjuda 5 minuter.",
+      "Ta från värmen och tillsätt 2 dl riven ost. Smaka av med salt och peppar.",
+      "Varva i en ugnsform: tomatsås, lasagneplattor, bechamelsås. Upprepa och avsluta med bechamelsås.",
+      "Strö över 1 dl riven ost och gratinera i ugnen ca 25-30 minuter tills lasagnen fått fin färg.",
+      "Låt vila 10 minuter före servering."
+    ],
+    tags: ["Vegetariskt", "Middag", "Pasta", "Matlådevänligt"],
+    source_url: "https://www.ica.se/recept/vegetarisk-lasagne-med-linser-718760/",
+    category: "Vegetariskt",
+    price: 60,
+    original_price: 80
+  });
+
+  // Laxsoppa
+  recipes.push({
+    id: crypto.randomUUID(),
+    title: "Krämig laxsoppa",
+    description: "En lyxig och krämig laxsoppa med dill och potatis. Perfekt för en kylig kväll.",
+    image_url: "https://assets.icanet.se/e_sharpen:80,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_166250/cf_259/kramig_laxsoppa.jpg",
+    time_minutes: 30,
+    servings: 4,
+    difficulty: "Lätt",
+    ingredients: [
+      "400 g laxfilé",
+      "1 st gul lök",
+      "2 st vitlöksklyftor",
+      "500 g potatis",
+      "2 msk smör",
+      "1 liter fiskbuljong",
+      "2 dl grädde",
+      "1 knippe dill",
+      "1 st citron (skal och juice)",
+      "Salt och vitpeppar efter smak",
+      "1 msk maizena (vid behov för tjockare konsistens)"
+    ],
+    instructions: [
+      "Skala och tärna potatisen. Finhacka löken och vitlöken.",
+      "Smält smöret i en stor kastrull och fräs lök och vitlök utan att de tar färg.",
+      "Tillsätt potatisen och fiskbuljongen. Låt koka tills potatisen är mjuk, ca 10-15 minuter.",
+      "Skär laxen i kuber.",
+      "Tillsätt grädden i soppan och låt koka upp.",
+      "Sänk värmen och lägg i laxbitarna. Låt sjuda i ca 5 minuter tills laxen är genomkokt.",
+      "Finhacka dillen och tillsätt den tillsammans med citronskal och citronsaft.",
+      "Smaka av med salt och vitpeppar.",
+      "Om du vill ha tjockare soppa, blanda maizena med lite kallt vatten och rör ner i soppan.",
+      "Servera med ett gott bröd."
+    ],
+    tags: ["Fisk & skaldjur", "Soppa", "Middag"],
+    source_url: "https://www.ica.se/recept/kramig-laxsoppa-724570/",
+    category: "Fisk & skaldjur",
+    price: 90,
+    original_price: 110
+  });
+
+  // Veganska bönbiffar
+  recipes.push({
+    id: crypto.randomUUID(),
+    title: "Veganska bönbiffar",
+    description: "Smakrika och saftiga veganska biffar gjorda på svarta bönor. Perfekta i burgare eller med tillbehör.",
+    image_url: "https://assets.icanet.se/e_sharpen:80,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_201713/cf_259/svartbonsbiffar.jpg",
+    time_minutes: 40,
+    servings: 4,
+    difficulty: "Medel",
+    ingredients: [
+      "2 burkar svarta bönor (à 400 g)",
+      "1 st röd lök",
+      "2 st vitlöksklyftor",
+      "1 dl havregryn",
+      "2 msk sojasås",
+      "1 msk rökt paprikapulver",
+      "1 tsk spiskummin",
+      "1 tsk torkad timjan",
+      "0.5 dl vetemjöl",
+      "Salt och peppar efter smak",
+      "3 msk olivolja till stekning"
+    ],
+    instructions: [
+      "Skölj och låt bönorna rinna av ordentligt.",
+      "Finhacka löken och vitlöken.",
+      "Fräs lök och vitlök i lite olja tills de mjuknat.",
+      "Mixa bönorna grovt i en matberedare eller mosa dem för hand.",
+      "Blanda bönorna med den frästa löken, havregryn, sojasås och kryddor.",
+      "Tillsätt vetemjöl och blanda ordentligt.",
+      "Forma smeten till 8 biffar.",
+      "Hetta upp olja i en stekpanna och stek biffarna ca 3-4 minuter på varje sida.",
+      "Servera med potatis, ris eller i hamburgebröd med tillbehör.",
+      "Tips: Biffarna kan även tillagas i ugn, 200°C i ca 20 minuter."
+    ],
+    tags: ["Veganskt", "Vegetariskt", "Middag", "Bönor"],
+    source_url: "https://www.ica.se/recept/veganska-bonbiffar-721467/",
+    category: "Veganskt",
+    price: 50,
+    original_price: 65
+  });
+
+  // Add more mock recipes here if needed
+
+  return recipes;
 }

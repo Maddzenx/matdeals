@@ -77,13 +77,21 @@ export async function scrapeRecipesFromICA(): Promise<any[]> {
               difficulty = 'Avancerad';
             }
             
-            // Extract ingredients
-            const ingredientElements = recipeDocument.querySelectorAll('.ingredients-list-group li, .ingredient-item');
-            const ingredients = Array.from(ingredientElements).map(el => el.textContent.trim());
+            // Enhanced: Extract ingredients with quantities
+            const ingredientElements = recipeDocument.querySelectorAll('.ingredients-list-group li, .ingredient-item, .ingredients li');
+            const ingredients = Array.from(ingredientElements).map(el => {
+              // Get the full text which should include quantity and ingredient
+              const fullText = el.textContent.trim();
+              return fullText; // This preserves the format: "300 g spaghetti", "1 vitlöksklyfta", etc.
+            }).filter(text => text.length > 0); // Filter out empty items
             
-            // Extract instructions
-            const instructionElements = recipeDocument.querySelectorAll('.recipe-instructions-item, .instruction-item');
-            const instructions = Array.from(instructionElements).map(el => el.textContent.trim());
+            // Enhanced: Extract step-by-step instructions
+            const instructionElements = recipeDocument.querySelectorAll('.recipe-instructions-item, .instruction-item, .instructions li, .recipe-preparation-steps li');
+            const instructions = Array.from(instructionElements).map((el, index) => {
+              // Get the full instruction step text
+              const stepText = el.textContent.trim();
+              return stepText; // This preserves the format of each step
+            }).filter(text => text.length > 0); // Filter out empty steps
             
             // Extract categories/tags
             const categoryElements = recipeDocument.querySelectorAll('.recipe-tags a, .recipe-categories a');
@@ -123,6 +131,7 @@ export async function scrapeRecipesFromICA(): Promise<any[]> {
             };
             
             console.log(`Extracted recipe: ${title}`);
+            console.log(`With ${ingredients.length} ingredients and ${instructions.length} instruction steps`);
             recipes.push(recipe);
             
             // Limit to 15 recipes per source to avoid rate limiting
