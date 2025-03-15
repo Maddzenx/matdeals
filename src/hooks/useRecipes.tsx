@@ -88,7 +88,7 @@ export const useRecipes = (initialCategory: string = "Matlådevänligt") => {
         
         uniqueCategories.sort();
         
-        const priorityCategories = ["Matlådevänligt", "Budget", "Veganskt", "Vegetariskt"];
+        const priorityCategories = ["Matlådevänligt", "Budget", "Veganskt", "Vegetariskt", "Middag"];
         
         const regularCategories = uniqueCategories.filter(
           cat => !priorityCategories.includes(cat)
@@ -99,8 +99,8 @@ export const useRecipes = (initialCategory: string = "Matlådevänligt") => {
           ...regularCategories
         ];
         
-        setCategories(availableCategories);
-        console.log("Available categories:", availableCategories);
+        setCategories(availableCategories.length > 0 ? availableCategories : ["Middag", "Vegetariskt"]);
+        console.log("Available categories:", availableCategories.length > 0 ? availableCategories : ["Middag", "Vegetariskt"]);
         
         if (availableCategories.length > 0 && !availableCategories.includes(activeCategory)) {
           setActiveCategory(availableCategories[0]);
@@ -108,6 +108,8 @@ export const useRecipes = (initialCategory: string = "Matlådevänligt") => {
       }
     } catch (err) {
       console.error("Error loading categories:", err);
+      // Set default categories if none found
+      setCategories(["Middag", "Vegetariskt"]);
     }
   }, [activeCategory]);
 
@@ -119,10 +121,7 @@ export const useRecipes = (initialCategory: string = "Matlådevänligt") => {
       
       const { data, error: functionError } = await supabase.functions.invoke("scrape-recipes", {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: {} // Empty body, but needed to ensure proper POST request
+        body: {} // Empty body for POST request
       });
       
       if (functionError) {
