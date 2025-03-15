@@ -173,13 +173,20 @@ export const useSupabaseProducts = () => {
           details: item.description || 'Ingen beskrivning tillgänglig',
           currentPrice: formattedPrice,
           originalPrice: originalPriceFormatted,
-          store: 'willys',  // Lowercase to match store filter
+          store: 'willys',  // Important: Ensure lowercase matches the store filter
           category: category,
           offerBadge: item.offer_details || 'Erbjudande' // Swedish offer badge
         };
         
         return product;
       }).filter(Boolean) as Product[];
+      
+      // Debug log to check data transformation
+      if (willysProducts.length > 0) {
+        console.log("First transformed Willys product:", willysProducts[0]);
+      } else {
+        console.log("No Willys products found or transformed");
+      }
       
       // Combine all products
       const allProducts = [...icaProducts, ...willysProducts];

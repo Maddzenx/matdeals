@@ -14,6 +14,17 @@ serve(async (req) => {
   try {
     console.log("Starting Willys scraper function...");
     
+    // Parse request body to check for forceRefresh flag
+    let forceRefresh = false;
+    
+    try {
+      const body = await req.json();
+      forceRefresh = body?.forceRefresh || false;
+      console.log(`ForceRefresh flag: ${forceRefresh}`);
+    } catch (e) {
+      console.log("No valid JSON body or forceRefresh flag");
+    }
+    
     // Try multiple URLs to increase chances of success
     const urls = [
       'https://www.willys.se/erbjudanden/veckans-erbjudanden',
@@ -44,8 +55,8 @@ serve(async (req) => {
               'User-Agent': userAgent,
               'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
               'Accept-Language': 'en-US,en;q=0.5',
-              'Cache-Control': 'no-cache',
-              'Pragma': 'no-cache'
+              'Cache-Control': forceRefresh ? 'no-cache' : 'max-age=0',
+              'Pragma': forceRefresh ? 'no-cache' : ''
             },
             redirect: 'follow'
           });
@@ -216,34 +227,6 @@ function createSampleProducts() {
       description: "Pågen. 500 g. Jämförpris 39:80/kg",
       price: 19,
       image_url: "https://assets.icanet.se/t_product_large_v1,f_auto/7311070362291.jpg",
-      offer_details: "Veckans erbjudande"
-    },
-    {
-      name: "Juice",
-      description: "Tropicana. 1 liter. Jämförpris 24:90/liter",
-      price: 24,
-      image_url: "https://assets.icanet.se/t_product_large_v1,f_auto/7310867720153.jpg",
-      offer_details: "Veckans erbjudande"
-    },
-    {
-      name: "Glass",
-      description: "GB Glace. 0.5 liter. Jämförpris 89:80/liter",
-      price: 45,
-      image_url: "https://assets.icanet.se/t_product_large_v1,f_auto/7310530122331.jpg",
-      offer_details: "Veckans erbjudande"
-    },
-    {
-      name: "Tvättmedel",
-      description: "Via. 750 ml. Jämförpris 65:33/liter",
-      price: 49,
-      image_url: "https://assets.icanet.se/t_product_large_v1,f_auto/7310610007205.jpg",
-      offer_details: "Veckans erbjudande"
-    },
-    {
-      name: "Köttfärs",
-      description: "Nötfärs. 500 g. Jämförpris 99:80/kg",
-      price: 49,
-      image_url: "https://assets.icanet.se/t_product_large_v1,f_auto/7310865070807.jpg",
       offer_details: "Veckans erbjudande"
     }
   ];
