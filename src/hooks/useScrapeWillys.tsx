@@ -23,7 +23,9 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
       });
       
       // Create the invocation promise
-      const invocationPromise = supabase.functions.invoke('scrape-willys');
+      const invocationPromise = supabase.functions.invoke('scrape-willys', {
+        body: { forceRefresh: true }
+      });
       
       // Race between timeout and invocation
       const { data, error } = await Promise.race([
