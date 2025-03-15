@@ -72,20 +72,25 @@ export const useProductSection = (
     return () => window.removeEventListener('scroll', handleScroll);
   }, [allCategoryNames, nonEmptyCategories, activeCategory]);
 
+  // Log activeStoreIds and storeTags for debugging
+  useEffect(() => {
+    console.log("Active store IDs:", activeStoreIds);
+    console.log("Store tags:", storeTags);
+  }, [activeStoreIds, storeTags]);
+
   const filteredProducts = allProducts.filter(product => {
-    console.log(`Checking product: ${product.name}, store: ${product.store}, activeStoreIds: ${activeStoreIds}`);
     // Match based on store ID
     const storeMatch = activeStoreIds.some(storeId => {
+      // Special handling for ICA and Willys stores
       if (product.store === 'ICA' && storeId === 'ica') return true;
       if (product.store === 'Willys' && storeId === 'willys') return true;
       
-      // Find matching store tag
+      // Find matching store tag (for other stores)
       const storeTag = storeTags.find(tag => tag.name === product.store);
       return storeTag && storeId === storeTag.id;
     });
     
     if (!storeMatch) {
-      console.log(`Filtered out product ${product.name} - store ${product.store} not in active stores`);
       return false;
     }
     
@@ -97,19 +102,19 @@ export const useProductSection = (
         product.details.toLowerCase().includes(query) ||
         (product.category && product.category.toLowerCase().includes(query));
       
-      if (!matchesSearch) {
-        console.log(`Filtered out product ${product.name} - doesn't match search query "${searchQuery}"`);
-      }
-      
       return matchesSearch;
     }
     
     // If no search query and store matches, include product
-    console.log(`Including product ${product.name} from store ${product.store}`);
     return true;
   });
 
   console.log(`Found ${filteredProducts.length} products after filtering from ${allProducts.length} total products`);
+  
+  // Log first few filtered products for debugging
+  if (filteredProducts.length > 0) {
+    console.log("First few filtered products:", filteredProducts.slice(0, 3));
+  }
 
   const handleCategorySelect = (categoryId: string) => {
     setActiveCategory(categoryId);

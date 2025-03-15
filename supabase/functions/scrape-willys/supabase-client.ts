@@ -21,7 +21,44 @@ export async function storeProducts(products: any[]): Promise<number> {
   }
 
   try {
-    console.log(`Storing ${products.length} products in Willys table`);
+    console.log(`Preparing to store ${products.length} products in Willys table`);
+    
+    // Validate products before storing
+    const validProducts = products.filter(product => {
+      if (!product.name) {
+        console.log("Skipping product without name:", product);
+        return false;
+      }
+      
+      // Ensure we have a price (convert to number if string)
+      if (product.price !== undefined && product.price !== null) {
+        if (typeof product.price === 'string') {
+          const parsedPrice = parseInt(product.price);
+          if (!isNaN(parsedPrice)) {
+            product.price = parsedPrice;
+          } else {
+            console.log(`Invalid price for product ${product.name}:`, product.price);
+            // Set a default price if parsing fails
+            product.price = 0;
+          }
+        }
+      } else {
+        console.log(`Missing price for product ${product.name}, setting default`);
+        product.price = 0;
+      }
+      
+      // Ensure image_url is a string
+      if (!product.image_url) {
+        product.image_url = 'https://assets.icanet.se/t_product_large_v1,f_auto/7300156501245.jpg'; // Default image
+      }
+      
+      // Store flag to identify products from Willys
+      product.store = 'Willys';
+      
+      return true;
+    });
+    
+    console.log(`Found ${validProducts.length} valid products to store`);
     
     // First, clear existing records
     const { error: deleteError } = await supabase
@@ -40,9 +77,9 @@ export async function storeProducts(products: any[]): Promise<number> {
     const batchSize = 10;
     let insertedCount = 0;
     
-    for (let i = 0; i < products.length; i += batchSize) {
-      const batch = products.slice(i, Math.min(i + batchSize, products.length));
-      console.log(`Inserting batch ${i/batchSize + 1} of ${Math.ceil(products.length/batchSize)}`);
+    for (let i = 0; i < validProducts.length; i += batchSize) {
+      const batch = validProducts.slice(i, Math.min(i + batchSize, validProducts.length));
+      console.log(`Inserting batch ${i/batchSize + 1} of ${Math.ceil(validProducts.length/batchSize)}`);
       
       const { data, error } = await supabase
         .from('Willys')
@@ -51,6 +88,7 @@ export async function storeProducts(products: any[]): Promise<number> {
       
       if (error) {
         console.error(`Error inserting batch ${i/batchSize + 1}:`, error);
+        console.error("First product in batch:", batch[0]);
       } else {
         console.log(`Successfully inserted batch ${i/batchSize + 1} with ${data.length} products`);
         insertedCount += data.length;

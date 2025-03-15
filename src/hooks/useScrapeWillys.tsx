@@ -36,21 +36,13 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
         throw error;
       }
       
-      console.log("Skrapningsresultat:", data);
+      console.log("Skrapningsresultat från Willys:", data);
       
       if (!data.success) {
         throw new Error(data.error || "Okänt fel i skrapningsfunktionen");
       }
       
-      if (!data.products || data.products.length === 0) {
-        toast({
-          title: "Inga produkter hittades",
-          description: "Skrapningen kunde inte hitta några giltiga produkter. Försök igen senare.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
+      // Even if products is empty, we might have fallback products
       // Refresh the products after scraping
       const refreshResult = await refetchProducts();
       
@@ -62,6 +54,8 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
         title: "Lyckades!",
         description: `Uppdaterade ${data.products?.length || 0} produkter från Willys.`,
       });
+      
+      return data;
     } catch (err) {
       console.error("Fel vid skrapning av Willys:", err);
       
@@ -84,6 +78,7 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
         description: errorMessage,
         variant: "destructive"
       });
+      throw err; // Re-throw for handling in the caller
     } finally {
       setScraping(false);
     }

@@ -47,15 +47,11 @@ const Index = () => {
   useEffect(() => {
     // Add ICA and Willys store tags if needed
     if (supabaseProducts && supabaseProducts.length > 0) {
-      const stores = supabaseProducts.map(product => product.store);
+      // Make sure we add both ICA and Willys stores to the filters
+      addStoreIfNeeded('ica', 'ICA', storeTagsData);
+      addStoreIfNeeded('willys', 'Willys', storeTagsData);
       
-      if (stores.includes('ICA')) {
-        addStoreIfNeeded('ica', 'ICA', storeTagsData);
-      }
-      
-      if (stores.includes('Willys')) {
-        addStoreIfNeeded('willys', 'Willys', storeTagsData);
-      }
+      console.log("Stores after adding ICA and Willys:", storeTagsData);
     }
   }, [supabaseProducts, addStoreIfNeeded]);
 
@@ -67,6 +63,8 @@ const Index = () => {
         handleStoreToggle(storeId);
       }
     });
+    
+    console.log("Active stores after initialization:", activeStores);
   }, []);
 
   const handleSearch = (query: string) => {
@@ -94,6 +92,12 @@ const Index = () => {
         handleScrapeIca(),
         handleScrapeWillys()
       ]);
+      
+      // Show a success toast
+      toast({
+        title: "Erbjudanden uppdaterade",
+        description: "Produktdata har uppdaterats från både ICA och Willys.",
+      });
     } catch (error) {
       console.error("Error during refresh:", error);
       toast({
@@ -106,7 +110,26 @@ const Index = () => {
     }
   };
 
+  // Ensure we have the right store tags
   const filteredStoreTags = storeTagsData.filter(store => activeStores.includes(store.id));
+  
+  // Debug log to check our products
+  useEffect(() => {
+    if (supabaseProducts && supabaseProducts.length > 0) {
+      console.log("Loaded products from Supabase:", supabaseProducts.length, supabaseProducts.slice(0, 3));
+      
+      // Count by store
+      const storeCount = supabaseProducts.reduce((acc, product) => {
+        const store = product.store || 'unknown';
+        acc[store] = (acc[store] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      console.log("Products by store:", storeCount);
+    } else {
+      console.log("No products loaded from Supabase");
+    }
+  }, [supabaseProducts]);
 
   return (
     <>
