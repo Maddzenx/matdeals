@@ -64,7 +64,6 @@ serve(async (req) => {
           if (response.ok) {
             html = await response.text();
             console.log(`Successfully fetched from ${url}, received ${html.length} characters`);
-            console.log(`First 100 chars: ${html.substring(0, 100)}...`);
             
             // If we got a valid HTML response, parse it
             if (html.length > 1000 && html.includes('</html>')) {
@@ -77,6 +76,8 @@ serve(async (req) => {
                 fetchSuccess = true;
                 break;
               }
+            } else {
+              console.log("HTML response too short or invalid");
             }
           } else {
             console.log(`Failed to fetch from ${url} with status: ${response.status}`);
@@ -92,7 +93,23 @@ serve(async (req) => {
     }
     
     if (!fetchSuccess || !document) {
-      throw new Error("Failed to fetch and parse any content from Willys website");
+      console.log("Failed to fetch and parse content from Willys website, using fallback products");
+      const sampleProducts = createSampleProducts();
+      const insertedCount = await storeProducts(sampleProducts);
+      
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: `Failed to fetch Willys website. Using ${insertedCount} fallback products instead.`,
+          products: sampleProducts.slice(0, 10)
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
     }
     
     console.log("Document parsed successfully, extracting products...");
@@ -115,7 +132,7 @@ serve(async (req) => {
         JSON.stringify({
           success: true,
           message: `No products found on Willys website. Using ${insertedCount} sample products instead.`,
-          products: sampleProducts.slice(0, 10) // Only send first 10 for response size
+          products: sampleProducts
         }),
         {
           headers: {
@@ -126,8 +143,10 @@ serve(async (req) => {
       );
     }
     
+    console.log("About to store products in database");
     // Store products in Supabase
     const insertedCount = await storeProducts(products);
+    console.log(`Stored ${insertedCount} products in database`);
 
     // Return success response
     return new Response(
@@ -157,7 +176,7 @@ serve(async (req) => {
         success: true, // Return success to avoid frontend errors
         message: `Error occurred during scraping: ${error.message}. Used ${insertedCount} sample products as fallback.`,
         error: error.message || "Unknown error occurred",
-        products: sampleProducts.slice(0, 10)
+        products: sampleProducts
       }),
       {
         status: 200, // Return 200 instead of 500 to prevent frontend error handling

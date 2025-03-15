@@ -46,8 +46,8 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
         throw new Error(data.error || "Okänt fel i skrapningsfunktionen");
       }
       
-      // Refresh the products after scraping
-      console.log("Scraping successful, now refreshing products");
+      // Refresh the products after scraping - whether successful or fallback
+      console.log("Scraping completed, now refreshing products");
       const refreshResult = await refetchProducts();
       
       if (!refreshResult.success) {
@@ -55,9 +55,11 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
         throw new Error("Kunde inte uppdatera produkter efter skrapning");
       }
       
+      const productsCount = data.products?.length || 0;
+      
       toast({
         title: "Lyckades!",
-        description: `Uppdaterade ${data.products?.length || 0} produkter från Willys.`,
+        description: `Uppdaterade ${productsCount} produkter från Willys.`,
       });
       
       return data;

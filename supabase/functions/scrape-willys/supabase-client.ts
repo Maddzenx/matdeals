@@ -24,6 +24,7 @@ export async function storeProducts(products: any[]): Promise<number> {
     console.log(`Preparing to store ${products.length} products in Willys table`);
     
     // First, clear existing records
+    console.log("Clearing existing Willys products");
     const { error: deleteError } = await supabase
       .from('Willys')
       .delete()
@@ -38,9 +39,6 @@ export async function storeProducts(products: any[]): Promise<number> {
     
     // Validate and prepare products for storage
     const validProducts = products.map(product => {
-      // Log the raw product for debugging
-      console.log("Processing product:", JSON.stringify(product, null, 2));
-      
       // Create a new product object with only the fields needed for the table
       return {
         name: product.name || 'Unnamed Product',
@@ -54,10 +52,12 @@ export async function storeProducts(products: any[]): Promise<number> {
     });
     
     console.log(`Prepared ${validProducts.length} valid products to store`);
-    console.log("First valid product:", JSON.stringify(validProducts[0], null, 2));
+    if (validProducts.length > 0) {
+      console.log("First valid product:", JSON.stringify(validProducts[0], null, 2));
+    }
     
-    // Insert products in batches to avoid hitting statement size limits
-    const batchSize = 5;
+    // Insert products in smaller batches to avoid hitting statement size limits
+    const batchSize = 2; // Using an even smaller batch size to avoid potential issues
     let insertedCount = 0;
     
     for (let i = 0; i < validProducts.length; i += batchSize) {
@@ -71,8 +71,9 @@ export async function storeProducts(products: any[]): Promise<number> {
       
       if (error) {
         console.error(`Error inserting batch ${i/batchSize + 1}:`, error);
+        console.error("Error details:", JSON.stringify(error));
         if (batch.length > 0) {
-          console.error("First product in batch:", batch[0]);
+          console.error("First product in batch:", JSON.stringify(batch[0]));
         }
       } else {
         console.log(`Successfully inserted batch ${i/batchSize + 1} with ${data.length} products`);
@@ -97,12 +98,20 @@ export async function storeProducts(products: any[]): Promise<number> {
         store: 'willys' // Important: Use lowercase for consistency
       }));
       
-      const { data } = await supabase
-        .from('Willys')
-        .insert(fallbackProducts)
-        .select();
-        
-      return data?.length || 0;
+      // Try inserting fallbacks one by one to have better chances of success
+      let insertedCount = 0;
+      for (const product of fallbackProducts) {
+        const { data, error } = await supabase
+          .from('Willys')
+          .insert([product])
+          .select();
+          
+        if (!error && data) {
+          insertedCount += data.length;
+        }
+      }
+      
+      return insertedCount;
     } catch (fallbackError) {
       console.error("Even fallback product insertion failed:", fallbackError);
       throw error; // Throw the original error
