@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -114,16 +115,22 @@ export const useRecipes = (initialCategory: string = "Matlådevänligt") => {
     try {
       setLoading(true);
       
+      console.log("Invoking scrape-recipes edge function...");
+      
       const { data, error: functionError } = await supabase.functions.invoke("scrape-recipes", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        }
+        },
+        body: {} // Empty body, but needed to ensure proper POST request
       });
       
       if (functionError) {
+        console.error("Edge function error:", functionError);
         throw new Error(functionError.message || 'Failed to scrape recipes');
       }
+      
+      console.log("Edge function response:", data);
       
       toast({
         title: "Recept uppdaterade",
