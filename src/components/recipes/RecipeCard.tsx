@@ -49,14 +49,20 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
       onClick={handleCardClick}
     >
       <div className="h-48 bg-gray-200 relative">
-        <img 
-          src={recipe.image_url || '/placeholder.svg'}
-          alt={recipe.title}
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            e.currentTarget.src = '/placeholder.svg';
-          }}
-        />
+        {recipe.image_url ? (
+          <img 
+            src={recipe.image_url}
+            alt={recipe.title}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.currentTarget.src = '/placeholder.svg';
+            }}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-500">
+            Ingen bild tillgänglig
+          </div>
+        )}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
           <h3 className="text-xl font-bold text-white">{recipe.title}</h3>
         </div>

@@ -1,6 +1,7 @@
 
 import React from "react";
 import { ShoppingCart, Search, BookOpen, Percent, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export interface NavItem {
   id: string;
@@ -16,6 +17,8 @@ interface BottomNavProps {
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({ items, onSelect }) => {
+  const navigate = useNavigate();
+
   const getIcon = (iconName: string) => {
     switch (iconName) {
       case "shopping-cart":
@@ -33,12 +36,33 @@ export const BottomNav: React.FC<BottomNavProps> = ({ items, onSelect }) => {
     }
   };
 
+  const handleNavItemClick = (id: string) => {
+    switch (id) {
+      case "recipes":
+        navigate("/recipes");
+        break;
+      case "offers":
+        navigate("/");
+        break;
+      case "cart":
+        navigate("/shopping-list");
+        break;
+      case "profile":
+        navigate("/auth");
+        break;
+      default:
+        console.log("Selected nav:", id);
+    }
+    
+    onSelect(id);
+  };
+
   return (
     <nav className="fixed w-full flex justify-around items-center bg-white py-1.5 bottom-0 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] border-t border-gray-200 z-50">
       {items.map((item) => (
         <button
           key={item.id}
-          onClick={() => onSelect(item.id)}
+          onClick={() => handleNavItemClick(item.id)}
           className={`flex flex-col items-center gap-0.5 text-[10px] font-bold relative px-3 py-1.5 transition-colors ${
             item.active ? "text-[#191919]" : "text-[#9E9E9E] hover:text-[#585858]"
           }`}

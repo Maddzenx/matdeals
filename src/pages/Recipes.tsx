@@ -25,15 +25,8 @@ const Recipes = () => {
   } = useRecipes();
 
   const handleNavSelect = (id: string) => {
-    if (id === "cart") {
-      navigate("/shopping-list");
-    } else if (id === "profile") {
-      navigate("/auth");
-    } else if (id === "offers") {
-      navigate("/");
-    } else {
-      console.log("Selected nav:", id);
-    }
+    // Navigation logic is now handled in BottomNav component
+    console.log("Selected nav:", id);
   };
 
   const handleRefresh = async () => {
