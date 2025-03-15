@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -38,9 +37,7 @@ export const useRecipes = (initialCategory: string = "Matlådevänligt") => {
         .from('recipes')
         .select('*');
         
-      // Apply category filter if provided
       if (category) {
-        // Look for the category either in the category field or in the tags array
         query = query.or(`category.eq.${category},tags.cs.{"${category}"}`);
       }
       
@@ -82,27 +79,20 @@ export const useRecipes = (initialCategory: string = "Matlådevänligt") => {
       }
       
       if (data) {
-        // Extract all tags from all recipes
         const allTags = data.flatMap(recipe => recipe.tags || []);
-        // Get categories from the category field
         const categoryValues = data.map(recipe => recipe.category).filter(Boolean);
         
-        // Combine all unique category values
         const allCategories = [...allTags, ...categoryValues];
         const uniqueCategories = [...new Set(allCategories)];
         
-        // Sort categories alphabetically
         uniqueCategories.sort();
         
-        // Prioritize specific categories to appear first
         const priorityCategories = ["Matlådevänligt", "Budget", "Veganskt", "Vegetariskt"];
         
-        // Filter out priority categories from the unique list
         const regularCategories = uniqueCategories.filter(
           cat => !priorityCategories.includes(cat)
         );
         
-        // Combine with priority categories first
         const availableCategories = [
           ...priorityCategories.filter(cat => uniqueCategories.includes(cat)),
           ...regularCategories
@@ -111,8 +101,6 @@ export const useRecipes = (initialCategory: string = "Matlådevänligt") => {
         setCategories(availableCategories);
         console.log("Available categories:", availableCategories);
         
-        // If the current active category is not in the available categories,
-        // and there are available categories, set the first one as active
         if (availableCategories.length > 0 && !availableCategories.includes(activeCategory)) {
           setActiveCategory(availableCategories[0]);
         }
@@ -126,36 +114,26 @@ export const useRecipes = (initialCategory: string = "Matlådevänligt") => {
     try {
       setLoading(true);
       
-      const response = await fetch(`${window.location.origin}/functions/v1/scrape-recipes`, {
+      const { data, error: functionError } = await supabase.functions.invoke("scrape-recipes", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         }
       });
       
-      if (!response.ok) {
-        const text = await response.text();
-        let errorData;
-        try {
-          errorData = JSON.parse(text);
-        } catch (e) {
-          errorData = { error: `Server returned status ${response.status}: ${text}` };
-        }
-        throw new Error(errorData.error || `Failed to scrape recipes: ${response.statusText}`);
+      if (functionError) {
+        throw new Error(functionError.message || 'Failed to scrape recipes');
       }
-      
-      const result = await response.json();
       
       toast({
         title: "Recept uppdaterade",
-        description: `${result.recipesCount} recept har hämtats från godare.se`,
+        description: `${data.recipesCount} recept har hämtats från godare.se`,
       });
       
-      // Reload recipes and categories
       await fetchCategories();
       await fetchRecipes(activeCategory);
       
-      return { success: true, count: result.recipesCount };
+      return { success: true, count: data.recipesCount };
     } catch (err) {
       console.error('Error scraping recipes:', err);
       
@@ -171,13 +149,11 @@ export const useRecipes = (initialCategory: string = "Matlådevänligt") => {
     }
   }, [activeCategory, fetchCategories, fetchRecipes]);
 
-  // Change active category
   const changeCategory = useCallback((category: string) => {
     setActiveCategory(category);
     fetchRecipes(category);
   }, [fetchRecipes]);
 
-  // Initial load
   useEffect(() => {
     fetchCategories();
     fetchRecipes(activeCategory);
