@@ -9,6 +9,7 @@ export function extractProducts(document: Document, baseUrl: string) {
   
   // Try multiple extraction strategies to increase success rate
   const products = [
+    ...extractByDynamicPatterns(document, baseUrl),
     ...extractByClassicSelectors(document, baseUrl),
     ...extractByDataAttributes(document, baseUrl),
     ...extractByArticleElements(document, baseUrl),
@@ -18,8 +19,75 @@ export function extractProducts(document: Document, baseUrl: string) {
   // Remove duplicates based on name
   const uniqueProducts = removeDuplicates(products);
   
-  console.log(`Successfully extracted ${uniqueProducts.length} unique products after trying multiple strategies`);
+  console.log(`Extracted ${uniqueProducts.length} unique products after trying multiple strategies`);
   return uniqueProducts;
+}
+
+// New strategy: Extract by analyzing patterns in the DOM that might indicate products
+function extractByDynamicPatterns(document: Document, baseUrl: string) {
+  console.log("Strategy 0: Extracting by analyzing DOM patterns");
+  
+  // Look for grids and lists which often contain products
+  const grids = [
+    ...document.querySelectorAll('[class*="grid"]'),
+    ...document.querySelectorAll('[class*="list"]'),
+    ...document.querySelectorAll('[class*="products"]'),
+    ...document.querySelectorAll('ul li'),
+    ...document.querySelectorAll('div > div > div'), // Nested divs often make up product grids
+  ];
+  
+  // Look for elements with multiple similar children - often product listings
+  const repeatingPatterns = [];
+  
+  for (const grid of grids) {
+    // Skip tiny grids
+    if (!grid.children || grid.children.length < 2) continue;
+    
+    // Check if children have similar structure (similar number of images, text nodes, etc)
+    const childElements = Array.from(grid.children);
+    
+    // Check first few children to see if they're similar
+    const similarChildren = [];
+    
+    for (let i = 0; i < Math.min(childElements.length, 5); i++) {
+      const child = childElements[i];
+      
+      // Looking for product-like characteristics
+      const hasImage = child.querySelector('img') !== null;
+      const hasText = (child.textContent || '').trim().length > 0;
+      const hasPricePattern = /\d+[,.:]\d+\s*(kr|:-)/i.test(child.textContent || '') || 
+                              /\d+\s*(kr|:-)/i.test(child.textContent || '');
+      
+      // Only include as potential product if it has basic product attributes
+      if (hasImage && hasText && hasPricePattern) {
+        similarChildren.push(child);
+      }
+    }
+    
+    if (similarChildren.length >= 2) {
+      // This grid likely contains products
+      repeatingPatterns.push(...childElements);
+    }
+  }
+  
+  console.log(`Found ${repeatingPatterns.length} elements in potential product patterns`);
+  
+  const processedProductNames = new Set<string>();
+  const products = [];
+  
+  for (const element of repeatingPatterns) {
+    try {
+      const product = processProductCard(element, baseUrl, processedProductNames);
+      if (product && product.name) {
+        products.push(product);
+      }
+    } catch (error) {
+      // Just continue to next element
+    }
+  }
+  
+  console.log(`Extracted ${products.length} products using dynamic pattern analysis`);
+  return products;
 }
 
 // Strategy 1: Extract by classic product class names and selectors
@@ -34,6 +102,9 @@ function extractByClassicSelectors(document: Document, baseUrl: string) {
     ...document.querySelectorAll('.product'),
     ...document.querySelectorAll('[class*="product-"]'),
     ...document.querySelectorAll('[class*="offer-"]'),
+    ...document.querySelectorAll('[class*="campaign-"]'),
+    ...document.querySelectorAll('[class*="item-"]'),
+    ...document.querySelectorAll('[id*="product"]'),
   ];
   
   console.log(`Found ${productElements.length} potential product elements with classic selectors`);
@@ -66,6 +137,10 @@ function extractByDataAttributes(document: Document, baseUrl: string) {
     ...document.querySelectorAll('[data-product-id]'),
     ...document.querySelectorAll('[data-item-id]'),
     ...document.querySelectorAll('[data-sku]'),
+    ...document.querySelectorAll('[data-test*="offer"]'),
+    ...document.querySelectorAll('[data-test*="item"]'),
+    ...document.querySelectorAll('[data-testid*="product"]'),
+    ...document.querySelectorAll('[data-testid*="offer"]'),
   ];
   
   console.log(`Found ${productElements.length} potential product elements with data attributes`);

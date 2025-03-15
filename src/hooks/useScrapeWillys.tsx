@@ -15,9 +15,11 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
         description: "Vänta medan vi hämtar de senaste erbjudandena...",
       });
       
-      // Set up a timeout for the request
+      console.log("Starting Willys scraping process");
+      
+      // Set up a timeout for the request (60 seconds)
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Förfrågan tog för lång tid (90 sekunder)')), 90000);
+        setTimeout(() => reject(new Error('Förfrågan tog för lång tid (60 sekunder)')), 60000);
       });
       
       // Create the invocation promise
@@ -27,7 +29,7 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
       const { data, error } = await Promise.race([
         invocationPromise,
         timeoutPromise.then(() => { 
-          throw new Error('Förfrågan tog för lång tid (90 sekunder)');
+          throw new Error('Förfrågan tog för lång tid (60 sekunder)');
         })
       ]);
       
@@ -42,11 +44,12 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
         throw new Error(data.error || "Okänt fel i skrapningsfunktionen");
       }
       
-      // Even if products is empty, we might have fallback products
       // Refresh the products after scraping
+      console.log("Scraping successful, now refreshing products");
       const refreshResult = await refetchProducts();
       
       if (!refreshResult.success) {
+        console.error("Refresh error:", refreshResult.error);
         throw new Error("Kunde inte uppdatera produkter efter skrapning");
       }
       
@@ -58,6 +61,15 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
       return data;
     } catch (err) {
       console.error("Fel vid skrapning av Willys:", err);
+      
+      // Check if we need to refresh products even after error
+      // (in cases where the edge function returned fallback products)
+      try {
+        console.log("Attempting to refresh products despite error");
+        await refetchProducts();
+      } catch (refreshErr) {
+        console.error("Could not refresh products after error:", refreshErr);
+      }
       
       // More user-friendly error message
       let errorMessage = "Kunde inte hämta Willys-produkter. Försök igen senare.";
@@ -78,7 +90,9 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
         description: errorMessage,
         variant: "destructive"
       });
-      throw err; // Re-throw for handling in the caller
+      
+      // Re-throw for handling in the caller
+      throw err;
     } finally {
       setScraping(false);
     }

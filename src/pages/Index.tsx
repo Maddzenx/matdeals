@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SearchBar } from "@/components/SearchBar";
@@ -45,17 +44,15 @@ const Index = () => {
   }, [error]);
 
   useEffect(() => {
-    // Add ICA and Willys store tags if needed
     if (supabaseProducts && supabaseProducts.length > 0) {
-      // Make sure we add both ICA and Willys stores to the filters
       addStoreIfNeeded('ica', 'ICA', storeTagsData);
       addStoreIfNeeded('willys', 'Willys', storeTagsData);
       
       console.log("Stores after adding ICA and Willys:", storeTagsData);
+      console.log("Active stores:", activeStores);
     }
   }, [supabaseProducts, addStoreIfNeeded]);
 
-  // Always include ICA and Willys in activeStores initially
   useEffect(() => {
     const defaultStores = ['ica', 'willys'];
     defaultStores.forEach(storeId => {
@@ -87,13 +84,29 @@ const Index = () => {
     setIsRefreshing(true);
     
     try {
-      // Scrape both ICA and Willys
+      console.log("Starting refresh of both ICA and Willys data");
+      
       await Promise.all([
-        handleScrapeIca(),
-        handleScrapeWillys()
+        handleScrapeIca().catch(err => {
+          console.error("Error scraping ICA:", err);
+          toast({
+            title: "Fel vid uppdatering av ICA",
+            description: "Kunde inte uppdatera ICA-erbjudanden. Willys-erbjudanden uppdateras ändå.",
+            variant: "destructive"
+          });
+        }),
+        handleScrapeWillys().catch(err => {
+          console.error("Error scraping Willys:", err);
+          toast({
+            title: "Fel vid uppdatering av Willys",
+            description: "Kunde inte uppdatera Willys-erbjudanden. ICA-erbjudanden uppdateras ändå.",
+            variant: "destructive"
+          });
+        })
       ]);
       
-      // Show a success toast
+      await refetch();
+      
       toast({
         title: "Erbjudanden uppdaterade",
         description: "Produktdata har uppdaterats från både ICA och Willys.",
@@ -110,17 +123,14 @@ const Index = () => {
     }
   };
 
-  // Ensure we have the right store tags
   const filteredStoreTags = storeTagsData.filter(store => activeStores.includes(store.id));
   
-  // Debug log to check our products
   useEffect(() => {
     if (supabaseProducts && supabaseProducts.length > 0) {
       console.log("Loaded products from Supabase:", supabaseProducts.length, supabaseProducts.slice(0, 3));
       
-      // Count by store
       const storeCount = supabaseProducts.reduce((acc, product) => {
-        const store = product.store || 'unknown';
+        const store = product.store?.toLowerCase() || 'unknown';
         acc[store] = (acc[store] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
