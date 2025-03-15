@@ -43,7 +43,6 @@ const Index = () => {
     }
   }, [error]);
 
-  // Ensure ICA is added as a store and selected by default
   useEffect(() => {
     // Always make sure ICA is available as a store
     addStoreIfNeeded('ica', 'ICA', storeTagsData);
@@ -53,14 +52,11 @@ const Index = () => {
       handleStoreToggle('ica');
     }
     
-    console.log("Active stores after ICA initialization:", activeStores);
   }, []);
   
-  // Additional effect to make sure Willys is added when products are available
   useEffect(() => {
     if (supabaseProducts && supabaseProducts.length > 0) {
       addStoreIfNeeded('willys', 'Willys', storeTagsData);
-      console.log("Stores after adding ICA and Willys:", storeTagsData);
     }
   }, [supabaseProducts, addStoreIfNeeded]);
 

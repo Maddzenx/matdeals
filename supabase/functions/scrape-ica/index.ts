@@ -1,7 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders, fetchAndParse, findOfferContainers, findAllOfferCards } from "./dom-utils.ts";
-import { extractProducts } from "./products-extractor.ts";
+import { extractProducts } from "./extractors/product-extractor.ts";
 import { storeProducts } from "./supabase-client.ts";
 
 serve(async (req) => {
@@ -20,28 +20,7 @@ serve(async (req) => {
       'https://www.ica.se/butiker/nara/goteborg/ica-nara-masthugget-1004251/erbjudanden/'
     ];
     
-    let document = null;
-    let error = null;
-    
-    // Try each URL until one works
-    for (const url of urls) {
-      try {
-        console.log(`Attempting to fetch from: ${url}`);
-        document = await fetchAndParse(url);
-        if (document) {
-          console.log(`Successfully fetched from: ${url}`);
-          break; // Success, exit the loop
-        }
-      } catch (e) {
-        error = e;
-        console.error(`Failed to fetch from ${url}:`, e.message);
-        // Continue to try the next URL
-      }
-    }
-    
-    if (!document) {
-      throw error || new Error("Failed to fetch from any ICA URL");
-    }
+    const document = await fetchFromMultipleUrls(urls);
     
     // Find offer containers and cards
     console.log("Finding offer containers...");
@@ -113,3 +92,29 @@ serve(async (req) => {
     );
   }
 });
+
+/**
+ * Attempts to fetch from multiple URLs until one succeeds
+ */
+async function fetchFromMultipleUrls(urls: string[]) {
+  let document = null;
+  let lastError = null;
+  
+  // Try each URL until one works
+  for (const url of urls) {
+    try {
+      console.log(`Attempting to fetch from: ${url}`);
+      document = await fetchAndParse(url);
+      if (document) {
+        console.log(`Successfully fetched from: ${url}`);
+        return document;
+      }
+    } catch (e) {
+      lastError = e;
+      console.error(`Failed to fetch from ${url}:`, e.message);
+      // Continue to try the next URL
+    }
+  }
+  
+  throw lastError || new Error("Failed to fetch from any ICA URL");
+}

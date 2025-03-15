@@ -17,23 +17,8 @@ export const useScrapeIca = (refetchProducts: () => Promise<{ success: boolean; 
       
       console.log("Starting ICA scraping process");
       
-      // Set up a timeout for the request
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Förfrågan tog för lång tid (120 sekunder)')), 120000);
-      });
-      
-      // Create the invocation promise
-      const invocationPromise = supabase.functions.invoke('scrape-ica', {
-        body: { forceRefresh: true }
-      });
-      
-      // Race between timeout and invocation
-      const { data, error } = await Promise.race([
-        invocationPromise,
-        timeoutPromise.then(() => { 
-          throw new Error('Förfrågan tog för lång tid (120 sekunder)');
-        })
-      ]);
+      // Create invocation with timeout handler
+      const { data, error } = await invokeScraperWithTimeout('scrape-ica', { forceRefresh: true });
       
       if (error) {
         console.error("Funktionsfel:", error);
@@ -92,6 +77,27 @@ export const useScrapeIca = (refetchProducts: () => Promise<{ success: boolean; 
     } finally {
       setScraping(false);
     }
+  };
+
+  /**
+   * Invokes a Supabase function with a timeout
+   */
+  const invokeScraperWithTimeout = async (functionName: string, body: any, timeoutMs: number = 120000) => {
+    // Set up a timeout for the request
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Förfrågan tog för lång tid (120 sekunder)')), timeoutMs);
+    });
+    
+    // Create the invocation promise
+    const invocationPromise = supabase.functions.invoke(functionName, { body });
+    
+    // Race between timeout and invocation
+    return await Promise.race([
+      invocationPromise,
+      timeoutPromise.then(() => { 
+        throw new Error('Förfrågan tog för lång tid (120 sekunder)');
+      })
+    ]);
   };
 
   return { scraping, handleScrapeIca };
