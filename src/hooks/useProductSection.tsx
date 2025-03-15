@@ -81,11 +81,13 @@ export const useProductSection = (
   const filteredProducts = allProducts.filter(product => {
     // Match based on store ID
     const storeMatch = activeStoreIds.some(storeId => {
-      // Special handling for ICA and Willys stores
-      if (product.store === 'ICA' && storeId === 'ica') return true;
-      if (product.store === 'Willys' && storeId === 'willys') return true;
+      // Check for lowercase store values for ICA and Willys
+      const productStore = product.store?.toLowerCase() || '';
       
-      // Find matching store tag (for other stores)
+      if (productStore === 'ica' && storeId === 'ica') return true;
+      if (productStore === 'willys' && storeId === 'willys') return true;
+      
+      // For other stores, match based on the tag name/id
       const storeTag = storeTags.find(tag => tag.name === product.store);
       return storeTag && storeId === storeTag.id;
     });
@@ -111,6 +113,15 @@ export const useProductSection = (
 
   console.log(`Found ${filteredProducts.length} products after filtering from ${allProducts.length} total products`);
   
+  // Log filtered products by store for debugging
+  const storeCount = filteredProducts.reduce((acc, product) => {
+    const store = product.store?.toLowerCase() || 'unknown';
+    acc[store] = (acc[store] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  
+  console.log("Filtered products by store:", storeCount);
+
   // Log first few filtered products for debugging
   if (filteredProducts.length > 0) {
     console.log("First few filtered products:", filteredProducts.slice(0, 3));

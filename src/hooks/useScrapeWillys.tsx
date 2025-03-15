@@ -17,9 +17,9 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
       
       console.log("Starting Willys scraping process");
       
-      // Set up a timeout for the request (60 seconds)
+      // Set up a timeout for the request (120 seconds to allow more time)
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Förfrågan tog för lång tid (60 sekunder)')), 60000);
+        setTimeout(() => reject(new Error('Förfrågan tog för lång tid (120 sekunder)')), 120000);
       });
       
       // Create the invocation promise
@@ -29,7 +29,7 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
       const { data, error } = await Promise.race([
         invocationPromise,
         timeoutPromise.then(() => { 
-          throw new Error('Förfrågan tog för lång tid (60 sekunder)');
+          throw new Error('Förfrågan tog för lång tid (120 sekunder)');
         })
       ]);
       

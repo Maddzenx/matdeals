@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { DOMParser } from "https://deno.land/x/deno_dom/deno-dom-wasm.ts";
 import { corsHeaders } from "./cors.ts";
@@ -17,52 +18,70 @@ serve(async (req) => {
     const urls = [
       'https://www.willys.se/erbjudanden/veckans-erbjudanden',
       'https://www.willys.se/erbjudanden',
+      'https://www.willys.se/kampanjer',
+      'https://www.willys.se/sok?q=erbjudande',
       'https://www.willys.se'
     ];
     
     let html = '';
     let fetchSuccess = false;
+    let document = null;
     
-    // Try each URL until we get a successful response
+    // Try each URL with multiple User-Agent headers until we get a successful response
+    const userAgents = [
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Safari/605.1.15',
+      'Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36'
+    ];
+    
     for (const url of urls) {
-      try {
-        console.log(`Fetching from: ${url}`);
-        const response = await fetch(url, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-          }
-        });
-        
-        if (response.ok) {
-          html = await response.text();
-          console.log(`Successfully fetched from ${url}, received ${html.length} characters`);
-          console.log(`First 100 chars: ${html.substring(0, 100)}...`);
+      for (const userAgent of userAgents) {
+        try {
+          console.log(`Fetching from: ${url} with User-Agent: ${userAgent.substring(0, 20)}...`);
+          const response = await fetch(url, {
+            headers: {
+              'User-Agent': userAgent,
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+              'Accept-Language': 'en-US,en;q=0.5',
+              'Cache-Control': 'no-cache',
+              'Pragma': 'no-cache'
+            },
+            redirect: 'follow'
+          });
           
-          // If we got a valid HTML response, break the loop
-          if (html.length > 1000 && html.includes('</html>')) {
-            fetchSuccess = true;
-            break;
+          if (response.ok) {
+            html = await response.text();
+            console.log(`Successfully fetched from ${url}, received ${html.length} characters`);
+            console.log(`First 100 chars: ${html.substring(0, 100)}...`);
+            
+            // If we got a valid HTML response, parse it
+            if (html.length > 1000 && html.includes('</html>')) {
+              // Parse the HTML
+              const parser = new DOMParser();
+              document = parser.parseFromString(html, "text/html");
+              
+              if (document) {
+                console.log("Successfully parsed HTML document");
+                fetchSuccess = true;
+                break;
+              }
+            }
+          } else {
+            console.log(`Failed to fetch from ${url} with status: ${response.status}`);
           }
-        } else {
-          console.log(`Failed to fetch from ${url} with status: ${response.status}`);
+        } catch (fetchError) {
+          console.error(`Error fetching from ${url} with User-Agent ${userAgent.substring(0, 20)}:`, fetchError);
         }
-      } catch (fetchError) {
-        console.error(`Error fetching from ${url}:`, fetchError);
+      }
+      
+      if (fetchSuccess && document) {
+        break;
       }
     }
     
-    if (!fetchSuccess || !html) {
-      throw new Error("Failed to fetch any content from Willys website");
-    }
-    
-    // Parse the HTML
-    const parser = new DOMParser();
-    const document = parser.parseFromString(html, "text/html");
-    
-    if (!document) {
-      throw new Error("Failed to parse HTML document");
+    if (!fetchSuccess || !document) {
+      throw new Error("Failed to fetch and parse any content from Willys website");
     }
     
     console.log("Document parsed successfully, extracting products...");

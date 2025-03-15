@@ -1,328 +1,180 @@
-import { processProductCard } from "./processors/card-processor.ts";
 
-/**
- * Extracts products from the document using various extraction methods
- */
+// Function to extract products from the Willys webpage
 export function extractProducts(document: Document, baseUrl: string) {
-  console.log("Starting product extraction with multiple strategies...");
+  console.log("Starting product extraction from Willys webpage");
   
-  // Try multiple extraction strategies to increase success rate
-  const products = [
-    ...extractByDynamicPatterns(document, baseUrl),
-    ...extractByClassicSelectors(document, baseUrl),
-    ...extractByDataAttributes(document, baseUrl),
-    ...extractByArticleElements(document, baseUrl),
-    ...extractByImageAndPriceProximity(document, baseUrl),
-    ...extractFromSearchResults(document, baseUrl),  // New method
-    ...extractFromOfferElements(document, baseUrl),  // New method
-  ];
+  const products = [];
   
-  // Remove duplicates based on name
-  const uniqueProducts = removeDuplicates(products);
-  
-  console.log(`Extracted ${uniqueProducts.length} unique products after trying multiple strategies`);
-  return uniqueProducts;
-}
-
-// Strategy 0: Extracting by analyzing DOM patterns
-function extractByDynamicPatterns(document: Document, baseUrl: string) {
-  console.log("Strategy 0: Extracting by analyzing DOM patterns");
-  
-  // Look for grids and lists which often contain products
-  const grids = [
-    ...document.querySelectorAll('[class*="grid"]'),
-    ...document.querySelectorAll('[class*="list"]'),
-    ...document.querySelectorAll('[class*="products"]'),
-    ...document.querySelectorAll('ul li'),
-    ...document.querySelectorAll('div > div > div'), // Nested divs often make up product grids
-  ];
-  
-  // Look for elements with multiple similar children - often product listings
-  const repeatingPatterns = [];
-  
-  for (const grid of grids) {
-    // Skip tiny grids
-    if (!grid.children || grid.children.length < 2) continue;
+  try {
+    // Try multiple extraction strategies
     
-    // Check if children have similar structure (similar number of images, text nodes, etc)
-    const childElements = Array.from(grid.children);
+    // Strategy 1: Look for offer cards in the weekly offers section
+    console.log("Trying strategy 1: Weekly offers");
+    const offerCards = document.querySelectorAll('.js-product-offer-card, .product-offer-card, .product-card');
     
-    // Check first few children to see if they're similar
-    const similarChildren = [];
-    
-    for (let i = 0; i < Math.min(childElements.length, 5); i++) {
-      const child = childElements[i];
+    if (offerCards && offerCards.length > 0) {
+      console.log(`Found ${offerCards.length} offer cards in the weekly offers section`);
       
-      // Looking for product-like characteristics
-      const hasImage = child.querySelector('img') !== null;
-      const hasText = (child.textContent || '').trim().length > 0;
-      const hasPricePattern = /\d+[,.:]\d+\s*(kr|:-)/i.test(child.textContent || '') || 
-                              /\d+\s*(kr|:-)/i.test(child.textContent || '');
-      
-      // Only include as potential product if it has basic product attributes
-      if (hasImage && hasText && hasPricePattern) {
-        similarChildren.push(child);
+      for (let i = 0; i < offerCards.length; i++) {
+        const card = offerCards[i];
+        
+        try {
+          // Extract product information
+          const nameElement = card.querySelector('.product-card__name, .js-product-name, .product-name, h3');
+          const name = nameElement ? nameElement.textContent?.trim() : null;
+          
+          const priceElement = card.querySelector('.product-card__price, .js-product-price, .product-price, .price');
+          const priceText = priceElement ? priceElement.textContent?.trim() : null;
+          
+          // Extract numeric price
+          let price = null;
+          if (priceText) {
+            const priceMatch = priceText.match(/(\d+)[,.]?(\d*)/);
+            if (priceMatch) {
+              price = parseInt(priceMatch[1]);
+            }
+          }
+          
+          const imageElement = card.querySelector('img');
+          const imageUrl = imageElement ? imageElement.getAttribute('src') : null;
+          
+          const descriptionElement = card.querySelector('.product-card__description, .js-product-description, .product-description');
+          const description = descriptionElement ? descriptionElement.textContent?.trim() : null;
+          
+          const offerElement = card.querySelector('.badge, .offer-badge, .js-offer-badge');
+          const offerDetails = offerElement ? offerElement.textContent?.trim() : "Erbjudande";
+          
+          if (name) {
+            products.push({
+              name,
+              price,
+              description: description || `${name}`,
+              image_url: imageUrl && imageUrl.startsWith('http') ? imageUrl : (imageUrl ? `${baseUrl}${imageUrl}` : null),
+              offer_details: offerDetails
+            });
+            
+            console.log(`Extracted product: ${name} with price: ${price}`);
+          }
+        } catch (error) {
+          console.error("Error extracting individual product:", error);
+        }
       }
     }
     
-    if (similarChildren.length >= 2) {
-      // This grid likely contains products
-      repeatingPatterns.push(...childElements);
-    }
-  }
-  
-  console.log(`Found ${repeatingPatterns.length} elements in potential product patterns`);
-  
-  const processedProductNames = new Set<string>();
-  const products = [];
-  
-  for (const element of repeatingPatterns) {
-    try {
-      const product = processProductCard(element, baseUrl, processedProductNames);
-      if (product && product.name) {
-        products.push(product);
-      }
-    } catch (error) {
-      // Just continue to next element
-    }
-  }
-  
-  console.log(`Extracted ${products.length} products using dynamic pattern analysis`);
-  return products;
-}
-
-// Strategy 1: Extract by classic product class names and selectors
-function extractByClassicSelectors(document: Document, baseUrl: string) {
-  console.log("Strategy 1: Extracting by classic product selectors");
-  
-  const productElements = [
-    ...document.querySelectorAll('.product-list-item'),
-    ...document.querySelectorAll('.product-tile'),
-    ...document.querySelectorAll('.offer-card'),
-    ...document.querySelectorAll('.product-card'),
-    ...document.querySelectorAll('.product'),
-    ...document.querySelectorAll('[class*="product-"]'),
-    ...document.querySelectorAll('[class*="offer-"]'),
-    ...document.querySelectorAll('[class*="campaign-"]'),
-    ...document.querySelectorAll('[class*="item-"]'),
-    ...document.querySelectorAll('[id*="product"]'),
-  ];
-  
-  console.log(`Found ${productElements.length} potential product elements with classic selectors`);
-  
-  const processedProductNames = new Set<string>();
-  const products = [];
-  
-  for (const element of productElements) {
-    try {
-      const product = processProductCard(element, baseUrl, processedProductNames);
-      if (product && product.name) {
-        products.push(product);
-      }
-    } catch (error) {
-      // Just continue to next element
-    }
-  }
-  
-  console.log(`Extracted ${products.length} products using classic selectors`);
-  return products;
-}
-
-// Strategy 2: Extract by data attributes that might indicate products
-function extractByDataAttributes(document: Document, baseUrl: string) {
-  console.log("Strategy 2: Extracting by data attributes");
-  
-  const productElements = [
-    ...document.querySelectorAll('[data-test*="product"]'),
-    ...document.querySelectorAll('[data-id*="product"]'),
-    ...document.querySelectorAll('[data-product-id]'),
-    ...document.querySelectorAll('[data-item-id]'),
-    ...document.querySelectorAll('[data-sku]'),
-    ...document.querySelectorAll('[data-test*="offer"]'),
-    ...document.querySelectorAll('[data-test*="item"]'),
-    ...document.querySelectorAll('[data-testid*="product"]'),
-    ...document.querySelectorAll('[data-testid*="offer"]'),
-  ];
-  
-  console.log(`Found ${productElements.length} potential product elements with data attributes`);
-  
-  const processedProductNames = new Set<string>();
-  const products = [];
-  
-  for (const element of productElements) {
-    try {
-      const product = processProductCard(element, baseUrl, processedProductNames);
-      if (product && product.name) {
-        products.push(product);
-      }
-    } catch (error) {
-      // Just continue to next element
-    }
-  }
-  
-  console.log(`Extracted ${products.length} products using data attributes`);
-  return products;
-}
-
-// Strategy 3: Extract by article elements which often represent products
-function extractByArticleElements(document: Document, baseUrl: string) {
-  console.log("Strategy 3: Extracting by article elements");
-  
-  const articleElements = document.querySelectorAll('article');
-  console.log(`Found ${articleElements.length} article elements`);
-  
-  const processedProductNames = new Set<string>();
-  const products = [];
-  
-  for (const element of articleElements) {
-    try {
-      const product = processProductCard(element, baseUrl, processedProductNames);
-      if (product && product.name) {
-        products.push(product);
-      }
-    } catch (error) {
-      // Just continue to next element
-    }
-  }
-  
-  console.log(`Extracted ${products.length} products from article elements`);
-  return products;
-}
-
-// Strategy 4: Look for elements with both images and price-like text nearby
-function extractByImageAndPriceProximity(document: Document, baseUrl: string) {
-  console.log("Strategy 4: Extracting by image and price proximity");
-  
-  const products = [];
-  const processedProductNames = new Set<string>();
-  
-  // Find all images that might be product images
-  const productImages = document.querySelectorAll('img');
-  console.log(`Found ${productImages.length} images to analyze`);
-  
-  for (const img of productImages) {
-    try {
-      // Check parent elements up to 3 levels for price-like content
-      let element: Element | null = img;
-      for (let i = 0; i < 3 && element; i++) {
-        element = element.parentElement;
-        if (!element) continue;
+    // Strategy 2: Look for product grid items (used in search results and category pages)
+    if (products.length === 0) {
+      console.log("Trying strategy 2: Product grid items");
+      const productItems = document.querySelectorAll('.product-grid-item, .product-list-item, .grid-item, .product');
+      
+      if (productItems && productItems.length > 0) {
+        console.log(`Found ${productItems.length} product grid items`);
         
-        // Look for price-like text in this container
-        const text = element.textContent || '';
-        const hasPriceLikeText = /\d+[,.:]\d+\s*(kr|:-)/i.test(text) || /\d+\s*(kr|:-)/i.test(text);
-        
-        if (hasPriceLikeText) {
-          // This might be a product container
-          const product = processProductCard(element, baseUrl, processedProductNames);
-          if (product && product.name) {
-            products.push(product);
-            break; // Found a product, no need to check higher parent elements
+        for (let i = 0; i < productItems.length; i++) {
+          const item = productItems[i];
+          
+          try {
+            const nameElement = item.querySelector('h3, .name, .product-name, .title');
+            const name = nameElement ? nameElement.textContent?.trim() : null;
+            
+            const priceElement = item.querySelector('.price, .product-price, .offer-price');
+            const priceText = priceElement ? priceElement.textContent?.trim() : null;
+            
+            // Extract numeric price
+            let price = null;
+            if (priceText) {
+              const priceMatch = priceText.match(/(\d+)[,.]?(\d*)/);
+              if (priceMatch) {
+                price = parseInt(priceMatch[1]);
+              }
+            }
+            
+            const imageElement = item.querySelector('img');
+            const imageUrl = imageElement ? imageElement.getAttribute('src') : null;
+            
+            const descriptionElement = item.querySelector('.description, .product-description, .details');
+            const description = descriptionElement ? descriptionElement.textContent?.trim() : null;
+            
+            if (name) {
+              products.push({
+                name,
+                price,
+                description: description || `${name}`,
+                image_url: imageUrl && imageUrl.startsWith('http') ? imageUrl : (imageUrl ? `${baseUrl}${imageUrl}` : null),
+                offer_details: "Erbjudande"
+              });
+              
+              console.log(`Extracted product: ${name} with price: ${price}`);
+            }
+          } catch (error) {
+            console.error("Error extracting individual product in strategy 2:", error);
           }
         }
       }
-    } catch (error) {
-      // Just continue to next element
     }
-  }
-  
-  console.log(`Extracted ${products.length} products using image and price proximity`);
-  return products;
-}
-
-// Strategy 5: Extract from search results layout
-function extractFromSearchResults(document: Document, baseUrl: string) {
-  console.log("Strategy 5: Extracting from search results layout");
-  
-  const searchResultsElements = [
-    ...document.querySelectorAll('[data-testid*="product-search-result"]'),
-    ...document.querySelectorAll('[data-testid*="search-result"]'),
-    ...document.querySelectorAll('[class*="search-result"]'),
-    ...document.querySelectorAll('[class*="product-list"]'),
-    ...document.querySelectorAll('[class*="result-item"]'),
-  ];
-  
-  console.log(`Found ${searchResultsElements.length} potential search result elements`);
-  
-  const processedProductNames = new Set<string>();
-  const products = [];
-  
-  for (const element of searchResultsElements) {
-    try {
-      const product = processProductCard(element, baseUrl, processedProductNames);
-      if (product && product.name) {
-        products.push(product);
-      }
-    } catch (error) {
-      // Just continue to next element
-    }
-  }
-  
-  console.log(`Extracted ${products.length} products from search results`);
-  return products;
-}
-
-// Strategy 6: Extract from offer elements
-function extractFromOfferElements(document: Document, baseUrl: string) {
-  console.log("Strategy 6: Extracting from offer elements");
-  
-  // Look for elements that might indicate offers
-  const offerElements = [
-    ...document.querySelectorAll('[class*="offer"]'),
-    ...document.querySelectorAll('[class*="campaign"]'),
-    ...document.querySelectorAll('[class*="deal"]'),
-    ...document.querySelectorAll('[class*="promotion"]'),
-    ...document.querySelectorAll('[class*="discount"]'),
-    ...document.querySelectorAll('[data-testid*="offer"]'),
-    ...document.querySelectorAll('[data-testid*="campaign"]'),
-  ];
-  
-  console.log(`Found ${offerElements.length} potential offer elements`);
-  
-  // Extract direct products from offer elements
-  const processedProductNames = new Set<string>();
-  const products = [];
-  
-  for (const element of offerElements) {
-    try {
-      // Try to process the element directly
-      const product = processProductCard(element, baseUrl, processedProductNames);
-      if (product && product.name) {
-        products.push(product);
-        continue;
-      }
+    
+    // Strategy 3: Generic elements with product attributes
+    if (products.length === 0) {
+      console.log("Trying strategy 3: Generic elements with product attributes");
+      // Look for any element with class or attributes related to products
+      const possibleProductElements = document.querySelectorAll('[class*="product"], [id*="product"], [class*="offer"], [class*="campaign"]');
       
-      // If direct processing failed, look for child elements that might be products
-      const childElements = element.querySelectorAll('div, article, li');
-      for (const child of childElements) {
-        const childProduct = processProductCard(child, baseUrl, processedProductNames);
-        if (childProduct && childProduct.name) {
-          products.push(childProduct);
+      if (possibleProductElements && possibleProductElements.length > 0) {
+        console.log(`Found ${possibleProductElements.length} possible product elements`);
+        
+        for (let i = 0; i < possibleProductElements.length; i++) {
+          const element = possibleProductElements[i];
+          
+          try {
+            // Skip if this is a container and not an actual product
+            if (element.children.length > 10) continue;
+            
+            const nameElement = element.querySelector('h2, h3, h4, [class*="name"], [class*="title"]');
+            const name = nameElement ? nameElement.textContent?.trim() : null;
+            
+            if (!name || name.length < 3) continue; // Skip if no valid name found
+            
+            const priceElement = element.querySelector('[class*="price"]');
+            const priceText = priceElement ? priceElement.textContent?.trim() : null;
+            
+            // Extract numeric price
+            let price = null;
+            if (priceText) {
+              const priceMatch = priceText.match(/(\d+)[,.]?(\d*)/);
+              if (priceMatch) {
+                price = parseInt(priceMatch[1]);
+              }
+            }
+            
+            const imageElement = element.querySelector('img');
+            const imageUrl = imageElement ? imageElement.getAttribute('src') : null;
+            
+            if (name && price) {
+              products.push({
+                name,
+                price,
+                description: `${name}`,
+                image_url: imageUrl && imageUrl.startsWith('http') ? imageUrl : (imageUrl ? `${baseUrl}${imageUrl}` : null),
+                offer_details: "Erbjudande"
+              });
+              
+              console.log(`Extracted product from generic element: ${name} with price: ${price}`);
+            }
+          } catch (error) {
+            console.error("Error extracting individual product in strategy 3:", error);
+          }
         }
       }
-    } catch (error) {
-      // Just continue to next element
     }
-  }
-  
-  console.log(`Extracted ${products.length} products from offer elements`);
-  return products;
-}
-
-// Helper function to remove duplicate products
-function removeDuplicates(products: any[]) {
-  const uniqueProducts: any[] = [];
-  const seenNames = new Set<string>();
-  
-  for (const product of products) {
-    if (!product.name) continue;
     
-    const normalizedName = product.name.toLowerCase().trim();
-    if (!seenNames.has(normalizedName)) {
-      seenNames.add(normalizedName);
-      uniqueProducts.push(product);
+    // Log the results
+    console.log(`Total products extracted: ${products.length}`);
+    if (products.length > 0) {
+      console.log("First product:", products[0]);
     }
+    
+    return products;
+  } catch (error) {
+    console.error("Error during product extraction:", error);
+    return [];
   }
-  
-  return uniqueProducts;
 }
