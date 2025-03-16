@@ -9,7 +9,7 @@ export const useNavItems = (cartCount: number) => {
   const [navItems, setNavItems] = useState<NavItem[]>([
     { id: "offers", icon: "discount", label: "Erbjudanden", active: false },
     { id: "recipes", icon: "book", label: "Recept", active: false },
-    { id: "menu", icon: "search", label: "Matsedel", active: false },
+    { id: "menu", icon: "calendar", label: "Matsedel", active: false },
     { id: "cart", icon: "shopping-cart", label: "Inköpslista", active: false },
     { id: "profile", icon: "user", label: "Profil", active: false },
   ]);
@@ -28,6 +28,9 @@ export const useNavItems = (cartCount: number) => {
         return { ...item, active: true };
       }
       if (path === "/auth" && item.id === "profile") {
+        return { ...item, active: true };
+      }
+      if (path === "/meal-plan" && item.id === "menu") {
         return { ...item, active: true };
       }
       return { ...item, active: false };

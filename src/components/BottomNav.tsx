@@ -1,6 +1,6 @@
 
 import React from "react";
-import { ShoppingCart, Search, BookOpen, Percent, User } from "lucide-react";
+import { ShoppingCart, Search, BookOpen, Percent, User, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export interface NavItem {
@@ -31,6 +31,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ items, onSelect }) => {
         return <Percent size={18} />;
       case "user":
         return <User size={18} />;
+      case "calendar":
+        return <Calendar size={18} />;
       default:
         return <div className="w-4.5 h-4.5" />;
     }
@@ -49,6 +51,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({ items, onSelect }) => {
         break;
       case "profile":
         navigate("/auth");
+        break;
+      case "menu":
+        navigate("/meal-plan");
         break;
       default:
         console.log("Selected nav:", id);
