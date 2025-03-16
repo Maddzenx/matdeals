@@ -1,10 +1,12 @@
 
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Clock, Users, ChefHat } from "lucide-react";
+import { Clock, Users, ChefHat, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Recipe } from "@/hooks/useRecipes";
 import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -42,10 +44,13 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
     // Add to cart functionality here
     console.log("Add to cart:", recipe.title);
   };
+
+  // Display savings badge if there are discounted ingredients
+  const hasSavings = recipe.matchedProducts && recipe.matchedProducts.length > 0;
   
   return (
     <Card 
-      className="overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+      className="overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer relative"
       onClick={handleCardClick}
     >
       <div className="h-48 bg-gray-200 relative">
@@ -66,6 +71,24 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
           <h3 className="text-xl font-bold text-white">{recipe.title}</h3>
         </div>
+        
+        {hasSavings && (
+          <div className="absolute top-2 right-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge className="bg-[#DB2C17] hover:bg-[#c02615] flex items-center gap-1">
+                    <ShoppingBag size={12} />
+                    {recipe.matchedProducts?.length} REA
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Ingredienser på rea just nu!</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        )}
       </div>
       <CardContent className="p-4">
         <div className="flex gap-2 mb-2 flex-wrap">
@@ -106,14 +129,25 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
         
         <div className="flex items-center justify-between">
           <div className="flex items-baseline">
-            {recipe.original_price && (
+            {recipe.calculatedOriginalPrice && recipe.calculatedOriginalPrice > recipe.calculatedPrice ? (
+              <span className="text-gray-500 line-through text-sm mr-2">
+                {formatPrice(recipe.calculatedOriginalPrice)}
+              </span>
+            ) : recipe.original_price ? (
               <span className="text-gray-500 line-through text-sm mr-2">
                 {formatPrice(recipe.original_price)}
               </span>
-            )}
+            ) : null}
+            
             <span className="text-[#DB2C17] font-bold text-lg">
-              {formatPrice(recipe.price)}
+              {recipe.calculatedPrice ? formatPrice(recipe.calculatedPrice) : formatPrice(recipe.price)}
             </span>
+            
+            {hasSavings && recipe.savings && recipe.savings > 0 && (
+              <span className="ml-2 text-green-600 text-xs font-semibold">
+                (spara {recipe.savings} kr)
+              </span>
+            )}
           </div>
           <Button 
             className="bg-[#DB2C17] hover:bg-[#c02615]"

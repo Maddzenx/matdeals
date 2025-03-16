@@ -2,6 +2,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { useSupabaseProducts } from "@/hooks/useSupabaseProducts";
+import { calculateRecipeSavings } from "@/utils/ingredientsMatchUtils";
+import { Product } from "@/data/types";
 
 export interface Recipe {
   id: string;
@@ -18,6 +21,11 @@ export interface Recipe {
   category: string | null;
   price: number | null;
   original_price: number | null;
+  // New fields for calculated prices from ingredients
+  calculatedPrice?: number | null;
+  calculatedOriginalPrice?: number | null;
+  savings?: number;
+  matchedProducts?: Product[];
 }
 
 export const useRecipes = (initialCategory: string = "Middag") => {
@@ -26,6 +34,9 @@ export const useRecipes = (initialCategory: string = "Middag") => {
   const [error, setError] = useState<Error | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>(initialCategory);
   const [categories, setCategories] = useState<string[]>([]);
+  
+  // Get products for matching with ingredients
+  const { products } = useSupabaseProducts();
 
   const fetchRecipes = useCallback(async (category?: string) => {
     try {
@@ -53,7 +64,22 @@ export const useRecipes = (initialCategory: string = "Middag") => {
       console.log(`Fetched ${data?.length || 0} recipes`);
       
       if (data) {
-        setRecipes(data as Recipe[]);
+        // Add calculated prices based on matching ingredients with products
+        const recipesWithPriceInfo = data.map((recipe: Recipe) => {
+          // Calculate price info based on matching ingredients with products
+          const { discountedPrice, originalPrice, savings, matchedProducts } = 
+            calculateRecipeSavings(recipe.ingredients, products);
+            
+          return {
+            ...recipe,
+            calculatedPrice: discountedPrice || recipe.price,
+            calculatedOriginalPrice: originalPrice || recipe.original_price,
+            savings,
+            matchedProducts
+          };
+        });
+        
+        setRecipes(recipesWithPriceInfo);
       }
     } catch (err) {
       console.error('Error fetching recipes:', err);
@@ -67,7 +93,7 @@ export const useRecipes = (initialCategory: string = "Middag") => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [products]);
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -180,6 +206,28 @@ export const useRecipes = (initialCategory: string = "Middag") => {
     setActiveCategory(category);
     fetchRecipes(category);
   }, [fetchRecipes]);
+
+  // Update recipes when products change
+  useEffect(() => {
+    if (products.length > 0 && recipes.length > 0) {
+      console.log("Products updated, recalculating recipe prices...");
+      
+      const updatedRecipes = recipes.map(recipe => {
+        const { discountedPrice, originalPrice, savings, matchedProducts } = 
+          calculateRecipeSavings(recipe.ingredients, products);
+          
+        return {
+          ...recipe,
+          calculatedPrice: discountedPrice || recipe.price,
+          calculatedOriginalPrice: originalPrice || recipe.original_price,
+          savings,
+          matchedProducts
+        };
+      });
+      
+      setRecipes(updatedRecipes);
+    }
+  }, [products]);
 
   useEffect(() => {
     fetchCategories();
