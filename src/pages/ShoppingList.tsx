@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +10,7 @@ import { StoreProductGroup } from "@/components/ShoppingList/StoreProductGroup";
 import { ConnectedRecipes } from "@/components/ShoppingList/ConnectedRecipes";
 import { useStorePriceCalculation } from "@/hooks/useStorePriceCalculation";
 import { useStoreGrouping } from "@/hooks/useStoreGrouping";
+import { toast } from "@/components/ui/use-toast";
 
 const ShoppingList = () => {
   const navigate = useNavigate();
@@ -95,7 +95,10 @@ const ShoppingList = () => {
     if (navigator.share && navigator.canShare(shareData)) {
       try {
         await navigator.share(shareData);
-        toast.success("Inköpslistan delad!");
+        toast({
+          title: "Inköpslistan delad!",
+          description: "Din inköpslista har delats framgångsrikt",
+        });
       } catch (err) {
         console.error("Error sharing:", err);
         shareViaEmail(shareData);
@@ -108,7 +111,10 @@ const ShoppingList = () => {
   const shareViaEmail = (shareData: { title: string, text: string }) => {
     const mailtoLink = `mailto:?subject=${encodeURIComponent(shareData.title)}&body=${encodeURIComponent(shareData.text)}`;
     window.open(mailtoLink);
-    toast.success("Inköpslistan öppnad i email!");
+    toast({
+      title: "Inköpslistan öppnad i email!",
+      description: "Din inköpslista har förberetts för email",
+    });
   };
 
   return (
