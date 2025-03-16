@@ -23,7 +23,7 @@ const Index = () => {
   } = useNavigationState();
   
   const { viewMode, toggleViewMode } = useViewMode("grid");
-  const { activeStores, handleRemoveTag, handleStoreToggle, addStoreIfNeeded } = useStoreFilters(['ica']); // Start with ICA as default store
+  const { activeStores, handleRemoveTag, handleStoreToggle, addStoreIfNeeded } = useStoreFilters(['ica']);
   const [searchQuery, setSearchQuery] = useState("");
   const { products: supabaseProducts, loading, error, refetch } = useSupabaseProducts();
   const { scraping: scrapingIca, handleScrapeIca } = useScrapeIca(refetch);

@@ -23,9 +23,25 @@ export const useSupabaseProducts = () => {
       
       console.log("Starting to fetch products in useSupabaseProducts");
       
-      // Fetch from both sources
-      const icaData = await fetchIcaProducts();
-      const willysData = await fetchWillysProducts();
+      // Fetch ICA products
+      let icaData: any[] = [];
+      try {
+        icaData = await fetchIcaProducts();
+        console.log("Successfully fetched ICA data:", icaData?.length);
+      } catch (icaError) {
+        console.error("Error fetching ICA products:", icaError);
+        // Continue execution to try Willys products
+      }
+      
+      // Fetch Willys products
+      let willysData: any[] = [];
+      try {
+        willysData = await fetchWillysProducts();
+        console.log("Successfully fetched Willys data:", willysData?.length);
+      } catch (willysError) {
+        console.error("Error fetching Willys products:", willysError);
+        // Continue execution
+      }
       
       console.log("Fetching completed, starting transformation");
       
@@ -51,7 +67,7 @@ export const useSupabaseProducts = () => {
       setProducts(allProducts);
       
       // If we have no ICA products, show a warning
-      if (icaProducts.length === 0) {
+      if (icaProducts.length === 0 && icaData.length > 0) {
         showNoIcaProductsWarning();
       }
     } catch (err) {

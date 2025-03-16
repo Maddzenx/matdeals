@@ -11,48 +11,53 @@ export const transformIcaProducts = (icaData: any[]): Product[] => {
     return [];
   }
   
-  const transformedProducts = (icaData || []).map((item) => {
-    if (!item.name) {
-      console.warn("Skipping ICA item without name:", item);
-      return null;
+  try {
+    const transformedProducts = icaData.map((item) => {
+      if (!item || !item.name) {
+        console.warn("Skipping ICA item without name:", item);
+        return null;
+      }
+      
+      // Extract detailed information from the combined description field
+      const descriptionParts = item.description ? item.description.split(' | ') : [];
+      const baseDescription = descriptionParts[0] || 'Ingen beskrivning tillgänglig';
+      
+      // Parse the price string to get the numeric value
+      let formattedPrice = 'N/A';
+      if (item.price !== null && item.price !== undefined) {
+        formattedPrice = `${item.price}:- kr`;
+      }
+      
+      // Determine product category based on keywords
+      const category = determineProductCategory(item.name, item.description || '');
+      
+      const productId = `ica-${item.name.replace(/\s+/g, '-').toLowerCase()}-${Math.random().toString(36).substring(2, 9)}`;
+      
+      console.log(`Processing ICA item: ${item.name} (${productId}), category: ${category}`);
+      
+      return {
+        id: productId,
+        image: item.image_url || 'https://assets.icanet.se/t_product_large_v1,f_auto/7310865085313.jpg', // Default image
+        name: item.name,
+        details: baseDescription,
+        currentPrice: formattedPrice,
+        originalPrice: '',
+        store: 'ica',  // Lowercase to match store filter
+        category: category,
+        offerBadge: 'Erbjudande' // Swedish offer badge
+      };
+    }).filter(Boolean) as Product[];
+    
+    console.log("Transformed ICA products:", transformedProducts.length);
+    if (transformedProducts.length > 0) {
+      console.log("Sample transformed ICA product:", transformedProducts[0]);
     }
     
-    console.log("Processing ICA item:", item.name);
-    
-    // Extract detailed information from the combined description field
-    const descriptionParts = item.description ? item.description.split(' | ') : [];
-    const baseDescription = descriptionParts[0] || 'Ingen beskrivning tillgänglig';
-    
-    // Parse the price string to get the numeric value
-    let formattedPrice = 'N/A';
-    if (item.price !== null && item.price !== undefined) {
-      formattedPrice = `${item.price}:- kr`;
-    }
-    
-    // Determine product category based on keywords
-    const category = determineProductCategory(item.name, item.description || '');
-    
-    const product = {
-      id: `ica-${item.name.replace(/\s+/g, '-').toLowerCase()}-${Math.random().toString(36).substring(2, 9)}`,
-      image: item.image_url || 'https://assets.icanet.se/t_product_large_v1,f_auto/7310865085313.jpg', // Default image
-      name: item.name,
-      details: baseDescription,
-      currentPrice: formattedPrice,
-      originalPrice: '',
-      store: 'ica',  // Lowercase to match store filter
-      category: category,
-      offerBadge: 'Erbjudande' // Swedish offer badge
-    };
-    
-    return product;
-  }).filter(Boolean) as Product[];
-  
-  console.log("Transformed ICA products:", transformedProducts.length);
-  if (transformedProducts.length > 0) {
-    console.log("Sample transformed ICA product:", transformedProducts[0]);
+    return transformedProducts;
+  } catch (error) {
+    console.error("Error transforming ICA products:", error);
+    return [];
   }
-  
-  return transformedProducts;
 };
 
 /**
