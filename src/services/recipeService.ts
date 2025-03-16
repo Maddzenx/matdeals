@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Recipe } from "@/types/recipe";
 import { Product } from "@/data/types";
 import { calculateRecipeSavings } from "@/utils/ingredientsMatchUtils";
-import { toast } from "@/components/ui/use-toast";
 
 export const fetchRecipesByCategory = async (
   category?: string,
@@ -78,24 +77,9 @@ export const scrapeRecipesFromApi = async (
       throw new Error(errorMsg);
     }
     
-    if (showNotification) {
-      toast({
-        title: "Recept uppdaterade",
-        description: `${data.recipesCount} recept har hämtats`,
-      });
-    }
-    
     return { success: true, count: data.recipesCount };
   } catch (err) {
     console.error('Error scraping recipes:', err);
-    
-    if (showNotification) {
-      toast({
-        title: "Fel vid hämtning av recept",
-        description: err instanceof Error ? err.message : 'Ett okänt fel inträffade',
-        variant: "destructive"
-      });
-    }
     
     return { 
       success: false, 

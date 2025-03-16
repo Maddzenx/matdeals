@@ -3,14 +3,12 @@ import React, { useState, useEffect } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
 import { useRecipes } from "@/hooks/useRecipes";
 import { RecipeListHeader } from "@/components/recipes/RecipeListHeader";
 import { RecipeList } from "@/components/recipes/RecipeList";
 
 const Recipes = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { navItems } = useNavigationState();
   const [isRefreshing, setIsRefreshing] = useState(false);
   
@@ -50,22 +48,9 @@ const Recipes = () => {
   const handleRefreshButton = async () => {
     try {
       setIsRefreshing(true);
-      const result = await scrapeRecipes(true); // Show notifications for manual refresh
-      
-      if (!result.success) {
-        toast({
-          title: "Fel vid hämtning av recept",
-          description: result.error || "Ett okänt fel inträffade",
-          variant: "destructive"
-        });
-      }
+      await scrapeRecipes(false); // Don't show notifications
     } catch (err) {
       console.error("Error refreshing recipes:", err);
-      toast({
-        title: "Fel vid hämtning av recept",
-        description: "Kunde inte ansluta till servern. Försök igen senare.",
-        variant: "destructive"
-      });
     } finally {
       setIsRefreshing(false);
     }

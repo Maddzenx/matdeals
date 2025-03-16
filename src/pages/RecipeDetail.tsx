@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/BottomNav";
@@ -11,7 +12,6 @@ import { useRecipeDetail } from "@/hooks/useRecipeDetail";
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
 import { ShoppingCart, ShoppingBag } from "lucide-react";
 
 import { calculateRecipeSavings } from "@/utils/ingredientsMatchUtils";
@@ -26,10 +26,6 @@ const RecipeDetail = () => {
   
   const handleAddToCart = () => {
     if (!recipe || !recipe.matchedProducts || recipe.matchedProducts.length === 0) {
-      toast({
-        title: "Inga rabatterade ingredienser",
-        description: "Det finns inga rabatterade ingredienser för detta recept just nu.",
-      });
       return;
     }
     
@@ -47,11 +43,6 @@ const RecipeDetail = () => {
           store: product.store
         }
       );
-    });
-    
-    toast({
-      title: "Ingredienser tillagda",
-      description: `${recipe.matchedProducts.length} rabatterade ingredienser tillagda i handlingslistan`,
     });
   };
   
