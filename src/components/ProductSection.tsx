@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { CategoryData, Product } from "@/data/types";
 import { useProductUtils } from "@/hooks/useProductUtils";
@@ -40,7 +39,6 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   const { getProductsWithCategories } = useProductUtils(categories);
   const allLocalProducts = getProductsWithCategories();
   
-  // Log to help debug visibility issues
   useEffect(() => {
     console.log("ProductSection rendered with supabaseProducts:", supabaseProducts.length);
     if (supabaseProducts.length > 0) {
@@ -48,11 +46,9 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
     }
   }, [supabaseProducts]);
   
-  // Combine local products with Supabase products
   const allProducts = React.useMemo(() => {
     console.log("Combining products - local:", allLocalProducts.length, "supabase:", supabaseProducts.length);
     
-    // Log product categories to debug
     if (supabaseProducts.length > 0) {
       const categories = supabaseProducts.map(p => p.category).filter(Boolean);
       const uniqueCategories = [...new Set(categories)];
@@ -79,12 +75,10 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   useEffect(() => {
     console.log("After filtering - products to display:", filteredProducts.length);
     console.log("Active stores:", activeStoreIds);
-    // Add detailed logging for debugging purposes
     if (filteredProducts.length === 0) {
       console.warn("No products after filtering. Check activeStoreIds:", activeStoreIds);
       console.warn("Store tags:", storeTags);
       
-      // Log first few products before filtering
       if (allProducts.length > 0) {
         console.warn("Sample products before filtering:", 
           allProducts.slice(0, 3).map(p => ({
@@ -99,7 +93,6 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   }, [filteredProducts, activeStoreIds, storeTags, allProducts]);
 
   const handleQuantityChange = (productId: string, newQuantity: number, previousQuantity: number) => {
-    // Find product details to include when changing quantity
     const product = allProducts.find(p => p.id === productId);
     if (product) {
       console.log("Product store info:", product.store);
@@ -121,6 +114,8 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
     }
   };
 
+  console.log("ProductSection rendering with categories:", nonEmptyCategories.length);
+  
   return (
     <ProductSectionLayout
       storeTags={storeTags}
