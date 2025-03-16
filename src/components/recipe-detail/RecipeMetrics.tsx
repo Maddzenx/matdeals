@@ -3,13 +3,13 @@ import React from "react";
 import { Clock, Users, ChefHat } from "lucide-react";
 
 interface RecipeMetricsProps {
-  timeMinutes: number | null;
+  time_minutes: number | null;
   servings: number | null;
   difficulty: string | null;
 }
 
 export const RecipeMetrics: React.FC<RecipeMetricsProps> = ({
-  timeMinutes,
+  time_minutes,
   servings,
   difficulty,
 }) => {
@@ -31,7 +31,7 @@ export const RecipeMetrics: React.FC<RecipeMetricsProps> = ({
     <div className="flex justify-between mb-6 text-sm text-gray-500 bg-gray-50 p-3 rounded-lg">
       <div className="flex items-center">
         <Clock size={16} className="mr-1" /> 
-        {timeMinutes} min
+        {time_minutes} min
       </div>
       
       {servings && (

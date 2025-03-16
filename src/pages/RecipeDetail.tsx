@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/BottomNav";
@@ -76,14 +77,14 @@ const RecipeDetail = () => {
           
           <div className="px-4 py-4">
             <RecipeMetrics 
-              time={recipe.time_minutes}
+              time_minutes={recipe.time_minutes}
               servings={recipe.servings}
               difficulty={recipe.difficulty}
             />
             
             <RecipeOverview 
               description={recipe.description}
-              source={recipe.source_url}
+              source_url={recipe.source_url}
             />
             
             <RecipePricing 
