@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/BottomNav";
@@ -12,6 +11,8 @@ import { useRecipeDetail } from "@/hooks/useRecipeDetail";
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
+import { ShoppingCart, ShoppingBag } from "lucide-react";
 
 import { calculateRecipeSavings } from "@/utils/ingredientsMatchUtils";
 import { useSupabaseProducts } from "@/hooks/useSupabaseProducts";
@@ -19,13 +20,39 @@ import { useSupabaseProducts } from "@/hooks/useSupabaseProducts";
 const RecipeDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { navItems } = useNavigationState();
+  const { navItems, handleProductQuantityChange } = useNavigationState();
   const { recipe, loading, error, scrapeRecipe } = useRecipeDetail(id);
   const { products } = useSupabaseProducts();
   
   const handleAddToCart = () => {
-    // Add to cart functionality here
-    console.log("Add to cart:", recipe?.title);
+    if (!recipe || !recipe.matchedProducts || recipe.matchedProducts.length === 0) {
+      toast({
+        title: "Inga rabatterade ingredienser",
+        description: "Det finns inga rabatterade ingredienser för detta recept just nu.",
+      });
+      return;
+    }
+    
+    // Add all matched products to cart
+    recipe.matchedProducts.forEach(product => {
+      handleProductQuantityChange(
+        product.id, 
+        1, 
+        0, 
+        {
+          name: product.name,
+          details: product.details,
+          price: product.currentPrice,
+          image: product.image,
+          store: product.store
+        }
+      );
+    });
+    
+    toast({
+      title: "Ingredienser tillagda",
+      description: `${recipe.matchedProducts.length} rabatterade ingredienser tillagda i handlingslistan`,
+    });
   };
   
   const handleBackClick = () => {
@@ -95,9 +122,43 @@ const RecipeDetail = () => {
               savings={savings}
             />
             
+            {/* Show discounted products if available */}
+            {matchedProducts && matchedProducts.length > 0 && (
+              <div className="mb-6 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 className="text-lg font-semibold mb-2 flex items-center">
+                  <ShoppingBag size={18} className="mr-2 text-[#DB2C17]" />
+                  Rabatterade ingredienser
+                </h3>
+                <ul className="space-y-2">
+                  {matchedProducts.map((product, idx) => (
+                    <li key={idx} className="flex justify-between items-center py-1 border-b border-gray-100 last:border-0">
+                      <div>
+                        <p className="font-medium">{product.name}</p>
+                        <p className="text-sm text-gray-500">{product.store}</p>
+                      </div>
+                      <div className="flex items-baseline">
+                        {product.originalPrice && (
+                          <span className="line-through mr-2 text-gray-500">{product.originalPrice}</span>
+                        )}
+                        <span className="font-bold text-[#DB2C17]">{product.currentPrice}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                <Button 
+                  className="mt-3 w-full bg-[#DB2C17] hover:bg-[#c02615]"
+                  onClick={handleAddToCart}
+                >
+                  <ShoppingCart className="mr-2" size={18} />
+                  Lägg till handlingslista
+                </Button>
+              </div>
+            )}
+            
             <RecipeIngredients 
               ingredients={recipe.ingredients}
               servings={recipe.servings}
+              matchedProducts={matchedProducts}
             />
             
             <RecipeInstructions 

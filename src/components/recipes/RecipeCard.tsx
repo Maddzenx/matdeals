@@ -1,12 +1,13 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Clock, Users, ChefHat, ShoppingBag } from "lucide-react";
+import { Clock, Users, ChefHat, ShoppingBag, ShoppingCart, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Recipe } from "@/types/recipe";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useNavigationState } from "@/hooks/useNavigationState";
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -14,6 +15,8 @@ interface RecipeCardProps {
 
 export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
   const navigate = useNavigate();
+  const { handleProductQuantityChange } = useNavigationState();
+  const [showProducts, setShowProducts] = useState(false);
   
   // Format price helper
   const formatPrice = (price: number | null) => {
@@ -41,8 +44,30 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
   
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click when button is clicked
-    // Add to cart functionality here
-    console.log("Add to cart:", recipe.title);
+    
+    // Add all discounted ingredients to cart
+    if (recipe.matchedProducts && recipe.matchedProducts.length > 0) {
+      recipe.matchedProducts.forEach(product => {
+        handleProductQuantityChange(
+          product.id, 
+          1, 
+          0, 
+          {
+            name: product.name,
+            details: product.details,
+            price: product.currentPrice,
+            image: product.image,
+            store: product.store
+          }
+        );
+      });
+    }
+  };
+
+  // Toggle showing matched products
+  const toggleProductsList = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    setShowProducts(!showProducts);
   };
 
   // Display savings badge if there are discounted ingredients
@@ -77,13 +102,17 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Badge className="bg-[#DB2C17] hover:bg-[#c02615] flex items-center gap-1">
+                  <Badge 
+                    className="bg-[#DB2C17] hover:bg-[#c02615] flex items-center gap-1 cursor-pointer"
+                    onClick={toggleProductsList}
+                  >
                     <ShoppingBag size={12} />
                     {recipe.matchedProducts?.length} REA
+                    {showProducts ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                   </Badge>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Ingredienser på rea just nu!</p>
+                  <p>Ingredienser på rea just nu! Klicka för att visa.</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -91,6 +120,29 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
         )}
       </div>
       <CardContent className="p-4">
+        {/* Discounted products list */}
+        {showProducts && recipe.matchedProducts && recipe.matchedProducts.length > 0 && (
+          <div className="mb-3 p-2 bg-gray-50 rounded-md">
+            <h4 className="text-sm font-semibold mb-1 flex items-center">
+              <ShoppingBag size={14} className="inline mr-1 text-[#DB2C17]" />
+              Rabatterade ingredienser:
+            </h4>
+            <ul className="text-xs space-y-1">
+              {recipe.matchedProducts.map((product, idx) => (
+                <li key={idx} className="flex justify-between">
+                  <div className="flex-grow">{product.name}</div>
+                  <div className="flex items-center">
+                    {product.originalPrice && (
+                      <span className="line-through mr-1 text-gray-500">{product.originalPrice}</span>
+                    )}
+                    <span className="font-semibold text-[#DB2C17]">{product.currentPrice}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <div className="flex gap-2 mb-2 flex-wrap">
           {recipe.tags?.slice(0, 3).map((tag) => (
             <span 
@@ -150,9 +202,10 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
             )}
           </div>
           <Button 
-            className="bg-[#DB2C17] hover:bg-[#c02615]"
+            className="bg-[#DB2C17] hover:bg-[#c02615] flex items-center gap-1"
             onClick={handleAddToCart}
           >
+            <ShoppingCart size={16} />
             Lägg till
           </Button>
         </div>
