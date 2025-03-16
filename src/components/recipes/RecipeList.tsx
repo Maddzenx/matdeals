@@ -1,6 +1,5 @@
-
 import React from "react";
-import { Recipe } from "@/hooks/useRecipes";
+import { Recipe } from "@/types/recipe";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { Button } from "@/components/ui/button";
 import { RecipeCard } from "./RecipeCard";

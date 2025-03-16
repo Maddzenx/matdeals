@@ -3,7 +3,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Clock, Users, ChefHat, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Recipe } from "@/hooks/useRecipes";
+import { Recipe } from "@/types/recipe";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
