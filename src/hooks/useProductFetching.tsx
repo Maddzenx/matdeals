@@ -102,15 +102,24 @@ export const useProductFetching = () => {
       setLoading(true);
       setError(null);
       
+      console.log("Starting refreshProducts function...");
+      
       const [icaData, willysData] = await Promise.all([
-        fetchIcaProducts(),
-        fetchWillysProducts()
+        fetchIcaProducts().catch(err => {
+          console.error("Error fetching ICA products during refresh:", err);
+          return [];
+        }),
+        fetchWillysProducts().catch(err => {
+          console.error("Error fetching Willys products during refresh:", err);
+          return [];
+        })
       ]);
       
       console.log(`Refreshed products - ICA: ${icaData.length}, Willys: ${willysData.length}`);
       
       return { icaData, willysData };
     } catch (error) {
+      console.error("Error in refreshProducts:", error);
       setError(error instanceof Error ? error : new Error('Unknown error'));
       throw error;
     } finally {

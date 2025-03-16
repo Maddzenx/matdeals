@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SearchBar } from "@/components/SearchBar";
@@ -23,7 +24,7 @@ const Index = () => {
   } = useNavigationState();
   
   const { viewMode, toggleViewMode } = useViewMode("grid");
-  const { activeStores, handleRemoveTag, handleStoreToggle, addStoreIfNeeded } = useStoreFilters(['ica']);
+  const { activeStores, handleRemoveTag, handleStoreToggle, addStoreIfNeeded } = useStoreFilters(['ica', 'willys']);
   const [searchQuery, setSearchQuery] = useState("");
   const { products: supabaseProducts, loading, error, refetch } = useSupabaseProducts();
   const { scraping: scrapingIca, handleScrapeIca } = useScrapeIca(refetch);
@@ -44,19 +45,41 @@ const Index = () => {
   }, [error]);
 
   useEffect(() => {
-    // Always make sure ICA is available as a store
+    // Make sure both stores are available in the store filter by default
     addStoreIfNeeded('ica', 'ICA', storeTagsData);
+    addStoreIfNeeded('willys', 'Willys', storeTagsData);
     
-    // Make sure ICA store is selected by default
+    // Make sure both stores are selected by default
     if (!activeStores.includes('ica')) {
       handleStoreToggle('ica');
     }
-    
+    if (!activeStores.includes('willys')) {
+      handleStoreToggle('willys');
+    }
   }, []);
   
   useEffect(() => {
     if (supabaseProducts && supabaseProducts.length > 0) {
-      addStoreIfNeeded('willys', 'Willys', storeTagsData);
+      console.log(`Loaded ${supabaseProducts.length} products from Supabase`);
+      
+      // Count products by store
+      const storeCount = supabaseProducts.reduce((acc, product) => {
+        const store = product.store?.toLowerCase() || 'unknown';
+        acc[store] = (acc[store] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      console.log("Products by store:", storeCount);
+      
+      // Make sure store filters are available for all stores in the data
+      Object.keys(storeCount).forEach(store => {
+        if (store !== 'unknown') {
+          const storeName = store === 'ica' ? 'ICA' : 
+                           store === 'willys' ? 'Willys' : 
+                           store.charAt(0).toUpperCase() + store.slice(1);
+          addStoreIfNeeded(store, storeName, storeTagsData);
+        }
+      });
     }
   }, [supabaseProducts, addStoreIfNeeded]);
 
@@ -120,22 +143,6 @@ const Index = () => {
   };
 
   const filteredStoreTags = storeTagsData.filter(store => activeStores.includes(store.id));
-  
-  useEffect(() => {
-    if (supabaseProducts && supabaseProducts.length > 0) {
-      console.log("Loaded products from Supabase:", supabaseProducts.length, supabaseProducts.slice(0, 3));
-      
-      const storeCount = supabaseProducts.reduce((acc, product) => {
-        const store = product.store?.toLowerCase() || 'unknown';
-        acc[store] = (acc[store] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-      
-      console.log("Products by store:", storeCount);
-    } else {
-      console.log("No products loaded from Supabase");
-    }
-  }, [supabaseProducts]);
 
   return (
     <>

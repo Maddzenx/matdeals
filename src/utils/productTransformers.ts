@@ -1,4 +1,3 @@
-
 import { Product } from "@/data/types";
 
 /**
@@ -34,6 +33,9 @@ export const transformIcaProducts = (icaData: any[]): Product[] => {
       
       const productId = `ica-${item.name.replace(/\s+/g, '-').toLowerCase()}-${Math.random().toString(36).substring(2, 9)}`;
       
+      // Always set store to lowercase for consistency
+      const store = 'ica';
+      
       console.log(`Processing ICA item: ${item.name} (${productId}), category: ${category}`);
       
       return {
@@ -43,16 +45,13 @@ export const transformIcaProducts = (icaData: any[]): Product[] => {
         details: baseDescription,
         currentPrice: formattedPrice,
         originalPrice: '',
-        store: 'ica',  // Lowercase to match store filter
+        store: store,  // Lowercase to match store filter
         category: category,
         offerBadge: 'Erbjudande' // Swedish offer badge
       };
     }).filter(Boolean) as Product[];
     
     console.log("Transformed ICA products:", transformedProducts.length);
-    if (transformedProducts.length > 0) {
-      console.log("Sample transformed ICA product:", transformedProducts[0]);
-    }
     
     return transformedProducts;
   } catch (error) {
@@ -74,7 +73,7 @@ export const transformWillysProducts = (willysData: any[]): Product[] => {
   
   try {
     const transformedProducts = (willysData || []).map((item) => {
-      if (!item.name) {
+      if (!item || !item.name) {
         console.warn("Skipping Willys item without name:", item);
         return null;
       }
@@ -97,7 +96,7 @@ export const transformWillysProducts = (willysData: any[]): Product[] => {
       const productId = `willys-${item.name.replace(/\s+/g, '-').toLowerCase()}-${Math.random().toString(36).substring(2, 9)}`;
       
       // Make sure we use the store field from the database if available
-      const store = item.store ? item.store.toLowerCase() : 'willys';
+      const store = (item.store && typeof item.store === 'string') ? item.store.toLowerCase() : 'willys';
       
       console.log(`Processing Willys item: ${item.name} (${productId}), category: ${category}, store: ${store}`);
       
@@ -115,9 +114,6 @@ export const transformWillysProducts = (willysData: any[]): Product[] => {
     }).filter(Boolean) as Product[];
     
     console.log("Transformed Willys products:", transformedProducts.length);
-    if (transformedProducts.length > 0) {
-      console.log("Sample transformed Willys product:", transformedProducts[0]);
-    }
     
     return transformedProducts;
   } catch (error) {
