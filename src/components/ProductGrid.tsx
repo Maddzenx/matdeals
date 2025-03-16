@@ -82,6 +82,8 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
 
   // Count total products
   const totalProducts = products.length;
+  
+  console.log(`ProductGrid rendering ${totalProducts} products in ${viewMode} mode`);
 
   return (
     <div className={className}>
