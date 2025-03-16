@@ -33,6 +33,23 @@ const Index = () => {
   
   useAuthCheck();
 
+  // Auto refresh products when the application loads
+  useEffect(() => {
+    const autoRefreshProducts = async () => {
+      try {
+        setIsRefreshing(true);
+        console.log("Auto refreshing products on application load...");
+        await handleRefresh();
+      } catch (error) {
+        console.error("Error during auto refresh:", error);
+      } finally {
+        setIsRefreshing(false);
+      }
+    };
+    
+    autoRefreshProducts();
+  }, []);
+
   useEffect(() => {
     if (error) {
       toast({
