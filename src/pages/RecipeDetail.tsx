@@ -29,7 +29,7 @@ const RecipeDetail = () => {
       return;
     }
     
-    // Add all matched products to cart
+    // Add all matched products to cart with recipe information
     recipe.matchedProducts.forEach(product => {
       handleProductQuantityChange(
         product.id, 
@@ -40,7 +40,9 @@ const RecipeDetail = () => {
           details: product.details,
           price: product.currentPrice,
           image: product.image,
-          store: product.store
+          store: product.store,
+          recipeId: recipe.id,
+          recipeTitle: recipe.title
         }
       );
     });

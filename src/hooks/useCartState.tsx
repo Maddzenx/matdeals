@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 
 export interface CartItem {
@@ -10,6 +9,8 @@ export interface CartItem {
   checked: boolean;
   image?: string;
   store?: string;
+  recipeId?: string;
+  recipeTitle?: string;
 }
 
 // Create a singleton instance to share state across components
@@ -53,6 +54,8 @@ export const useCartState = (initialCartCount: number = 0) => {
       price: string;
       image?: string;
       store?: string;
+      recipeId?: string;
+      recipeTitle?: string;
     }
   ) => {
     // Update cart items
@@ -72,17 +75,16 @@ export const useCartState = (initialCartCount: number = 0) => {
           ? { 
               ...item, 
               quantity: newQuantity,
-              // Always use productDetails.store if available
-              store: productDetails?.store || item.store
+              // Always use productDetails properties if available
+              store: productDetails?.store || item.store,
+              recipeId: productDetails?.recipeId || item.recipeId,
+              recipeTitle: productDetails?.recipeTitle || item.recipeTitle
             }
           : item
       );
     } 
     // If item is new and we have details, add it to cart
     else if (productDetails && newQuantity > 0) {
-      // Log to debug the store property
-      console.log("Adding new item with store:", productDetails.store);
-      
       const newItem = {
         id: productId,
         name: productDetails.name,
@@ -91,8 +93,9 @@ export const useCartState = (initialCartCount: number = 0) => {
         price: productDetails.price,
         checked: false,
         image: productDetails.image,
-        // IMPORTANT: Make sure store is always included and not defaulted unless absolutely necessary
-        store: productDetails.store
+        store: productDetails.store,
+        recipeId: productDetails.recipeId,
+        recipeTitle: productDetails.recipeTitle
       };
       
       updatedCartItems = [...updatedCartItems, newItem];

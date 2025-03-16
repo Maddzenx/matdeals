@@ -8,9 +8,9 @@ import { StorePriceComparison } from "@/components/ShoppingList/StorePriceCompar
 import { ShoppingListItem } from "@/components/ShoppingList/ShoppingListItem";
 import { EmptyShoppingList } from "@/components/ShoppingList/EmptyShoppingList";
 import { StoreProductGroup } from "@/components/ShoppingList/StoreProductGroup";
+import { ConnectedRecipes } from "@/components/ShoppingList/ConnectedRecipes";
 import { useStorePriceCalculation } from "@/hooks/useStorePriceCalculation";
 import { useStoreGrouping } from "@/hooks/useStoreGrouping";
-import { toast } from "sonner";
 
 const ShoppingList = () => {
   const navigate = useNavigate();
@@ -135,26 +135,32 @@ const ShoppingList = () => {
           {cartItems.length === 0 ? (
             <EmptyShoppingList />
           ) : activeTab === "stores" ? (
-            sortedStoreNames.map((storeName) => (
-              <StoreProductGroup
-                key={storeName}
-                storeName={storeName}
-                items={groupedByStore[storeName]}
-                onItemCheck={handleItemCheck}
-                onIncrement={handleIncrement}
-                onDecrement={handleDecrement}
-              />
-            ))
+            <>
+              {sortedStoreNames.map((storeName) => (
+                <StoreProductGroup
+                  key={storeName}
+                  storeName={storeName}
+                  items={groupedByStore[storeName]}
+                  onItemCheck={handleItemCheck}
+                  onIncrement={handleIncrement}
+                  onDecrement={handleDecrement}
+                />
+              ))}
+              <ConnectedRecipes cartItems={cartItems} />
+            </>
           ) : (
-            cartItems.map((item) => (
-              <ShoppingListItem
-                key={item.id}
-                item={item}
-                onItemCheck={handleItemCheck}
-                onIncrement={handleIncrement}
-                onDecrement={handleDecrement}
-              />
-            ))
+            <>
+              {cartItems.map((item) => (
+                <ShoppingListItem
+                  key={item.id}
+                  item={item}
+                  onItemCheck={handleItemCheck}
+                  onIncrement={handleIncrement}
+                  onDecrement={handleDecrement}
+                />
+              ))}
+              <ConnectedRecipes cartItems={cartItems} />
+            </>
           )}
         </div>
       </div>
