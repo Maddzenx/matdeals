@@ -3,12 +3,13 @@ import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/data/types";
 import { toast } from "@/components/ui/use-toast";
+import { showNoIcaProductsWarning, showFetchErrorNotification } from "@/utils/productNotifications";
 
 export const useProductFetching = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchIcaProducts = useCallback(async () => {
+  const fetchIcaProducts = useCallback(async (showNotifications = true) => {
     console.log("Fetching products from Supabase ICA table...");
     
     try {
@@ -28,11 +29,9 @@ export const useProductFetching = () => {
         console.warn("No ICA data found in database");
         
         // If no data in the database, provide a clear message to the user
-        toast({
-          title: "Inga ICA-erbjudanden",
-          description: "Det finns inga ICA-erbjudanden i databasen. Klicka på uppdatera för att hämta nya erbjudanden.",
-          variant: "default"
-        });
+        if (showNotifications) {
+          showNoIcaProductsWarning();
+        }
       }
       
       return icaData || [];
@@ -40,17 +39,15 @@ export const useProductFetching = () => {
       console.error("Error in fetchIcaProducts:", error);
       
       // Show a toast message about the error
-      toast({
-        title: "Fel vid hämtning av ICA-erbjudanden",
-        description: error instanceof Error ? error.message : "Ett okänt fel inträffade",
-        variant: "destructive"
-      });
+      if (showNotifications) {
+        showFetchErrorNotification(error);
+      }
       
       throw error;
     }
   }, []);
 
-  const fetchWillysProducts = useCallback(async () => {
+  const fetchWillysProducts = useCallback(async (showNotifications = true) => {
     console.log("Fetching products from Supabase Willys table...");
     
     try {
@@ -74,11 +71,13 @@ export const useProductFetching = () => {
         console.warn("No Willys data found in database");
         
         // If no data in the database, provide a clear message to the user
-        toast({
-          title: "Inga Willys-erbjudanden",
-          description: "Det finns inga Willys-erbjudanden i databasen. Klicka på uppdatera för att hämta nya erbjudanden.",
-          variant: "default"
-        });
+        if (showNotifications) {
+          toast({
+            title: "Inga Willys-erbjudanden",
+            description: "Det finns inga Willys-erbjudanden i databasen. Klicka på uppdatera för att hämta nya erbjudanden.",
+            variant: "default"
+          });
+        }
       }
       
       return willysData || [];
@@ -87,17 +86,15 @@ export const useProductFetching = () => {
       console.error("Error details:", JSON.stringify(error));
       
       // Show a toast message about the error
-      toast({
-        title: "Fel vid hämtning av Willys-erbjudanden",
-        description: error instanceof Error ? error.message : "Ett okänt fel inträffade",
-        variant: "destructive"
-      });
+      if (showNotifications) {
+        showFetchErrorNotification(error);
+      }
       
       return [];
     }
   }, []);
 
-  const refreshProducts = useCallback(async () => {
+  const refreshProducts = useCallback(async (showNotifications = true) => {
     try {
       setLoading(true);
       setError(null);
@@ -105,11 +102,11 @@ export const useProductFetching = () => {
       console.log("Starting refreshProducts function...");
       
       const [icaData, willysData] = await Promise.all([
-        fetchIcaProducts().catch(err => {
+        fetchIcaProducts(showNotifications).catch(err => {
           console.error("Error fetching ICA products during refresh:", err);
           return [];
         }),
-        fetchWillysProducts().catch(err => {
+        fetchWillysProducts(showNotifications).catch(err => {
           console.error("Error fetching Willys products during refresh:", err);
           return [];
         })

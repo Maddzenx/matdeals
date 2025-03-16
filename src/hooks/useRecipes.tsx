@@ -122,7 +122,7 @@ export const useRecipes = (initialCategory: string = "Middag") => {
     }
   }, [activeCategory]);
 
-  const scrapeRecipes = useCallback(async () => {
+  const scrapeRecipes = useCallback(async (showNotification = true) => {
     try {
       setLoading(true);
       
@@ -147,10 +147,12 @@ export const useRecipes = (initialCategory: string = "Middag") => {
         throw new Error(errorMsg);
       }
       
-      toast({
-        title: "Recept uppdaterade",
-        description: `${data.recipesCount} recept har hämtats`,
-      });
+      if (showNotification) {
+        toast({
+          title: "Recept uppdaterade",
+          description: `${data.recipesCount} recept har hämtats`,
+        });
+      }
       
       // Refresh categories and recipes after scraping
       await fetchCategories();
@@ -160,11 +162,13 @@ export const useRecipes = (initialCategory: string = "Middag") => {
     } catch (err) {
       console.error('Error scraping recipes:', err);
       
-      toast({
-        title: "Fel vid hämtning av recept",
-        description: err instanceof Error ? err.message : 'Ett okänt fel inträffade',
-        variant: "destructive"
-      });
+      if (showNotification) {
+        toast({
+          title: "Fel vid hämtning av recept",
+          description: err instanceof Error ? err.message : 'Ett okänt fel inträffade',
+          variant: "destructive"
+        });
+      }
       
       return { success: false, error: err instanceof Error ? err.message : 'Unknown error' };
     } finally {

@@ -6,14 +6,16 @@ import { toast } from "@/components/ui/use-toast";
 export const useScrapeIca = (refetchProducts: () => Promise<{ success: boolean; error?: any }>) => {
   const [scraping, setScraping] = useState(false);
 
-  const handleScrapeIca = async () => {
+  const handleScrapeIca = async (showNotification = true) => {
     try {
       setScraping(true);
       
-      toast({
-        title: "Hämtar ICA-produkter",
-        description: "Vänta medan vi hämtar de senaste erbjudandena...",
-      });
+      if (showNotification) {
+        toast({
+          title: "Hämtar ICA-produkter",
+          description: "Vänta medan vi hämtar de senaste erbjudandena...",
+        });
+      }
       
       console.log("Starting ICA scraping process");
       
@@ -42,10 +44,12 @@ export const useScrapeIca = (refetchProducts: () => Promise<{ success: boolean; 
       
       const productsCount = data.products?.length || 0;
       
-      toast({
-        title: "Lyckades!",
-        description: `Uppdaterade ${productsCount} produkter från ICA.`,
-      });
+      if (showNotification) {
+        toast({
+          title: "Lyckades!",
+          description: `Uppdaterade ${productsCount} produkter från ICA.`,
+        });
+      }
       
       return data;
     } catch (err: any) {
@@ -59,19 +63,21 @@ export const useScrapeIca = (refetchProducts: () => Promise<{ success: boolean; 
         console.error("Could not refresh products after error:", refreshErr);
       }
       
-      let errorMessage = "Kunde inte hämta ICA-produkter. Försök igen senare.";
-      
-      if (err instanceof Error) {
-        if (err.message && typeof err.message === 'string') {
-          errorMessage = `Fel: ${err.message}`;
+      if (showNotification) {
+        let errorMessage = "Kunde inte hämta ICA-produkter. Försök igen senare.";
+        
+        if (err instanceof Error) {
+          if (err.message && typeof err.message === 'string') {
+            errorMessage = `Fel: ${err.message}`;
+          }
         }
+        
+        toast({
+          title: "Fel",
+          description: errorMessage,
+          variant: "destructive"
+        });
       }
-      
-      toast({
-        title: "Fel",
-        description: errorMessage,
-        variant: "destructive"
-      });
       
       throw err;
     } finally {

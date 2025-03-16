@@ -68,6 +68,11 @@ const Index = () => {
   // Get navigation items from navigation state
   const { navItems } = useNavigationState();
 
+  // Handler for button press - we'll still show notifications here to give user feedback
+  const handleRefreshButton = () => {
+    handleRefresh(true); // Pass true to show notifications
+  };
+
   return (
     <OffersPageContent
       title="Erbjudanden"
@@ -79,7 +84,7 @@ const Index = () => {
       navItems={navItems}
       storeTags={storeTagsData}
       supabaseProducts={supabaseProducts}
-      handleRefresh={handleRefresh}
+      handleRefresh={handleRefreshButton}
       toggleViewMode={toggleViewMode}
       handleSearch={handleSearch}
       handleNavSelect={handleNavSelect}

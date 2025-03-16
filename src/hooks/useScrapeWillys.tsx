@@ -6,14 +6,16 @@ import { toast } from "@/components/ui/use-toast";
 export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolean; error?: any }>) => {
   const [scraping, setScraping] = useState(false);
 
-  const handleScrapeWillys = async () => {
+  const handleScrapeWillys = async (showNotification = true) => {
     try {
       setScraping(true);
       
-      toast({
-        title: "Hämtar Willys-produkter",
-        description: "Vänta medan vi hämtar de senaste erbjudandena...",
-      });
+      if (showNotification) {
+        toast({
+          title: "Hämtar Willys-produkter",
+          description: "Vänta medan vi hämtar de senaste erbjudandena...",
+        });
+      }
       
       console.log("Starting Willys scraping process");
       
@@ -57,10 +59,12 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
       
       const productsCount = data.products?.length || 0;
       
-      toast({
-        title: "Lyckades!",
-        description: `Uppdaterade ${productsCount} produkter från Willys.`,
-      });
+      if (showNotification) {
+        toast({
+          title: "Lyckades!",
+          description: `Uppdaterade ${productsCount} produkter från Willys.`,
+        });
+      }
       
       return data;
     } catch (err: any) {
@@ -75,27 +79,29 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
         console.error("Could not refresh products after error:", refreshErr);
       }
       
-      // More user-friendly error message
-      let errorMessage = "Kunde inte hämta Willys-produkter. Försök igen senare.";
-      
-      if (err instanceof Error) {
-        if (err.name === "AbortError" || 
-            (err.message && (err.message.includes("timeout") || err.message.includes("tid")))) {
-          errorMessage = "Förfrågan tog för lång tid och avbröts. Willys-webbplatsen kan vara långsam eller otillgänglig.";
-        } else if (err.message && typeof err.message === 'string') {
-          if (!err.message.includes("token") && 
-              !err.message.includes("auth") && 
-              !err.message.includes("key")) {
-            errorMessage = `Fel: ${err.message}`;
+      if (showNotification) {
+        // More user-friendly error message
+        let errorMessage = "Kunde inte hämta Willys-produkter. Försök igen senare.";
+        
+        if (err instanceof Error) {
+          if (err.name === "AbortError" || 
+              (err.message && (err.message.includes("timeout") || err.message.includes("tid")))) {
+            errorMessage = "Förfrågan tog för lång tid och avbröts. Willys-webbplatsen kan vara långsam eller otillgänglig.";
+          } else if (err.message && typeof err.message === 'string') {
+            if (!err.message.includes("token") && 
+                !err.message.includes("auth") && 
+                !err.message.includes("key")) {
+              errorMessage = `Fel: ${err.message}`;
+            }
           }
         }
+        
+        toast({
+          title: "Fel",
+          description: errorMessage,
+          variant: "destructive"
+        });
       }
-      
-      toast({
-        title: "Fel",
-        description: errorMessage,
-        variant: "destructive"
-      });
       
       // Re-throw for handling in the caller
       throw err;

@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { useNavigate } from "react-router-dom";
@@ -29,10 +29,28 @@ const Recipes = () => {
     console.log("Selected nav:", id);
   };
 
-  const handleRefresh = async () => {
+  // Auto refresh recipes when the page loads
+  useEffect(() => {
+    const autoRefreshRecipes = async () => {
+      try {
+        console.log("Auto refreshing recipes on page load...");
+        setIsRefreshing(true);
+        await scrapeRecipes(false); // Pass false to suppress notifications
+      } catch (error) {
+        console.error("Error during auto recipe refresh:", error);
+      } finally {
+        setIsRefreshing(false);
+      }
+    };
+    
+    autoRefreshRecipes();
+  }, [scrapeRecipes]);
+
+  // Handler for button press - we'll still show notifications when user clicks refresh
+  const handleRefreshButton = async () => {
     try {
       setIsRefreshing(true);
-      const result = await scrapeRecipes();
+      const result = await scrapeRecipes(true); // Show notifications for manual refresh
       
       if (!result.success) {
         toast({
@@ -64,7 +82,7 @@ const Recipes = () => {
         categories={categories}
         activeCategory={activeCategory}
         onCategoryChange={changeCategory}
-        onRefresh={handleRefresh}
+        onRefresh={handleRefreshButton}
         isRefreshing={isRefreshing}
         isLoading={loading}
       />
@@ -74,7 +92,7 @@ const Recipes = () => {
           recipes={recipes}
           loading={loading}
           error={error}
-          onRefresh={handleRefresh}
+          onRefresh={handleRefreshButton}
         />
       </div>
 
