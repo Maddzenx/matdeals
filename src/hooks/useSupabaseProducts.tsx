@@ -50,7 +50,7 @@ export const useSupabaseProducts = () => {
       const icaProducts = transformIcaProducts(icaData);
       const willysProducts = transformWillysProducts(willysData);
       
-      // Log ICA products to help debugging
+      // Log products to help debugging
       console.log('ICA products transformed:', icaProducts.length);
       if (icaProducts.length > 0) {
         console.log("First few ICA products:", icaProducts.slice(0, 3));
@@ -58,7 +58,14 @@ export const useSupabaseProducts = () => {
         console.warn("No ICA products after transformation!");
       }
       
-      // Combine all products - put ICA first
+      console.log('Willys products transformed:', willysProducts.length);
+      if (willysProducts.length > 0) {
+        console.log("First few Willys products:", willysProducts.slice(0, 3));
+      } else {
+        console.warn("No Willys products after transformation!");
+      }
+      
+      // Combine all products
       const allProducts = [...icaProducts, ...willysProducts];
       console.log('Total number of products:', allProducts.length);
       console.log('ICA products:', icaProducts.length);

@@ -57,7 +57,7 @@ export async function storeProducts(products: any[]): Promise<number> {
     }
     
     // Insert products in smaller batches to avoid hitting statement size limits
-    const batchSize = 2; // Using an even smaller batch size to avoid potential issues
+    const batchSize = 10; // Using a smaller batch size to avoid potential issues
     let insertedCount = 0;
     
     for (let i = 0; i < validProducts.length; i += batchSize) {

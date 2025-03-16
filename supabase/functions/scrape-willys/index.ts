@@ -28,8 +28,8 @@ serve(async (req) => {
     // Try multiple URLs to increase chances of success
     const urls = [
       'https://www.willys.se/erbjudanden/veckans-erbjudanden',
+      'https://www.willys.se/kampanjer/veckans-erbjudanden',
       'https://www.willys.se/erbjudanden',
-      'https://www.willys.se/kampanjer',
       'https://www.willys.se/sok?q=erbjudande',
       'https://www.willys.se'
     ];
@@ -40,10 +40,10 @@ serve(async (req) => {
     
     // Try each URL with multiple User-Agent headers until we get a successful response
     const userAgents = [
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Safari/605.1.15',
-      'Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36'
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
+      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36',
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/118.0.5993.69 Mobile/15E148 Safari/604.1'
     ];
     
     for (const url of urls) {
@@ -54,7 +54,7 @@ serve(async (req) => {
             headers: {
               'User-Agent': userAgent,
               'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-              'Accept-Language': 'en-US,en;q=0.5',
+              'Accept-Language': 'sv-SE,sv;q=0.9,en-US;q=0.8,en;q=0.7',
               'Cache-Control': forceRefresh ? 'no-cache' : 'max-age=0',
               'Pragma': forceRefresh ? 'no-cache' : ''
             },
@@ -65,6 +65,9 @@ serve(async (req) => {
             html = await response.text();
             console.log(`Successfully fetched from ${url}, received ${html.length} characters`);
             
+            // Log the first 500 characters to see what we're getting
+            console.log(`Preview of HTML: ${html.substring(0, 500)}...`);
+            
             // If we got a valid HTML response, parse it
             if (html.length > 1000 && html.includes('</html>')) {
               // Parse the HTML
@@ -73,8 +76,17 @@ serve(async (req) => {
               
               if (document) {
                 console.log("Successfully parsed HTML document");
-                fetchSuccess = true;
-                break;
+                
+                // Check if we can find any product elements to confirm this is a useful page
+                const productElements = document.querySelectorAll('.product, .product-card, [class*="product"], article');
+                console.log(`Found ${productElements.length} potential product elements`);
+                
+                if (productElements.length > 0) {
+                  fetchSuccess = true;
+                  break;
+                } else {
+                  console.log("No product elements found on this page, trying next URL");
+                }
               }
             } else {
               console.log("HTML response too short or invalid");

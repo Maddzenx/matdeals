@@ -51,6 +51,8 @@ export const useProductFetching = () => {
   }, []);
 
   const fetchWillysProducts = useCallback(async () => {
+    console.log("Fetching products from Supabase Willys table...");
+    
     try {
       const { data: willysData, error: willysError } = await supabase
         .from('Willys')
@@ -58,13 +60,34 @@ export const useProductFetching = () => {
         
       if (willysError) {
         console.error("Supabase Willys query error:", willysError);
-        // Don't throw, we'll still use ICA data if available
+        throw willysError;
       }
       
       console.log("Raw Willys data:", willysData?.length || 0, "items");
+      if (willysData && willysData.length > 0) {
+        console.log("Sample Willys item:", willysData[0]);
+      } else {
+        console.warn("No Willys data found in database");
+        
+        // If no data in the database, provide a clear message to the user
+        toast({
+          title: "Inga Willys-erbjudanden",
+          description: "Det finns inga Willys-erbjudanden i databasen. Klicka på uppdatera för att hämta nya erbjudanden.",
+          variant: "default"
+        });
+      }
+      
       return willysData || [];
     } catch (error) {
       console.error("Error in fetchWillysProducts:", error);
+      
+      // Show a toast message about the error
+      toast({
+        title: "Fel vid hämtning av Willys-erbjudanden",
+        description: error instanceof Error ? error.message : "Ett okänt fel inträffade",
+        variant: "destructive"
+      });
+      
       return [];
     }
   }, []);
