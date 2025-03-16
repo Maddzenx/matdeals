@@ -16,7 +16,7 @@ export const useProductRefresh = (refetch: () => Promise<{ success: boolean; err
       console.log("Starting refresh of both ICA and Willys data");
       
       await Promise.all([
-        handleScrapeIca(showNotification).catch(err => {
+        handleScrapeIca(false).catch(err => {
           console.error("Error scraping ICA:", err);
           if (showNotification) {
             toast({
@@ -26,7 +26,7 @@ export const useProductRefresh = (refetch: () => Promise<{ success: boolean; err
             });
           }
         }),
-        handleScrapeWillys(showNotification).catch(err => {
+        handleScrapeWillys(false).catch(err => {
           console.error("Error scraping Willys:", err);
           if (showNotification) {
             toast({

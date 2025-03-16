@@ -20,7 +20,7 @@ export const useSupabaseProducts = () => {
   const { transformProducts } = useProductTransformation();
   const { showNoProductsWarning, showFetchErrorNotification } = useProductNotifications();
 
-  const fetchProducts = useCallback(async () => {
+  const fetchProducts = useCallback(async (showNotifications = false) => {
     try {
       setLoading(true);
       setError(null);
@@ -30,7 +30,7 @@ export const useSupabaseProducts = () => {
       // Fetch ICA products
       let icaData: any[] = [];
       try {
-        icaData = await fetchIcaProducts();
+        icaData = await fetchIcaProducts(false);
         console.log("Successfully fetched ICA data:", icaData?.length);
       } catch (icaError) {
         console.error("Error fetching ICA products:", icaError);
@@ -40,7 +40,7 @@ export const useSupabaseProducts = () => {
       // Fetch Willys products
       let willysData: any[] = [];
       try {
-        willysData = await fetchWillysProducts();
+        willysData = await fetchWillysProducts(false);
         console.log("Successfully fetched Willys data:", willysData?.length);
       } catch (willysError) {
         console.error("Error fetching Willys products:", willysError);
@@ -53,14 +53,16 @@ export const useSupabaseProducts = () => {
       // Always set products, even if empty, to avoid stale state
       setProducts(allProducts);
       
-      // If we have no products, show a warning
-      if (allProducts.length === 0) {
+      // If we have no products, show a warning only if explicitly requested
+      if (allProducts.length === 0 && showNotifications) {
         showNoProductsWarning();
       }
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Unknown error occurred'));
       console.error("Error in fetchProducts:", err);
-      showFetchErrorNotification(err);
+      if (showNotifications) {
+        showFetchErrorNotification(err);
+      }
     } finally {
       setLoading(false);
     }
@@ -76,14 +78,14 @@ export const useSupabaseProducts = () => {
 
   useEffect(() => {
     console.log("useSupabaseProducts useEffect running, calling fetchProducts");
-    fetchProducts();
+    fetchProducts(false);
   }, [fetchProducts]);
 
-  const refetch = useCallback(async () => {
+  const refetch = useCallback(async (showNotifications = false) => {
     console.log("Refetching products");
     try {
       setLoading(true);
-      await fetchProducts();
+      await fetchProducts(showNotifications);
       return { success: true };
     } catch (err) {
       console.error("Error refetching products:", err);

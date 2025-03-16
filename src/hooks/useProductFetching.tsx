@@ -9,7 +9,7 @@ export const useProductFetching = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchIcaProducts = useCallback(async (showNotifications = true) => {
+  const fetchIcaProducts = useCallback(async (showNotifications = false) => {
     console.log("Fetching products from Supabase ICA table...");
     
     try {
@@ -28,7 +28,7 @@ export const useProductFetching = () => {
       } else {
         console.warn("No ICA data found in database");
         
-        // If no data in the database, provide a clear message to the user
+        // If no data in the database, provide a clear message to the user only if requested
         if (showNotifications) {
           showNoIcaProductsWarning();
         }
@@ -38,7 +38,7 @@ export const useProductFetching = () => {
     } catch (error) {
       console.error("Error in fetchIcaProducts:", error);
       
-      // Show a toast message about the error
+      // Show a toast message about the error only if requested
       if (showNotifications) {
         showFetchErrorNotification(error);
       }
@@ -47,7 +47,7 @@ export const useProductFetching = () => {
     }
   }, []);
 
-  const fetchWillysProducts = useCallback(async (showNotifications = true) => {
+  const fetchWillysProducts = useCallback(async (showNotifications = false) => {
     console.log("Fetching products from Supabase Willys table...");
     
     try {
@@ -70,7 +70,7 @@ export const useProductFetching = () => {
       } else {
         console.warn("No Willys data found in database");
         
-        // If no data in the database, provide a clear message to the user
+        // If no data in the database, provide a clear message to the user only if requested
         if (showNotifications) {
           toast({
             title: "Inga Willys-erbjudanden",
@@ -85,7 +85,7 @@ export const useProductFetching = () => {
       console.error("Error in fetchWillysProducts:", error);
       console.error("Error details:", JSON.stringify(error));
       
-      // Show a toast message about the error
+      // Show a toast message about the error only if requested
       if (showNotifications) {
         showFetchErrorNotification(error);
       }
@@ -94,7 +94,7 @@ export const useProductFetching = () => {
     }
   }, []);
 
-  const refreshProducts = useCallback(async (showNotifications = true) => {
+  const refreshProducts = useCallback(async (showNotifications = false) => {
     try {
       setLoading(true);
       setError(null);

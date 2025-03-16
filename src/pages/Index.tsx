@@ -24,7 +24,7 @@ const Index = () => {
   useAuthCheck();
   useInitialStoreSetup(activeStores, addStoreIfNeeded, handleStoreToggle, supabaseProducts);
 
-  // Auto refresh products when the application loads
+  // Auto refresh products when the application loads, but don't show notifications
   useEffect(() => {
     const autoRefreshProducts = async () => {
       try {
@@ -40,11 +40,6 @@ const Index = () => {
 
   useEffect(() => {
     if (error) {
-      toast({
-        title: "Fel vid laddning av produkter",
-        description: "Kunde inte ladda produkter från Supabase. Använder förvald produktdata istället.",
-        variant: "destructive"
-      });
       console.error("Supabase error:", error);
     }
   }, [error]);

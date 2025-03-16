@@ -27,7 +27,7 @@ const Recipes = () => {
     console.log("Selected nav:", id);
   };
 
-  // Auto refresh recipes when the page loads
+  // Auto refresh recipes when the page loads, but never show notifications
   useEffect(() => {
     const autoRefreshRecipes = async () => {
       try {
@@ -48,7 +48,7 @@ const Recipes = () => {
   const handleRefreshButton = async () => {
     try {
       setIsRefreshing(true);
-      await scrapeRecipes(false); // Don't show notifications
+      await scrapeRecipes(true); // Show notifications for explicit user action
     } catch (err) {
       console.error("Error refreshing recipes:", err);
     } finally {

@@ -31,12 +31,6 @@ export const useRecipes = (initialCategory: string = "Middag") => {
     } catch (err) {
       console.error('Error fetching recipes:', err);
       setError(err instanceof Error ? err : new Error('Unknown error occurred'));
-      
-      toast({
-        title: "Fel vid laddning av recept",
-        description: "Kunde inte ladda recept från databasen. Försök igen senare.",
-        variant: "destructive"
-      });
     } finally {
       setLoading(false);
     }
@@ -54,7 +48,7 @@ export const useRecipes = (initialCategory: string = "Middag") => {
     }
   }, [activeCategory]);
 
-  const scrapeRecipes = useCallback(async (showNotification = true) => {
+  const scrapeRecipes = useCallback(async (showNotification = false) => {
     try {
       setLoading(true);
       
