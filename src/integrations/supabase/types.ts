@@ -99,6 +99,7 @@ export type Database = {
           original_price: number | null
           price: number | null
           quantity_info: string | null
+          store: string | null
         }
         Insert: {
           comparison_price?: string | null
@@ -111,6 +112,7 @@ export type Database = {
           original_price?: number | null
           price?: number | null
           quantity_info?: string | null
+          store?: string | null
         }
         Update: {
           comparison_price?: string | null
@@ -123,6 +125,7 @@ export type Database = {
           original_price?: number | null
           price?: number | null
           quantity_info?: string | null
+          store?: string | null
         }
         Relationships: []
       }

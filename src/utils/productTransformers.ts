@@ -96,7 +96,10 @@ export const transformWillysProducts = (willysData: any[]): Product[] => {
       
       const productId = `willys-${item.name.replace(/\s+/g, '-').toLowerCase()}-${Math.random().toString(36).substring(2, 9)}`;
       
-      console.log(`Processing Willys item: ${item.name} (${productId}), category: ${category}`);
+      // Make sure we use the store field from the database if available
+      const store = item.store ? item.store.toLowerCase() : 'willys';
+      
+      console.log(`Processing Willys item: ${item.name} (${productId}), category: ${category}, store: ${store}`);
       
       return {
         id: productId,
@@ -105,7 +108,7 @@ export const transformWillysProducts = (willysData: any[]): Product[] => {
         details: item.description || 'Ingen beskrivning tillgänglig',
         currentPrice: formattedPrice,
         originalPrice: originalPriceFormatted,
-        store: 'willys',  // Important: Ensure lowercase matches the store filter
+        store: store,  // Important: Ensure lowercase matches the store filter
         category: category,
         offerBadge: item.offer_details || 'Erbjudande' // Swedish offer badge
       };

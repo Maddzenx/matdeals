@@ -47,7 +47,7 @@ export async function storeProducts(products: any[]): Promise<number> {
                typeof product.price === 'string' ? parseInt(product.price) || 0 : 0,
         image_url: product.image_url || 'https://assets.icanet.se/t_product_large_v1,f_auto/7300156501245.jpg',
         offer_details: product.offer_details || 'Veckans erbjudande',
-        store: 'willys' // Important: Use lowercase for consistency
+        store: 'willys' // Now explicitly set the store field
       };
     });
     
@@ -95,7 +95,7 @@ export async function storeProducts(products: any[]): Promise<number> {
         price: p.price,
         image_url: p.image_url,
         offer_details: p.offer_details,
-        store: 'willys' // Important: Use lowercase for consistency
+        store: 'willys' // Make sure fallback products also have the store field
       }));
       
       // Try inserting fallbacks one by one to have better chances of success

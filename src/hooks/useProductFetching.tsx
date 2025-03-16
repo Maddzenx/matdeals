@@ -54,12 +54,16 @@ export const useProductFetching = () => {
     console.log("Fetching products from Supabase Willys table...");
     
     try {
+      // Log the query we're about to make for debugging
+      console.log("About to query Willys table with: supabase.from('Willys').select('*')");
+      
       const { data: willysData, error: willysError } = await supabase
         .from('Willys')
         .select('*');
         
       if (willysError) {
         console.error("Supabase Willys query error:", willysError);
+        console.error("Error details:", JSON.stringify(willysError));
         throw willysError;
       }
       
@@ -80,6 +84,7 @@ export const useProductFetching = () => {
       return willysData || [];
     } catch (error) {
       console.error("Error in fetchWillysProducts:", error);
+      console.error("Error details:", JSON.stringify(error));
       
       // Show a toast message about the error
       toast({
