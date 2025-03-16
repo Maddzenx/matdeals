@@ -53,9 +53,25 @@ export const ProductSectionLayout: React.FC<ProductSectionLayoutProps> = ({
   const filteredCategoryProducts = activeCategory === "all" 
     ? products 
     : products.filter(product => {
+        // Match by both category ID and name for flexibility
+        if (activeCategory === "fruits") return product.category === "fruits";
+        if (activeCategory === "meat") return product.category === "meat";
+        if (activeCategory === "fish") return product.category === "fish";
+        if (activeCategory === "dairy") return product.category === "dairy";
+        if (activeCategory === "snacks") return product.category === "snacks";
+        if (activeCategory === "bread") return product.category === "bread";
+        if (activeCategory === "drinks") return product.category === "drinks";
+        if (activeCategory === "other") return product.category === "other";
+        
+        // Fallback to comparing with category name
         const categoryData = categories.find(c => c.id === activeCategory);
-        return categoryData && product.category === categoryData.name;
+        return categoryData && product.category === categoryData.id;
       });
+      
+  console.log(`Category filtering: Active category = ${activeCategory}, Products after filter: ${filteredCategoryProducts.length}`);
+  if (filteredCategoryProducts.length > 0) {
+    console.log("Sample product after category filtering:", filteredCategoryProducts[0]);
+  }
 
   return (
     <>
@@ -74,6 +90,13 @@ export const ProductSectionLayout: React.FC<ProductSectionLayoutProps> = ({
         {activeCategory !== "all" && activeCategoryName && (
           <h2 className="text-xl font-bold text-[#1C1C1C] mb-4">{translatedCategoryName}</h2>
         )}
+        
+        {/* Debug output to troubleshoot */}
+        <div className="bg-gray-100 p-2 mb-4 rounded text-sm" style={{display: 'none'}}>
+          <p>Filtered products: {filteredCategoryProducts.length}</p>
+          <p>Active category: {activeCategory}</p>
+        </div>
+        
         <ProductGrid
           products={filteredCategoryProducts}
           showCategoryHeaders={activeCategory === "all"} // Only show category headers in "All" view

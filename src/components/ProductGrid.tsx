@@ -99,6 +99,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
     console.log("Sample product:", products[0]);
   } else {
     console.warn("No products to display in ProductGrid");
+    console.warn("Products array:", products);
   }
 
   return (

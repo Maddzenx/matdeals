@@ -51,6 +51,14 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   // Combine local products with Supabase products
   const allProducts = React.useMemo(() => {
     console.log("Combining products - local:", allLocalProducts.length, "supabase:", supabaseProducts.length);
+    
+    // Log product categories to debug
+    if (supabaseProducts.length > 0) {
+      const categories = supabaseProducts.map(p => p.category).filter(Boolean);
+      const uniqueCategories = [...new Set(categories)];
+      console.log("Categories in Supabase products:", uniqueCategories);
+    }
+    
     return [...allLocalProducts, ...supabaseProducts];
   }, [allLocalProducts, supabaseProducts]);
   

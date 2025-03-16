@@ -18,7 +18,7 @@ export const useProductSection = (
   } = useProductUtils(categories);
   
   const nonEmptyCategories = getNonEmptyCategories();
-  const [activeCategory, setActiveCategory] = useState(nonEmptyCategories.length > 0 ? nonEmptyCategories[0].id : "");
+  const [activeCategory, setActiveCategory] = useState('all'); // Start with 'all' as default
   const scrolledToCategoryRef = useRef(false);
   const initialScrollRef = useRef(false);
   
@@ -26,7 +26,7 @@ export const useProductSection = (
 
   useEffect(() => {
     if (nonEmptyCategories.length > 0 && !nonEmptyCategories.some(c => c.id === activeCategory)) {
-      setActiveCategory(nonEmptyCategories[0].id);
+      setActiveCategory('all');
     }
   }, [nonEmptyCategories, activeCategory]);
 
@@ -84,9 +84,6 @@ export const useProductSection = (
       // Check for lowercase store values for ICA and Willys
       const productStore = product.store?.toLowerCase() || '';
       
-      // Debug log for store matching
-      console.log(`Checking product '${product.name}' with store '${productStore}' against storeId '${storeId}'`);
-      
       if (productStore === 'ica' && storeId === 'ica') return true;
       if (productStore === 'willys' && storeId === 'willys') return true;
       
@@ -127,7 +124,14 @@ export const useProductSection = (
 
   // Log first few filtered products for debugging
   if (filteredProducts.length > 0) {
-    console.log("First few filtered products:", filteredProducts.slice(0, 3));
+    console.log("First few filtered products:", filteredProducts.slice(0, 3).map(p => ({
+      id: p.id,
+      name: p.name,
+      store: p.store,
+      category: p.category
+    })));
+  } else {
+    console.warn("No products found after filtering!");
   }
 
   const handleCategorySelect = (categoryId: string) => {
