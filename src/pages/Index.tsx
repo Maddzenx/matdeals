@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SearchBar } from "@/components/SearchBar";
@@ -39,7 +38,7 @@ const Index = () => {
       try {
         setIsRefreshing(true);
         console.log("Auto refreshing products on application load...");
-        await handleRefresh();
+        await handleRefresh(false); // Pass false to suppress notification
       } catch (error) {
         console.error("Error during auto refresh:", error);
       } finally {
@@ -116,7 +115,7 @@ const Index = () => {
     }
   };
 
-  const handleRefresh = async () => {
+  const handleRefresh = async (showNotification = true) => {
     setIsRefreshing(true);
     
     try {
@@ -125,35 +124,43 @@ const Index = () => {
       await Promise.all([
         handleScrapeIca().catch(err => {
           console.error("Error scraping ICA:", err);
-          toast({
-            title: "Fel vid uppdatering av ICA",
-            description: "Kunde inte uppdatera ICA-erbjudanden. Willys-erbjudanden uppdateras ändå.",
-            variant: "destructive"
-          });
+          if (showNotification) {
+            toast({
+              title: "Fel vid uppdatering av ICA",
+              description: "Kunde inte uppdatera ICA-erbjudanden. Willys-erbjudanden uppdateras ändå.",
+              variant: "destructive"
+            });
+          }
         }),
         handleScrapeWillys().catch(err => {
           console.error("Error scraping Willys:", err);
-          toast({
-            title: "Fel vid uppdatering av Willys",
-            description: "Kunde inte uppdatera Willys-erbjudanden. ICA-erbjudanden uppdateras ändå.",
-            variant: "destructive"
-          });
+          if (showNotification) {
+            toast({
+              title: "Fel vid uppdatering av Willys",
+              description: "Kunde inte uppdatera Willys-erbjudanden. ICA-erbjudanden uppdateras ändå.",
+              variant: "destructive"
+            });
+          }
         })
       ]);
       
       await refetch();
       
-      toast({
-        title: "Erbjudanden uppdaterade",
-        description: "Produktdata har uppdaterats från både ICA och Willys.",
-      });
+      if (showNotification) {
+        toast({
+          title: "Erbjudanden uppdaterade",
+          description: "Produktdata har uppdaterats från både ICA och Willys.",
+        });
+      }
     } catch (error) {
       console.error("Error during refresh:", error);
-      toast({
-        title: "Refresheringsfel",
-        description: "Ett fel inträffade vid uppdatering av erbjudanden.",
-        variant: "destructive"
-      });
+      if (showNotification) {
+        toast({
+          title: "Refresheringsfel",
+          description: "Ett fel inträffade vid uppdatering av erbjudanden.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsRefreshing(false);
     }
