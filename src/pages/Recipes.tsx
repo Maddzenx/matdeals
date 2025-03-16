@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useRecipes } from "@/hooks/useRecipes";
 import { RecipeListHeader } from "@/components/recipes/RecipeListHeader";
 import { RecipeList } from "@/components/recipes/RecipeList";
+import { useMealPlan } from "@/hooks/useMealPlan";
 
 const Recipes = () => {
   const navigate = useNavigate();
@@ -21,6 +22,9 @@ const Recipes = () => {
     changeCategory,
     scrapeRecipes
   } = useRecipes();
+
+  // Load meal plan hook to make it available for recipe cards
+  useMealPlan();
 
   const handleNavSelect = (id: string) => {
     // Navigation logic is now handled in BottomNav component

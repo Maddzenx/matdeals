@@ -1,13 +1,14 @@
 
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Clock, Users, ChefHat, ShoppingBag, ShoppingCart, ChevronDown, ChevronUp } from "lucide-react";
+import { Clock, Users, ChefHat, ShoppingBag, ShoppingCart, ChevronDown, ChevronUp, CalendarPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Recipe } from "@/types/recipe";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useNavigationState } from "@/hooks/useNavigationState";
+import { useMealPlan } from "@/hooks/useMealPlan";
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -16,6 +17,7 @@ interface RecipeCardProps {
 export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
   const navigate = useNavigate();
   const { handleProductQuantityChange } = useNavigationState();
+  const { toggleFavorite, favoriteIds } = useMealPlan();
   const [showProducts, setShowProducts] = useState(false);
   
   // Format price helper
@@ -64,6 +66,12 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
     }
   };
 
+  // Add to meal plan
+  const handleAddToMealPlan = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    navigate("/meal-plan");
+  };
+
   // Toggle showing matched products
   const toggleProductsList = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click
@@ -72,6 +80,9 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
 
   // Display savings badge if there are discounted ingredients
   const hasSavings = recipe.matchedProducts && recipe.matchedProducts.length > 0;
+  
+  // Check if the recipe is a favorite
+  const isFavorite = favoriteIds.includes(recipe.id);
   
   return (
     <Card 
@@ -201,13 +212,27 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
               </span>
             )}
           </div>
-          <Button 
-            className="bg-[#DB2C17] hover:bg-[#c02615] flex items-center gap-1"
-            onClick={handleAddToCart}
-          >
-            <ShoppingCart size={16} />
-            Lägg till
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFavorite(recipe.id);
+              }}
+            >
+              <CalendarPlus size={16} className={isFavorite ? "text-[#DB2C17]" : ""} />
+              {isFavorite ? "Favorit" : "Matsedel"}
+            </Button>
+            <Button 
+              className="bg-[#DB2C17] hover:bg-[#c02615] flex items-center gap-1"
+              onClick={handleAddToCart}
+            >
+              <ShoppingCart size={16} />
+              Lägg till
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

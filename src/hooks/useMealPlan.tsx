@@ -154,6 +154,7 @@ export const useMealPlan = () => {
     previousRecipes, 
     loading,
     addToMealPlan,
-    toggleFavorite
+    toggleFavorite,
+    favoriteIds
   };
 };
