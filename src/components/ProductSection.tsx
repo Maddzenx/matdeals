@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { CategoryData, Product } from "@/data/types";
 import { useProductUtils } from "@/hooks/useProductUtils";
@@ -120,7 +121,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
     <ProductSectionLayout
       storeTags={storeTags}
       onRemoveTag={onRemoveTag}
-      categories={nonEmptyCategories}
+      categories={nonEmptyCategories.length > 0 ? nonEmptyCategories : categories}
       activeCategory={activeCategory}
       onCategorySelect={handleCategorySelect}
       products={filteredProducts}

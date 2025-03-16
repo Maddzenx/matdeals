@@ -17,7 +17,36 @@ export const useProductSection = (
     getNonEmptyCategories
   } = useProductUtils(categories);
   
-  const nonEmptyCategories = getNonEmptyCategories();
+  // Add category for "all"
+  const allCategory = { id: "all", name: "All" };
+  
+  // Get non-empty categories and ensure they're not empty
+  let nonEmptyCategories = getNonEmptyCategories();
+  
+  // If no products are in the local data, use supabase product categories
+  if (nonEmptyCategories.length === 0 && allProducts.length > 0) {
+    // Extract categories from products
+    const uniqueCategories = [...new Set(allProducts.map(p => p.category))].filter(Boolean);
+    
+    // Map to proper CategoryData format
+    nonEmptyCategories = uniqueCategories.map(catName => {
+      // Find existing category or create new one
+      const existingCat = categories.find(c => c.id === catName || c.name === catName);
+      if (existingCat) return existingCat;
+      
+      // Create new category
+      return {
+        id: catName || 'other',
+        name: catName || 'Other'
+      };
+    });
+    
+    console.log("Created categories from products:", nonEmptyCategories);
+  }
+  
+  // Ensure "all" category is first
+  nonEmptyCategories = [allCategory, ...nonEmptyCategories.filter(c => c.id !== 'all')];
+  
   const [activeCategory, setActiveCategory] = useState('all'); // Start with 'all' as default
   const scrolledToCategoryRef = useRef(false);
   const initialScrollRef = useRef(false);
