@@ -110,6 +110,7 @@ export const determineProductCategory = (name: string, description: string): str
   // Combined check of name and description for better categorization
   const combined = lowerName + ' ' + lowerDesc;
   
+  // Map Swedish category names directly to category IDs that match what's expected in the UI
   if (combined.includes('grönsak') || combined.includes('frukt') || 
       combined.includes('äpple') || combined.includes('banan') ||
       combined.includes('mango')) {

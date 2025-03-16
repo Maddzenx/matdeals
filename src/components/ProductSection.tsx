@@ -71,7 +71,24 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   useEffect(() => {
     console.log("After filtering - products to display:", filteredProducts.length);
     console.log("Active stores:", activeStoreIds);
-  }, [filteredProducts, activeStoreIds]);
+    // Add detailed logging for debugging purposes
+    if (filteredProducts.length === 0) {
+      console.warn("No products after filtering. Check activeStoreIds:", activeStoreIds);
+      console.warn("Store tags:", storeTags);
+      
+      // Log first few products before filtering
+      if (allProducts.length > 0) {
+        console.warn("Sample products before filtering:", 
+          allProducts.slice(0, 3).map(p => ({
+            id: p.id, 
+            name: p.name, 
+            store: p.store,
+            category: p.category
+          }))
+        );
+      }
+    }
+  }, [filteredProducts, activeStoreIds, storeTags, allProducts]);
 
   const handleQuantityChange = (productId: string, newQuantity: number, previousQuantity: number) => {
     // Find product details to include when changing quantity

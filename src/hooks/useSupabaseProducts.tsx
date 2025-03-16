@@ -10,6 +10,7 @@ export const useSupabaseProducts = () => {
   const { 
     fetchIcaProducts, 
     fetchWillysProducts, 
+    refreshProducts,
     loading, 
     setLoading, 
     error, 

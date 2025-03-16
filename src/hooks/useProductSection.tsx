@@ -80,15 +80,18 @@ export const useProductSection = (
 
   const filteredProducts = allProducts.filter(product => {
     // Match based on store ID
-    const storeMatch = activeStoreIds.some(storeId => {
+    const storeMatch = activeStoreIds.length === 0 || activeStoreIds.some(storeId => {
       // Check for lowercase store values for ICA and Willys
       const productStore = product.store?.toLowerCase() || '';
+      
+      // Debug log for store matching
+      console.log(`Checking product '${product.name}' with store '${productStore}' against storeId '${storeId}'`);
       
       if (productStore === 'ica' && storeId === 'ica') return true;
       if (productStore === 'willys' && storeId === 'willys') return true;
       
       // For other stores, match based on the tag name/id
-      const storeTag = storeTags.find(tag => tag.name === product.store);
+      const storeTag = storeTags.find(tag => tag.name.toLowerCase() === productStore);
       return storeTag && storeId === storeTag.id;
     });
     

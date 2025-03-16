@@ -35,7 +35,16 @@ const translateCategory = (name: string): string => {
     "Snacks": "Snacks",
     "Bread": "Bröd",
     "Drinks": "Drycker",
-    "Other": "Övrigt"
+    "Other": "Övrigt",
+    // Map our category IDs to display names
+    "fruits": "Frukt & Grönt",
+    "meat": "Kött",
+    "fish": "Fisk",
+    "dairy": "Mejeri",
+    "snacks": "Snacks",
+    "bread": "Bröd",
+    "drinks": "Drycker",
+    "other": "Övrigt"
   };
 
   return translations[name] || name;
@@ -84,6 +93,13 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   const totalProducts = products.length;
   
   console.log(`ProductGrid rendering ${totalProducts} products in ${viewMode} mode`);
+  
+  // Additional debug logging
+  if (totalProducts > 0) {
+    console.log("Sample product:", products[0]);
+  } else {
+    console.warn("No products to display in ProductGrid");
+  }
 
   return (
     <div className={className}>
