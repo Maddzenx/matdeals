@@ -127,11 +127,10 @@ const RecipeDetail: React.FC = () => {
   return (
     <div className="min-h-screen bg-white pb-20">
       <RecipeHeader 
-        title={recipe.title} 
-        image={recipe.image_url} 
+        recipe={recipe}
         onBack={handleGoBack}
         onRefresh={refreshRecipe}
-        isRefreshing={isRefreshing}
+        showRefreshButton={true}
       />
       
       <div className="px-4 mb-4 flex justify-between">
@@ -166,10 +165,16 @@ const RecipeDetail: React.FC = () => {
           </TabsList>
           
           <TabsContent value="overview">
-            <RecipeOverview recipe={recipe} />
+            <RecipeOverview 
+              description={recipe.description} 
+              source_url={recipe.source_url} 
+            />
             <RecipePricing 
-              recipe={recipe} 
+              price={recipe.price}
+              originalPrice={recipe.original_price}
               onAddToCart={handleAddIngredientsToCart} 
+              matchedProducts={recipe.matchedProducts}
+              savings={recipe.savings}
             />
           </TabsContent>
           
