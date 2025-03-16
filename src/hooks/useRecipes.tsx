@@ -2,7 +2,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { Recipe } from "@/types/recipe";
 import { useSupabaseProducts } from "@/hooks/useSupabaseProducts";
-import { toast } from "@/components/ui/use-toast";
 import { 
   fetchRecipesByCategory, 
   scrapeRecipesFromApi 

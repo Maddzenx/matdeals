@@ -3,7 +3,6 @@ import { useEffect, useState, useCallback } from "react";
 import { Product } from "@/data/types";
 import { useProductFetching } from "@/hooks/useProductFetching";
 import { useProductTransformation } from "@/hooks/useProductTransformation";
-import { useProductNotifications } from "@/hooks/useProductNotifications";
 
 export const useSupabaseProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -18,7 +17,6 @@ export const useSupabaseProducts = () => {
   } = useProductFetching();
   
   const { transformProducts } = useProductTransformation();
-  const { showNoProductsWarning, showFetchErrorNotification } = useProductNotifications();
 
   const fetchProducts = useCallback(async (showNotifications = false) => {
     try {
@@ -52,26 +50,16 @@ export const useSupabaseProducts = () => {
       
       // Always set products, even if empty, to avoid stale state
       setProducts(allProducts);
-      
-      // If we have no products, show a warning only if explicitly requested
-      if (allProducts.length === 0 && showNotifications) {
-        showNoProductsWarning();
-      }
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Unknown error occurred'));
       console.error("Error in fetchProducts:", err);
-      if (showNotifications) {
-        showFetchErrorNotification(err);
-      }
     } finally {
       setLoading(false);
     }
   }, [
     fetchIcaProducts, 
     fetchWillysProducts, 
-    transformProducts, 
-    showNoProductsWarning, 
-    showFetchErrorNotification, 
+    transformProducts,
     setLoading, 
     setError
   ]);

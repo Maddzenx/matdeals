@@ -2,7 +2,6 @@
 import { useCallback } from "react";
 import { Product } from "@/data/types";
 import { transformIcaProducts, transformWillysProducts } from "@/utils/productTransformers";
-import { toast } from "@/components/ui/use-toast";
 
 export const useProductTransformation = () => {
   const transformProducts = useCallback((icaData: any[], willysData: any[]) => {
@@ -49,14 +48,6 @@ export const useProductTransformation = () => {
     }, {} as Record<string, number>);
     
     console.log('Products by store:', storeCount);
-    
-    if (allProducts.length > 0) {
-      toast({
-        title: "Produkter laddade",
-        description: `Totalt ${allProducts.length} produkter från ICA (${icaProducts.length}) och Willys (${willysProducts.length})`,
-        variant: "default"
-      });
-    }
     
     return allProducts;
   }, []);
