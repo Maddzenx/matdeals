@@ -78,6 +78,12 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
     toggleFavorite(recipe.id);
   };
 
+  // Toggle showing matched products
+  const toggleProductsList = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    setShowProducts(!showProducts);
+  };
+
   // Display savings badge if there are discounted ingredients
   const hasSavings = recipe.matchedProducts && recipe.matchedProducts.length > 0;
   
