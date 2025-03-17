@@ -59,7 +59,7 @@ export const CompactRecipeCard: React.FC<CompactRecipeCardProps> = ({
                 onToggleFavorite();
               }}
             >
-              <Heart size={16} fill={isFavorite ? "#DB2C17" : "none"} className={isFavorite ? "text-[#DB2C17]" : ""} />
+              <Heart size={16} className={isFavorite ? "text-[#DB2C17] fill-[#DB2C17]" : ""} />
             </button>
           </div>
           

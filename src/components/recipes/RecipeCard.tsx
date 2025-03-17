@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Clock, Users, ChefHat, ShoppingBag, ShoppingCart, ChevronDown, ChevronUp, CalendarPlus } from "lucide-react";
+import { Clock, Users, ChefHat, ShoppingBag, ShoppingCart, ChevronDown, ChevronUp, Heart, CalendarPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Recipe } from "@/types/recipe";
 import { useNavigate } from "react-router-dom";
@@ -72,10 +72,10 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
     navigate("/meal-plan");
   };
 
-  // Toggle showing matched products
-  const toggleProductsList = (e: React.MouseEvent) => {
+  // Toggle favorite status
+  const handleFavoriteToggle = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click
-    setShowProducts(!showProducts);
+    toggleFavorite(recipe.id);
   };
 
   // Display savings badge if there are discounted ingredients
@@ -217,17 +217,24 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
               variant="outline"
               size="sm"
               className="flex items-center gap-1"
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleFavorite(recipe.id);
-              }}
+              onClick={handleFavoriteToggle}
             >
-              <CalendarPlus size={16} className={isFavorite ? "text-[#DB2C17]" : ""} />
-              {isFavorite ? "Favorit" : "Matsedel"}
+              <Heart size={16} className={isFavorite ? "text-[#DB2C17] fill-[#DB2C17]" : ""} />
+              {isFavorite ? "Favorit" : "Favorit"}
+            </Button>
+            <Button 
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1"
+              onClick={handleAddToMealPlan}
+            >
+              <CalendarPlus size={16} />
+              Matsedel
             </Button>
             <Button 
               className="bg-[#DB2C17] hover:bg-[#c02615] flex items-center gap-1"
               onClick={handleAddToCart}
+              size="sm"
             >
               <ShoppingCart size={16} />
               Lägg till

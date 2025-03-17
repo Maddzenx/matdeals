@@ -11,7 +11,7 @@ import { RecipeInstructions } from "@/components/recipe-detail/RecipeInstruction
 import { RecipePricing } from "@/components/recipe-detail/RecipePricing";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, ArrowLeft, Loader2 } from "lucide-react";
+import { Heart, ArrowLeft, Loader2 } from "lucide-react";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
@@ -140,7 +140,7 @@ const RecipeDetail: React.FC = () => {
           className="flex items-center gap-1"
           onClick={handleFavoriteToggle}
         >
-          <CalendarDays size={16} className={favoriteIds.includes(recipe.id) ? "text-[#DB2C17]" : ""} />
+          <Heart size={16} className={favoriteIds.includes(recipe.id) ? "text-[#DB2C17] fill-[#DB2C17]" : ""} />
           {favoriteIds.includes(recipe.id) ? "Ta bort favorit" : "Spara som favorit"}
         </Button>
         
