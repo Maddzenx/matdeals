@@ -5,17 +5,12 @@ import { BottomNav } from "@/components/BottomNav";
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { useRecipeDetail } from "@/hooks/useRecipeDetail";
 import { RecipeHeader } from "@/components/recipe-detail/RecipeHeader";
-import { RecipeOverview } from "@/components/recipe-detail/RecipeOverview";
-import { RecipeIngredients } from "@/components/recipe-detail/RecipeIngredients";
-import { RecipeInstructions } from "@/components/recipe-detail/RecipeInstructions";
-import { RecipePricing } from "@/components/recipe-detail/RecipePricing";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
-import { Button } from "@/components/ui/button";
-import { Heart, ArrowLeft, Loader2 } from "lucide-react";
 import { useMealPlan } from "@/hooks/useMealPlan";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
-import { DaySelector } from "@/components/meal-plan/DaySelector";
+import { RecipeActions } from "@/components/recipe-detail/RecipeActions";
+import { RecipeTabs } from "@/components/recipe-detail/RecipeTabs";
+import { RecipeError } from "@/components/recipe-detail/RecipeError";
 
 const RecipeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -112,15 +107,10 @@ const RecipeDetail: React.FC = () => {
 
   if (error || !recipe) {
     return (
-      <div className="min-h-screen bg-white pb-20 flex flex-col items-center justify-center px-4">
-        <h2 className="text-xl font-semibold mb-4">Kunde inte ladda receptet</h2>
-        <p className="text-gray-500 mb-6">{error?.message || "Receptet kunde inte hittas."}</p>
-        <Button onClick={handleGoBack}>
-          <ArrowLeft className="mr-2" size={16} />
-          Tillbaka
-        </Button>
+      <>
+        <RecipeError message={error?.message} onGoBack={handleGoBack} />
         <BottomNav items={navItems} onSelect={handleNavSelect} />
-      </div>
+      </>
     );
   }
 
@@ -133,64 +123,20 @@ const RecipeDetail: React.FC = () => {
         showRefreshButton={true}
       />
       
-      <div className="px-4 mb-4 flex justify-between">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="flex items-center gap-1"
-          onClick={handleFavoriteToggle}
-        >
-          <Heart size={16} className={favoriteIds.includes(recipe.id) ? "text-[#DB2C17] fill-[#DB2C17]" : ""} />
-          {favoriteIds.includes(recipe.id) ? "Ta bort favorit" : "Spara som favorit"}
-        </Button>
-        
-        <DaySelector
-          mealPlan={mealPlan}
-          recipe={recipe}
-          onSelectDay={handleAddToMealPlanDay}
-          trigger={
-            <Button variant="outline" size="sm">
-              Lägg till i matsedel
-            </Button>
-          }
-        />
-      </div>
+      <RecipeActions 
+        recipe={recipe}
+        favoriteIds={favoriteIds}
+        mealPlan={mealPlan}
+        onFavoriteToggle={handleFavoriteToggle}
+        onAddToMealPlan={handleAddToMealPlan}
+      />
       
-      <div className="px-4">
-        <Tabs defaultValue="overview" onValueChange={setActiveTab} value={activeTab}>
-          <TabsList className="grid w-full grid-cols-3 mb-4">
-            <TabsTrigger value="overview">Översikt</TabsTrigger>
-            <TabsTrigger value="ingredients">Ingredienser</TabsTrigger>
-            <TabsTrigger value="instructions">Tillagning</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="overview">
-            <RecipeOverview 
-              description={recipe.description} 
-              source_url={recipe.source_url} 
-            />
-            <RecipePricing 
-              price={recipe.price}
-              originalPrice={recipe.original_price}
-              onAddToCart={handleAddIngredientsToCart} 
-              matchedProducts={recipe.matchedProducts}
-              savings={recipe.savings}
-            />
-          </TabsContent>
-          
-          <TabsContent value="ingredients">
-            <RecipeIngredients 
-              ingredients={recipe.ingredients} 
-              matchedProducts={recipe.matchedProducts}
-              servings={recipe.servings}
-            />
-          </TabsContent>
-          
-          <TabsContent value="instructions">
-            <RecipeInstructions instructions={recipe.instructions} />
-          </TabsContent>
-        </Tabs>
-      </div>
+      <RecipeTabs
+        recipe={recipe}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onAddToCart={handleAddIngredientsToCart}
+      />
       
       <BottomNav items={navItems} onSelect={handleNavSelect} />
     </div>
