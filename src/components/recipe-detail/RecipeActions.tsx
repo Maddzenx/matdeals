@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import { Recipe } from "@/types/recipe";
 import { DaySelector } from "@/components/meal-plan/DaySelector";
-import { MealPlan } from "@/types/mealPlan";
+import { DayMeal } from "@/types/mealPlan";
 
 interface RecipeActionsProps {
   recipe: Recipe;
   favoriteIds: string[];
-  mealPlan: MealPlan;
+  mealPlan: DayMeal[];
   onFavoriteToggle: () => void;
   onAddToMealPlan: (day: string, recipeId: string) => void;
 }

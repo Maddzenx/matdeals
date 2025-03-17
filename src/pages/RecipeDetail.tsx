@@ -1,126 +1,110 @@
 
-import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { BottomNav } from "@/components/BottomNav";
+import React, { useEffect, useCallback } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { useRecipeDetail } from "@/hooks/useRecipeDetail";
-import { RecipeHeader } from "@/components/recipe-detail/RecipeHeader";
-import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { useMealPlan } from "@/hooks/useMealPlan";
-import { toast } from "@/components/ui/use-toast";
+import { RecipeHeader } from "@/components/recipe-detail/RecipeHeader";
+import { RecipeMetrics } from "@/components/recipe-detail/RecipeMetrics";
 import { RecipeActions } from "@/components/recipe-detail/RecipeActions";
 import { RecipeTabs } from "@/components/recipe-detail/RecipeTabs";
 import { RecipeError } from "@/components/recipe-detail/RecipeError";
+import { LoadingIndicator } from "@/components/LoadingIndicator";
+import { BottomNav } from "@/components/BottomNav";
 
-const RecipeDetail: React.FC = () => {
+const RecipeDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { navItems, handleProductQuantityChange } = useNavigationState();
-  const { recipe, loading, error, scrapeRecipe } = useRecipeDetail(id);
-  const [activeTab, setActiveTab] = useState("overview");
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const { toggleFavorite, favoriteIds, mealPlan, addToMealPlan } = useMealPlan();
+  
+  const {
+    recipe,
+    isLoading,
+    error,
+    activeTab,
+    setActiveTab,
+  } = useRecipeDetail(id);
 
-  const handleNavSelect = (id: string) => {
-    console.log("Selected nav:", id);
-  };
-
-  const handleGoBack = () => {
+  // Handle back button click
+  const handleGoBack = useCallback(() => {
     navigate(-1);
+  }, [navigate]);
+
+  // Handle navigation selection
+  const handleNavSelect = (id: string) => {
+    navigate(`/${id}`);
   };
 
-  const refreshRecipe = async () => {
-    if (!id || isRefreshing) return;
-    
-    setIsRefreshing(true);
-    await scrapeRecipe(id);
-    setIsRefreshing(false);
-    
-    toast({
-      title: "Uppdaterat",
-      description: "Receptet har uppdaterats med den senaste informationen.",
-    });
-  };
-
-  // Add to shopping cart functionality
-  const handleAddIngredientsToCart = () => {
-    if (!recipe?.matchedProducts || recipe.matchedProducts.length === 0) {
-      toast({
-        title: "Inga rabatterade varor",
-        description: "Det finns inga rabatterade ingredienser att lägga till.",
-      });
-      return;
+  // Handle favorite toggle
+  const handleFavoriteToggle = useCallback(() => {
+    if (recipe) {
+      toggleFavorite(recipe.id);
     }
-    
-    // Add all matched products to cart
-    recipe.matchedProducts.forEach(product => {
-      handleProductQuantityChange(
-        product.id, 
-        1, 
-        0, 
-        {
-          name: product.name,
-          details: product.details,
-          price: product.currentPrice,
-          image: product.image,
-          store: product.store
-        }
-      );
-    });
-    
-    toast({
-      title: "Tillagt i varukorgen",
-      description: `${recipe.matchedProducts.length} rabatterade varor har lagts till i varukorgen.`,
-    });
-  };
+  }, [recipe, toggleFavorite]);
 
-  const handleFavoriteToggle = () => {
-    if (!recipe) return;
-    toggleFavorite(recipe.id);
-    
-    const isFavorite = favoriteIds.includes(recipe.id);
-    toast({
-      title: isFavorite ? "Borttagen från favoriter" : "Tillagd som favorit",
-      description: isFavorite 
-        ? "Receptet har tagits bort från dina favoriter." 
-        : "Receptet har lagts till bland dina favoriter.",
-    });
-  };
-
-  const handleAddToMealPlanDay = (day: string, recipeId: string) => {
+  // Handle adding to meal plan
+  const handleAddToMealPlanDay = useCallback((day: string, recipeId: string) => {
     addToMealPlan(day, recipeId);
-    
-    toast({
-      title: "Tillagt i matsedeln",
-      description: "Receptet har lagts till i din matsedel.",
-    });
-  };
+  }, [addToMealPlan]);
 
-  if (loading) {
+  // Handle add to cart
+  const handleAddToCart = useCallback(() => {
+    if (recipe && recipe.matchedProducts && recipe.matchedProducts.length > 0) {
+      recipe.matchedProducts.forEach((product) => {
+        handleProductQuantityChange(
+          product.id,
+          1,
+          0,
+          {
+            name: product.name,
+            details: product.details,
+            price: product.currentPrice,
+            image: product.image,
+            store: product.store,
+            recipeId: recipe.id,
+            recipeTitle: recipe.title
+          }
+        );
+      });
+    }
+  }, [recipe, handleProductQuantityChange]);
+
+  // Auto scroll to top on page load
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-white pb-20">
+      <div className="min-h-screen bg-white pb-20 flex flex-col items-center justify-center">
         <LoadingIndicator message="Laddar recept..." />
-        <BottomNav items={navItems} onSelect={handleNavSelect} />
       </div>
     );
   }
 
   if (error || !recipe) {
     return (
-      <>
-        <RecipeError message={error?.message} onGoBack={handleGoBack} />
-        <BottomNav items={navItems} onSelect={handleNavSelect} />
-      </>
+      <RecipeError
+        message={error?.message}
+        onGoBack={handleGoBack}
+      />
     );
   }
 
   return (
     <div className="min-h-screen bg-white pb-20">
       <RecipeHeader 
-        recipe={recipe}
-        onBack={handleGoBack}
-        onRefresh={refreshRecipe}
-        showRefreshButton={true}
+        title={recipe.title}
+        imageUrl={recipe.image_url}
+        onGoBack={handleGoBack}
+      />
+      
+      <RecipeMetrics 
+        timeMinutes={recipe.time_minutes}
+        servings={recipe.servings}
+        difficulty={recipe.difficulty}
+        tags={recipe.tags}
       />
       
       <RecipeActions 
@@ -128,14 +112,14 @@ const RecipeDetail: React.FC = () => {
         favoriteIds={favoriteIds}
         mealPlan={mealPlan}
         onFavoriteToggle={handleFavoriteToggle}
-        onAddToMealPlan={handleAddToMealPlan}
+        onAddToMealPlan={handleAddToMealPlanDay}
       />
       
-      <RecipeTabs
+      <RecipeTabs 
         recipe={recipe}
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        onAddToCart={handleAddIngredientsToCart}
+        onAddToCart={handleAddToCart}
       />
       
       <BottomNav items={navItems} onSelect={handleNavSelect} />
