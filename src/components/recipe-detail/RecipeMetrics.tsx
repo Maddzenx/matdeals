@@ -6,12 +6,14 @@ interface RecipeMetricsProps {
   time_minutes: number | null;
   servings: number | null;
   difficulty: string | null;
+  tags?: string[] | null;
 }
 
 export const RecipeMetrics: React.FC<RecipeMetricsProps> = ({
   time_minutes,
   servings,
   difficulty,
+  tags
 }) => {
   // Determine difficulty icon and color
   const getDifficultyProps = (difficulty: string | null) => {

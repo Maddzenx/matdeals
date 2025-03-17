@@ -1,5 +1,5 @@
 
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { useRecipeDetail } from "@/hooks/useRecipeDetail";
@@ -17,13 +17,13 @@ const RecipeDetail = () => {
   const navigate = useNavigate();
   const { navItems, handleProductQuantityChange } = useNavigationState();
   const { toggleFavorite, favoriteIds, mealPlan, addToMealPlan } = useMealPlan();
+  const [activeTab, setActiveTab] = useState("overview");
   
   const {
     recipe,
-    isLoading,
+    loading,
     error,
-    activeTab,
-    setActiveTab,
+    scrapeRecipe
   } = useRecipeDetail(id);
 
   // Handle back button click
@@ -70,12 +70,19 @@ const RecipeDetail = () => {
     }
   }, [recipe, handleProductQuantityChange]);
 
+  // Handle refreshing recipe details
+  const handleRefreshRecipe = useCallback(() => {
+    if (recipe) {
+      scrapeRecipe(recipe.id);
+    }
+  }, [recipe, scrapeRecipe]);
+
   // Auto scroll to top on page load
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-white pb-20 flex flex-col items-center justify-center">
         <LoadingIndicator message="Laddar recept..." />
@@ -95,16 +102,16 @@ const RecipeDetail = () => {
   return (
     <div className="min-h-screen bg-white pb-20">
       <RecipeHeader 
-        title={recipe.title}
-        imageUrl={recipe.image_url}
-        onGoBack={handleGoBack}
+        recipe={recipe}
+        onBack={handleGoBack}
+        onRefresh={handleRefreshRecipe}
+        showRefreshButton={true}
       />
       
       <RecipeMetrics 
-        timeMinutes={recipe.time_minutes}
+        time_minutes={recipe.time_minutes}
         servings={recipe.servings}
         difficulty={recipe.difficulty}
-        tags={recipe.tags}
       />
       
       <RecipeActions 
