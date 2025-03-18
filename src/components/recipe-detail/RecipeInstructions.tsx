@@ -17,23 +17,18 @@ export const RecipeInstructions: React.FC<RecipeInstructionsProps> = ({
   useEffect(() => {
     // Only run this effect when the toggle is switched
     if (keepScreenOn) {
+      let wakeLockSentinel: WakeLockSentinel | null = null;
+      
       // Request wake lock to prevent screen from turning off
       const requestWakeLock = async () => {
         try {
           // The Wake Lock API is used to prevent the screen from turning off
-          const wakeLock = await navigator.wakeLock.request("screen");
+          wakeLockSentinel = await navigator.wakeLock.request("screen");
           
           toast({
             title: "Skärmen hålls tänd",
             description: "Skärmen kommer att förbli tänd medan du lagar mat",
           });
-          
-          // Release wake lock when the component unmounts or when toggle is switched off
-          return () => {
-            wakeLock.release().then(() => {
-              console.log("Wake Lock released");
-            });
-          };
         } catch (err) {
           console.error(`Failed to keep screen on: ${err}`);
           
@@ -48,13 +43,17 @@ export const RecipeInstructions: React.FC<RecipeInstructionsProps> = ({
         }
       };
 
-      const release = requestWakeLock();
+      // Execute the wake lock request
+      requestWakeLock();
       
       // Clean up function
       return () => {
-        // Call the release function returned from requestWakeLock
-        if (typeof release === 'function') {
-          release();
+        if (wakeLockSentinel) {
+          wakeLockSentinel.release().then(() => {
+            console.log("Wake Lock released");
+          }).catch(error => {
+            console.error("Error releasing wake lock:", error);
+          });
         }
       };
     }
