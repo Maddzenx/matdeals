@@ -21,7 +21,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
 }) => {
   const navigate = useNavigate();
   const { handleProductQuantityChange } = useNavigationState();
-  const { toggleFavorite, favoriteIds } = useMealPlan();
+  const { toggleFavorite, favoriteIds, mealPlan, addToMealPlan } = useMealPlan();
   const [showProducts, setShowProducts] = useState(false);
   
   // Determine if recipe has discounted ingredients
@@ -60,6 +60,11 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
   const handleAddToMealPlan = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click
     navigate("/meal-plan");
+  };
+
+  // Select day for meal plan
+  const handleSelectDay = (day: string, recipeId: string) => {
+    addToMealPlan(day, recipeId);
   };
 
   // Toggle favorite status
@@ -117,6 +122,9 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
             onFavoriteToggle={handleFavoriteToggle}
             onAddToMealPlan={handleAddToMealPlan}
             onAddToCart={handleAddToCart}
+            recipeId={recipe.id}
+            mealPlan={mealPlan}
+            onSelectDay={handleSelectDay}
           />
         </div>
       </CardContent>

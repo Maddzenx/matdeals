@@ -2,22 +2,28 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, Clock, Users, Plus } from "lucide-react";
+import { Heart, Clock, Users } from "lucide-react";
 import { Recipe } from "@/types/recipe";
 import { useNavigate } from "react-router-dom";
+import { DaySelector } from "./DaySelector";
+import { DayMeal } from "@/types/mealPlan";
 
 interface CompactRecipeCardProps {
   recipe: Recipe;
   isFavorite: boolean;
   onToggleFavorite: () => void;
   onAddToMealPlan: () => void;
+  mealPlan?: DayMeal[];
+  onSelectDay?: (day: string, recipeId: string) => void;
 }
 
 export const CompactRecipeCard: React.FC<CompactRecipeCardProps> = ({
   recipe,
   isFavorite,
   onToggleFavorite,
-  onAddToMealPlan
+  onAddToMealPlan,
+  mealPlan,
+  onSelectDay
 }) => {
   const navigate = useNavigate();
 
@@ -75,18 +81,34 @@ export const CompactRecipeCard: React.FC<CompactRecipeCardProps> = ({
           </div>
           
           <div className="mt-2 flex justify-end">
-            <Button 
-              size="sm" 
-              variant="outline"
-              className="py-1 h-7 text-xs"
-              onClick={(e) => {
-                e.stopPropagation();
-                onAddToMealPlan();
-              }}
-            >
-              <Plus size={12} className="mr-1" />
-              Lägg till
-            </Button>
+            {mealPlan && onSelectDay ? (
+              <DaySelector
+                mealPlan={mealPlan}
+                recipe={recipe}
+                onSelectDay={onSelectDay}
+                trigger={
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    className="py-1 h-7 text-xs"
+                  >
+                    Lägg till i matsedel
+                  </Button>
+                }
+              />
+            ) : (
+              <Button 
+                size="sm" 
+                variant="outline"
+                className="py-1 h-7 text-xs"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddToMealPlan();
+                }}
+              >
+                Lägg till i matsedel
+              </Button>
+            )}
           </div>
         </CardContent>
       </div>

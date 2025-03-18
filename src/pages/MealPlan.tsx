@@ -20,6 +20,13 @@ const MealPlan = () => {
     console.log("Selected nav:", id);
   };
 
+  // Handle selecting a day for a recipe
+  const handleSelectDay = (day: string, recipeId: string) => {
+    addToMealPlan(day, recipeId);
+    // Switch to weekly view after selecting a day
+    setActiveTab("weekly");
+  };
+
   return (
     <div className="min-h-screen pb-20 bg-white">
       <MealPlanHeader />
@@ -47,8 +54,9 @@ const MealPlan = () => {
               onToggleFavorite={toggleFavorite}
               onAddToMealPlan={(recipeId) => {
                 setActiveTab("weekly");
-                // The user can select which day when they're back on the weekly view
               }}
+              mealPlan={mealPlan}
+              onSelectDay={handleSelectDay}
             />
           </TabsContent>
           
@@ -59,8 +67,9 @@ const MealPlan = () => {
               onToggleFavorite={toggleFavorite}
               onAddToMealPlan={(recipeId) => {
                 setActiveTab("weekly");
-                // The user can select which day when they're back on the weekly view
               }}
+              mealPlan={mealPlan}
+              onSelectDay={handleSelectDay}
             />
           </TabsContent>
         </Tabs>

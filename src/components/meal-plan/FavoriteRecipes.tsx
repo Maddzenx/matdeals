@@ -3,19 +3,24 @@ import React from "react";
 import { Recipe } from "@/types/recipe";
 import { CompactRecipeCard } from "./CompactRecipeCard";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
+import { DayMeal } from "@/types/mealPlan";
 
 interface FavoriteRecipesProps {
   recipes: Recipe[];
   loading: boolean;
   onToggleFavorite: (recipeId: string) => void;
   onAddToMealPlan: (recipeId: string) => void;
+  mealPlan?: DayMeal[];
+  onSelectDay?: (day: string, recipeId: string) => void;
 }
 
 export const FavoriteRecipes: React.FC<FavoriteRecipesProps> = ({
   recipes,
   loading,
   onToggleFavorite,
-  onAddToMealPlan
+  onAddToMealPlan,
+  mealPlan,
+  onSelectDay
 }) => {
   if (loading) {
     return <LoadingIndicator message="Laddar favoritrecept..." />;
@@ -41,6 +46,8 @@ export const FavoriteRecipes: React.FC<FavoriteRecipesProps> = ({
           isFavorite={true}
           onToggleFavorite={() => onToggleFavorite(recipe.id)}
           onAddToMealPlan={() => onAddToMealPlan(recipe.id)}
+          mealPlan={mealPlan}
+          onSelectDay={onSelectDay}
         />
       ))}
     </div>

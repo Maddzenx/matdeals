@@ -7,7 +7,7 @@ import { Recipe } from "@/types/recipe";
 
 interface DaySelectorProps {
   mealPlan: DayMeal[];
-  recipe: Recipe;
+  recipe: Recipe | {id: string}; // Allow minimal recipe data with just ID
   onSelectDay: (day: string, recipeId: string) => void;
   trigger?: React.ReactNode;
 }
