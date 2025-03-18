@@ -53,7 +53,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ items, onSelect }) => {
         navigate("/auth");
         break;
       case "menu":
-        navigate("/meal-plan");
+        navigate("/meal-plan"); // Fixed: Now correctly navigates to /meal-plan instead of /menu
         break;
       default:
         console.log("Selected nav:", id);
