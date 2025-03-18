@@ -1,9 +1,12 @@
 
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { DayMeal } from "@/types/mealPlan";
 import { Recipe } from "@/types/recipe";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Check } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface DaySelectorProps {
   mealPlan: DayMeal[];
@@ -18,6 +21,10 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
   onSelectDay,
   trigger
 }) => {
+  const { toast } = useToast();
+  const [selectedDay, setSelectedDay] = React.useState<string | null>(null);
+  const [open, setOpen] = React.useState(false);
+  
   const getDayName = (day: string) => {
     switch(day.toLowerCase()) {
       case 'monday': return 'Måndag';
@@ -31,33 +38,71 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
     }
   };
 
+  const handleSelectDay = (day: string) => {
+    setSelectedDay(day);
+  };
+
+  const handleConfirm = () => {
+    if (selectedDay) {
+      onSelectDay(selectedDay, recipe.id);
+      setOpen(false);
+      
+      // Show success toast
+      toast({
+        title: "Receptet lades till",
+        description: `Receptet lades till i matsedeln för ${getDayName(selectedDay)}`,
+      });
+    }
+  };
+
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (!newOpen) {
+      // Reset selected day when closing
+      setSelectedDay(null);
+    }
+  };
+
   return (
-    <Dialog>
-      <DialogTrigger asChild>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
+      <SheetTrigger asChild>
         {trigger || <Button>Välj dag</Button>}
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Välj dag för receptet</DialogTitle>
-        </DialogHeader>
-        <div className="grid gap-3 py-4">
+      </SheetTrigger>
+      <SheetContent side="bottom" className="rounded-t-lg">
+        <SheetHeader className="mb-4">
+          <SheetTitle>Välj dag för receptet</SheetTitle>
+        </SheetHeader>
+        <div className="grid gap-3 py-2">
           {mealPlan.map((day) => (
             <Button
               key={day.day}
-              variant={day.recipe ? "outline" : "default"}
-              className="w-full justify-start"
-              onClick={() => onSelectDay(day.day, recipe.id)}
+              variant={selectedDay === day.day ? "default" : "outline"}
+              className={`w-full justify-between ${selectedDay === day.day ? "bg-[#DB2C17] hover:bg-[#c02615]" : ""}`}
+              onClick={() => handleSelectDay(day.day)}
             >
-              {getDayName(day.day)}
+              <span>{getDayName(day.day)}</span>
               {day.recipe && (
-                <span className="ml-2 text-xs text-gray-500">
-                  (ersätter: {day.recipe.title})
+                <span className="text-xs">
+                  {selectedDay === day.day ? "(ersätter)" : "(upptagen)"}
                 </span>
               )}
+              {selectedDay === day.day && <Check size={18} />}
             </Button>
           ))}
         </div>
-      </DialogContent>
-    </Dialog>
+        <div className="mt-6 flex justify-end gap-3">
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Avbryt
+          </Button>
+          <Button 
+            className="bg-[#DB2C17] hover:bg-[#c02615]"
+            onClick={handleConfirm}
+            disabled={!selectedDay}
+          >
+            Bekräfta
+          </Button>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 };
