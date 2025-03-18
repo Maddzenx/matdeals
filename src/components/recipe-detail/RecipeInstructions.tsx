@@ -1,5 +1,8 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { Toggle } from "@/components/ui/toggle";
+import { Lightbulb } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface RecipeInstructionsProps {
   instructions: string[] | null;
@@ -8,13 +11,86 @@ interface RecipeInstructionsProps {
 export const RecipeInstructions: React.FC<RecipeInstructionsProps> = ({
   instructions,
 }) => {
+  const [keepScreenOn, setKeepScreenOn] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Only run this effect when the toggle is switched
+    if (keepScreenOn) {
+      // Request wake lock to prevent screen from turning off
+      const requestWakeLock = async () => {
+        try {
+          // The Wake Lock API is used to prevent the screen from turning off
+          const wakeLock = await navigator.wakeLock.request("screen");
+          
+          toast({
+            title: "Skärmen hålls tänd",
+            description: "Skärmen kommer att förbli tänd medan du lagar mat",
+          });
+          
+          // Release wake lock when the component unmounts or when toggle is switched off
+          return () => {
+            wakeLock.release().then(() => {
+              console.log("Wake Lock released");
+            });
+          };
+        } catch (err) {
+          console.error(`Failed to keep screen on: ${err}`);
+          
+          toast({
+            title: "Kunde inte hålla skärmen tänd",
+            description: "Din enhet stödjer eventuellt inte denna funktion",
+            variant: "destructive",
+          });
+          
+          // Reset the toggle if we couldn't get a wake lock
+          setKeepScreenOn(false);
+        }
+      };
+
+      const release = requestWakeLock();
+      
+      // Clean up function
+      return () => {
+        // Call the release function returned from requestWakeLock
+        if (typeof release === 'function') {
+          release();
+        }
+      };
+    }
+  }, [keepScreenOn, toast]);
+
+  const handleToggleScreenOn = () => {
+    setKeepScreenOn(!keepScreenOn);
+    
+    // If we're turning it off, show a toast
+    if (keepScreenOn) {
+      toast({
+        title: "Skärmen kommer att släckas som vanligt",
+        description: "Automatisk skärmsläckning är aktiverad igen",
+      });
+    }
+  };
+
   if (!instructions || instructions.length === 0) {
     return null;
   }
 
   return (
     <div className="mb-6">
-      <h2 className="text-xl font-bold mb-2">Instruktioner</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Instruktioner</h2>
+        <Toggle 
+          pressed={keepScreenOn}
+          onPressedChange={handleToggleScreenOn}
+          aria-label="Håll skärmen tänd"
+          className="data-[state=on]:bg-[#DB2C17] data-[state=on]:text-white"
+        >
+          <Lightbulb size={18} className="mr-2" />
+          Håll skärmen tänd
+        </Toggle>
+      </div>
+      
       <ol className="space-y-4">
         {instructions.map((step, idx) => (
           <li key={idx} className="flex">
