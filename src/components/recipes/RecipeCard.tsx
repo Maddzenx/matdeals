@@ -8,7 +8,6 @@ import { useMealPlan } from "@/hooks/useMealPlan";
 import { RecipeCardImage } from "./RecipeCardImage";
 import { RecipeDiscountedProducts } from "./RecipeDiscountedProducts";
 import { RecipeMetadata } from "./RecipeMetadata";
-import { RecipePrice } from "./RecipePrice";
 import { RecipeCardActions } from "./RecipeCardActions";
 
 interface RecipeCardProps {
@@ -18,7 +17,7 @@ interface RecipeCardProps {
 
 export const RecipeCard: React.FC<RecipeCardProps> = ({ 
   recipe,
-  hidePricing = false
+  hidePricing = true // Set default to true to hide pricing
 }) => {
   const navigate = useNavigate();
   const { handleProductQuantityChange } = useNavigationState();
@@ -112,18 +111,13 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
           </p>
         )}
         
-        <div className="flex items-center justify-between">
-          {!hidePricing && (
-            <RecipePrice recipe={recipe} hasSavings={hasSavings} hidePricing={hidePricing} />
-          )}
-          <div className={hidePricing ? "w-full" : ""}>
-            <RecipeCardActions 
-              isFavorite={isFavorite}
-              onFavoriteToggle={handleFavoriteToggle}
-              onAddToMealPlan={handleAddToMealPlan}
-              onAddToCart={handleAddToCart}
-            />
-          </div>
+        <div className="flex justify-end mt-2">
+          <RecipeCardActions 
+            isFavorite={isFavorite}
+            onFavoriteToggle={handleFavoriteToggle}
+            onAddToMealPlan={handleAddToMealPlan}
+            onAddToCart={handleAddToCart}
+          />
         </div>
       </CardContent>
     </Card>

@@ -17,32 +17,32 @@ export const RecipeCardActions: React.FC<RecipeCardActionsProps> = ({
   onAddToCart,
 }) => {
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-1">
       <Button
-        variant="outline"
-        size="sm"
-        className="flex items-center gap-1"
+        variant="ghost"
+        size="icon"
+        className="w-9 h-9 rounded-full"
         onClick={onFavoriteToggle}
+        aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
       >
-        <Heart size={16} className={isFavorite ? "text-[#DB2C17] fill-[#DB2C17]" : ""} />
-        {isFavorite ? "Favorit" : "Favorit"}
+        <Heart size={18} className={isFavorite ? "text-[#DB2C17] fill-[#DB2C17]" : ""} />
       </Button>
       <Button 
-        variant="outline"
-        size="sm"
-        className="flex items-center gap-1"
+        variant="ghost"
+        size="icon"
+        className="w-9 h-9 rounded-full"
         onClick={onAddToMealPlan}
+        aria-label="Add to meal plan"
       >
-        <CalendarPlus size={16} />
-        Matsedel
+        <CalendarPlus size={18} />
       </Button>
       <Button 
-        className="bg-[#DB2C17] hover:bg-[#c02615] flex items-center gap-1"
+        className="bg-[#DB2C17] hover:bg-[#c02615] w-9 h-9 rounded-full"
         onClick={onAddToCart}
-        size="sm"
+        size="icon"
+        aria-label="Add ingredients to cart"
       >
-        <ShoppingCart size={16} />
-        Lägg till
+        <ShoppingCart size={18} />
       </Button>
     </div>
   );

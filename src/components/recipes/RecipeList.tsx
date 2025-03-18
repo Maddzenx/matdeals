@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Recipe } from "@/types/recipe";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
@@ -45,7 +46,7 @@ export const RecipeList: React.FC<RecipeListProps> = ({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       {recipes.map((recipe) => (
         <RecipeCard key={recipe.id} recipe={recipe} />
       ))}
