@@ -11,10 +11,12 @@ import { RecipeTabs } from "@/components/recipe-detail/RecipeTabs";
 import { RecipeError } from "@/components/recipe-detail/RecipeError";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { BottomNav } from "@/components/BottomNav";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const RecipeDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const { navItems, handleProductQuantityChange } = useNavigationState();
   const { toggleFavorite, favoriteIds, mealPlan, addToMealPlan } = useMealPlan();
   const [activeTab, setActiveTab] = useState("overview");
@@ -108,25 +110,28 @@ const RecipeDetail = () => {
         showRefreshButton={true}
       />
       
-      <RecipeMetrics 
-        time_minutes={recipe.time_minutes}
-        servings={recipe.servings}
-        difficulty={recipe.difficulty}
-      />
-      
-      <RecipeActions 
-        recipe={recipe}
-        favoriteIds={favoriteIds}
-        mealPlan={mealPlan}
-        onFavoriteToggle={handleFavoriteToggle}
-        onAddToMealPlan={handleAddToMealPlanDay}
-      />
+      <div className="px-4">
+        <RecipeMetrics 
+          time_minutes={recipe.time_minutes}
+          servings={recipe.servings}
+          difficulty={recipe.difficulty}
+        />
+        
+        <RecipeActions 
+          recipe={recipe}
+          favoriteIds={favoriteIds}
+          mealPlan={mealPlan}
+          onFavoriteToggle={handleFavoriteToggle}
+          onAddToMealPlan={handleAddToMealPlanDay}
+        />
+      </div>
       
       <RecipeTabs 
         recipe={recipe}
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onAddToCart={handleAddToCart}
+        hidePricing={true}
       />
       
       <BottomNav items={navItems} onSelect={handleNavSelect} />

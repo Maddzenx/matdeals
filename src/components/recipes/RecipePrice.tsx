@@ -5,9 +5,18 @@ import { Recipe } from "@/types/recipe";
 interface RecipePriceProps {
   recipe: Recipe;
   hasSavings: boolean;
+  hidePricing?: boolean;
 }
 
-export const RecipePrice: React.FC<RecipePriceProps> = ({ recipe, hasSavings }) => {
+export const RecipePrice: React.FC<RecipePriceProps> = ({ 
+  recipe, 
+  hasSavings,
+  hidePricing = false 
+}) => {
+  if (hidePricing) {
+    return null;
+  }
+  
   // Format price helper
   const formatPrice = (price: number | null) => {
     if (price === null) return "";

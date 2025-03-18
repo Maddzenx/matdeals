@@ -13,9 +13,13 @@ import { RecipeCardActions } from "./RecipeCardActions";
 
 interface RecipeCardProps {
   recipe: Recipe;
+  hidePricing?: boolean;
 }
 
-export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
+export const RecipeCard: React.FC<RecipeCardProps> = ({ 
+  recipe,
+  hidePricing = false
+}) => {
   const navigate = useNavigate();
   const { handleProductQuantityChange } = useNavigationState();
   const { toggleFavorite, favoriteIds } = useMealPlan();
@@ -73,7 +77,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
   
   return (
     <Card 
-      className="overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer relative"
+      className="overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer relative touch-feedback"
       onClick={handleCardClick}
     >
       <RecipeCardImage 
@@ -109,13 +113,17 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
         )}
         
         <div className="flex items-center justify-between">
-          <RecipePrice recipe={recipe} hasSavings={hasSavings} />
-          <RecipeCardActions 
-            isFavorite={isFavorite}
-            onFavoriteToggle={handleFavoriteToggle}
-            onAddToMealPlan={handleAddToMealPlan}
-            onAddToCart={handleAddToCart}
-          />
+          {!hidePricing && (
+            <RecipePrice recipe={recipe} hasSavings={hasSavings} hidePricing={hidePricing} />
+          )}
+          <div className={hidePricing ? "w-full" : ""}>
+            <RecipeCardActions 
+              isFavorite={isFavorite}
+              onFavoriteToggle={handleFavoriteToggle}
+              onAddToMealPlan={handleAddToMealPlan}
+              onAddToCart={handleAddToCart}
+            />
+          </div>
         </div>
       </CardContent>
     </Card>
