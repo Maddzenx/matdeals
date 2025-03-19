@@ -102,4 +102,3 @@ export const MealPlanDay: React.FC<MealPlanDayProps> = ({ day, onAddRecipe }) =>
     </Card>
   );
 };
-
