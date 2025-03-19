@@ -37,6 +37,13 @@ export const CompactRecipeCard: React.FC<CompactRecipeCardProps> = ({
     onAddToMealPlan();
   };
 
+  // Function to handle image errors
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    console.log(`Failed to load compact recipe image for ${recipe.title}, using fallback`);
+    e.currentTarget.onerror = null; // Prevent infinite loop
+    e.currentTarget.src = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'; // Food-related fallback
+  };
+
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
       <div className="flex">
@@ -44,15 +51,17 @@ export const CompactRecipeCard: React.FC<CompactRecipeCardProps> = ({
           className="h-24 w-24 bg-gray-200 cursor-pointer"
           onClick={handleCardClick}
         >
-          {recipe.image_url && (
+          {recipe.image_url ? (
             <img 
               src={recipe.image_url} 
               alt={recipe.title} 
               className="h-full w-full object-cover"
-              onError={(e) => {
-                e.currentTarget.src = '/placeholder.svg';
-              }}
+              onError={handleImageError}
             />
+          ) : (
+            <div className="h-full w-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs p-2 text-center">
+              {recipe.title}
+            </div>
           )}
         </div>
         

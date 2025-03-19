@@ -17,21 +17,17 @@ export const RecipeHeader: React.FC<RecipeHeaderProps> = ({
   onRefresh,
   showRefreshButton = false,
 }) => {
+  // Function to handle image errors
+  const imageUrl = recipe.image_url || 'https://images.unsplash.com/photo-1495521821757-a1efb6729352?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80';
+  
   return (
     <div className="relative">
       <div 
-        className="h-64 bg-gray-200"
+        className="h-64 bg-gray-200 bg-center bg-cover"
         style={{
-          backgroundImage: recipe.image_url ? `url(${recipe.image_url})` : undefined,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          backgroundImage: `url(${imageUrl})`,
         }}
       >
-        {!recipe.image_url && (
-          <div className="w-full h-full flex items-center justify-center text-gray-500">
-            Ingen bild tillgänglig
-          </div>
-        )}
         <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/60 to-transparent p-4">
           <button onClick={onBack} className="flex items-center text-white">
             <ArrowLeft size={20} className="mr-1" />

@@ -32,6 +32,13 @@ export const MealPlanDay: React.FC<MealPlanDayProps> = ({ day, onAddRecipe }) =>
     return today === day.day.toLowerCase();
   };
 
+  // Function to handle image errors
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    console.log(`Failed to load meal plan image for ${day.day}, using fallback`);
+    e.currentTarget.onerror = null; // Prevent infinite loop
+    e.currentTarget.src = 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'; // Food-related fallback
+  };
+
   return (
     <Card className={`overflow-hidden transition-all duration-200 ${isCurrentDay() ? 'border-[#DB2C17] shadow-md' : 'border-gray-200'}`}>
       <div className={`py-3 px-4 border-b ${isCurrentDay() ? 'bg-[#FEF3F2] text-[#DB2C17]' : 'bg-gray-50'}`}>
@@ -44,12 +51,17 @@ export const MealPlanDay: React.FC<MealPlanDayProps> = ({ day, onAddRecipe }) =>
               className="h-20 w-20 bg-gray-100 rounded-md overflow-hidden mr-4 cursor-pointer shadow-sm transition-transform hover:scale-105"
               onClick={() => navigate(`/recipe/${day.recipe.id}`)}
             >
-              {day.recipe.image_url && (
+              {day.recipe.image_url ? (
                 <img 
                   src={day.recipe.image_url} 
                   alt={day.recipe.title} 
                   className="h-full w-full object-cover"
+                  onError={handleImageError}
                 />
+              ) : (
+                <div className="h-full w-full flex items-center justify-center text-gray-400 text-xs text-center p-1">
+                  {day.recipe.title}
+                </div>
               )}
             </div>
             <div className="flex-1 cursor-pointer" onClick={() => navigate(`/recipe/${day.recipe.id}`)}>

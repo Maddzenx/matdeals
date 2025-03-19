@@ -26,12 +26,18 @@ export const RecipeCardImage: React.FC<RecipeCardImageProps> = ({
           alt={recipe.title}
           className="w-full h-full object-cover"
           onError={(e) => {
-            e.currentTarget.src = '/placeholder.svg';
+            const target = e.currentTarget;
+            console.log(`Failed to load image for ${recipe.title}, using fallback`);
+            target.onerror = null; // Prevent infinite loop
+            target.src = 'https://images.unsplash.com/photo-1547592180-85f173990554?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'; // A food-related fallback image
           }}
         />
       ) : (
-        <div className="w-full h-full flex items-center justify-center text-gray-500">
-          Ingen bild tillgänglig
+        <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-500">
+          <div className="text-center p-4">
+            <span className="block mb-2">Ingen bild tillgänglig</span>
+            <span className="text-sm">{recipe.title}</span>
+          </div>
         </div>
       )}
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">

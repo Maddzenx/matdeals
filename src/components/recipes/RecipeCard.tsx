@@ -17,7 +17,7 @@ interface RecipeCardProps {
 
 export const RecipeCard: React.FC<RecipeCardProps> = ({ 
   recipe,
-  hidePricing = true // Set default to true to hide pricing
+  hidePricing = true
 }) => {
   const navigate = useNavigate();
   const { handleProductQuantityChange } = useNavigationState();
@@ -31,6 +31,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
   const isFavorite = favoriteIds.includes(recipe.id);
   
   const handleCardClick = () => {
+    console.log(`Navigating to recipe: ${recipe.id}, title: ${recipe.title}, image: ${recipe.image_url || 'no image'}`);
     navigate(`/recipe/${recipe.id}`);
   };
   
