@@ -9,6 +9,7 @@ import { FavoriteRecipes } from "@/components/meal-plan/FavoriteRecipes";
 import { PreviousRecipes } from "@/components/meal-plan/PreviousRecipes";
 import { MealPlanHeader } from "@/components/meal-plan/MealPlanHeader";
 import { useMealPlan } from "@/hooks/useMealPlan";
+import { Calendar, Heart, Clock } from "lucide-react";
 
 const MealPlan = () => {
   const navigate = useNavigate();
@@ -31,15 +32,33 @@ const MealPlan = () => {
     <div className="min-h-screen pb-20 bg-white">
       <MealPlanHeader />
 
-      <div className="p-4">
+      <div className="px-4 pt-2">
         <Tabs defaultValue="weekly" onValueChange={setActiveTab} value={activeTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-4 bg-gray-100">
-            <TabsTrigger value="weekly">Veckans plan</TabsTrigger>
-            <TabsTrigger value="favorites">Favoriter</TabsTrigger>
-            <TabsTrigger value="previous">Tidigare</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 mb-6 bg-gray-50 p-1 rounded-lg">
+            <TabsTrigger 
+              value="weekly" 
+              className="flex items-center gap-1.5 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
+              <Calendar size={14} />
+              <span>Veckans plan</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="favorites" 
+              className="flex items-center gap-1.5 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
+              <Heart size={14} />
+              <span>Favoriter</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="previous" 
+              className="flex items-center gap-1.5 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
+              <Clock size={14} />
+              <span>Tidigare</span>
+            </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="weekly">
+          <TabsContent value="weekly" className="pt-2 animate-fade-in">
             <WeeklyPlanView 
               mealPlan={mealPlan} 
               loading={loading} 
@@ -47,7 +66,7 @@ const MealPlan = () => {
             />
           </TabsContent>
           
-          <TabsContent value="favorites">
+          <TabsContent value="favorites" className="animate-fade-in">
             <FavoriteRecipes 
               recipes={favorites} 
               loading={loading} 
@@ -60,7 +79,7 @@ const MealPlan = () => {
             />
           </TabsContent>
           
-          <TabsContent value="previous">
+          <TabsContent value="previous" className="animate-fade-in">
             <PreviousRecipes 
               recipes={previousRecipes} 
               loading={loading}
@@ -81,3 +100,4 @@ const MealPlan = () => {
 };
 
 export default MealPlan;
+
