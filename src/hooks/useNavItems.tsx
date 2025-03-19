@@ -30,7 +30,7 @@ export const useNavItems = (cartCount: number) => {
       if (path === "/auth" && item.id === "profile") {
         return { ...item, active: true };
       }
-      if (path === "/meal-plan" && item.id === "menu") {
+      if ((path === "/meal-plan" || path === "/menu") && item.id === "menu") {
         return { ...item, active: true };
       }
       return { ...item, active: false };

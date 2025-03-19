@@ -5,6 +5,7 @@ import { Heart, CalendarPlus, ShoppingCart } from "lucide-react";
 import { DaySelector } from "@/components/meal-plan/DaySelector";
 import { DayMeal } from "@/types/mealPlan";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface RecipeCardActionsProps {
   isFavorite: boolean;
@@ -26,6 +27,7 @@ export const RecipeCardActions: React.FC<RecipeCardActionsProps> = ({
   onSelectDay,
 }) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const handleAddToCart = (e: React.MouseEvent) => {
     onAddToCart(e);
@@ -35,6 +37,18 @@ export const RecipeCardActions: React.FC<RecipeCardActionsProps> = ({
       title: "Varor tillagda",
       description: "Ingredienserna lades till i inköpslistan",
     });
+  };
+
+  const handleAddToMealPlan = (e: React.MouseEvent) => {
+    if (onSelectDay && mealPlan) {
+      // Use the DaySelector component
+      return;
+    } else {
+      // Directly navigate to the meal plan page
+      e.stopPropagation();
+      navigate("/meal-plan");
+      onAddToMealPlan(e);
+    }
   };
 
   return (
@@ -70,7 +84,7 @@ export const RecipeCardActions: React.FC<RecipeCardActionsProps> = ({
           variant="ghost"
           size="icon"
           className="w-9 h-9 rounded-full"
-          onClick={onAddToMealPlan}
+          onClick={handleAddToMealPlan}
           aria-label="Lägg till i matsedel"
         >
           <CalendarPlus size={18} />

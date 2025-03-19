@@ -31,6 +31,12 @@ export const CompactRecipeCard: React.FC<CompactRecipeCardProps> = ({
     navigate(`/recipe/${recipe.id}`);
   };
 
+  const handleMealPlanClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate("/meal-plan");
+    onAddToMealPlan();
+  };
+
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
       <div className="flex">
@@ -101,10 +107,7 @@ export const CompactRecipeCard: React.FC<CompactRecipeCardProps> = ({
                 size="sm" 
                 variant="outline"
                 className="py-1 h-7 text-xs"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAddToMealPlan();
-                }}
+                onClick={handleMealPlanClick}
               >
                 Lägg till i matsedel
               </Button>
