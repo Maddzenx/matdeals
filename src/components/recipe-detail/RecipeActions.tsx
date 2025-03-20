@@ -39,6 +39,7 @@ export const RecipeActions: React.FC<RecipeActionsProps> = ({
         onSelectDay={onAddToMealPlan}
         trigger={
           <Button 
+            id="meal-plan-trigger"
             variant="outline" 
             size="sm"
           >

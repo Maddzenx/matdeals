@@ -1,7 +1,7 @@
 
-import React, { useEffect, useCallback, useState } from "react";
+import React, { useEffect, useCallback, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Tag } from "lucide-react"; // Add the missing import
+import { Tag, ArrowLeft, Heart, MoreVertical, ChevronRight } from "lucide-react"; // Add the missing imports
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { useRecipeDetail } from "@/hooks/useRecipeDetail";
 import { useMealPlan } from "@/hooks/useMealPlan";
@@ -13,6 +13,12 @@ import { RecipeError } from "@/components/recipe-detail/RecipeError";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { BottomNav } from "@/components/BottomNav";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 
 const RecipeDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,12 +27,25 @@ const RecipeDetail = () => {
   const { navItems, handleProductQuantityChange } = useNavigationState();
   const { toggleFavorite, favoriteIds, mealPlan, addToMealPlan } = useMealPlan();
   const [activeTab, setActiveTab] = useState("overview");
+  const [showTopPanel, setShowTopPanel] = useState(false);
   
   const {
     recipe,
     loading,
     error,
   } = useRecipeDetail(id);
+
+  // Handle scroll events
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show the top panel when scrolled past a certain point (e.g., 100px)
+      const scrollPosition = window.scrollY;
+      setShowTopPanel(scrollPosition > 100);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Handle back button click
   const handleGoBack = useCallback(() => {
@@ -98,7 +117,62 @@ const RecipeDetail = () => {
   const hasDiscountedIngredients = recipe.matchedProducts && recipe.matchedProducts.length > 0;
 
   return (
-    <div className="min-h-screen bg-white pb-24">
+    <div className="min-h-screen bg-white pb-24 relative">
+      {/* Floating top panel that appears on scroll */}
+      <div 
+        className={`fixed top-0 left-0 right-0 bg-white z-50 border-b border-gray-200 transition-transform duration-200 ease-in-out ${
+          showTopPanel ? 'translate-y-0 shadow-md' : '-translate-y-full'
+        }`}
+      >
+        <div className="px-4 py-3 flex items-center justify-between">
+          <button onClick={handleGoBack} className="text-[#DB2C17]">
+            <ArrowLeft size={24} />
+          </button>
+          
+          <h1 className="text-base font-medium truncate max-w-[60%]">
+            {recipe.title}
+          </h1>
+          
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={handleFavoriteToggle}
+              className="p-2 rounded-full"
+            >
+              <Heart 
+                size={22} 
+                className={favoriteIds.includes(recipe.id) ? "text-[#DB2C17] fill-[#DB2C17]" : "text-gray-600"} 
+              />
+            </button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="p-2 rounded-full">
+                  <MoreVertical size={22} className="text-gray-600" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem 
+                  className="flex items-center cursor-pointer"
+                  onClick={() => {
+                    // Open meal plan day selector
+                    document.getElementById('meal-plan-trigger')?.click();
+                  }}
+                >
+                  <span>Lägg till i matsedel</span>
+                  <ChevronRight size={16} className="ml-auto" />
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={handleAddToCart}
+                >
+                  Lägg till i inköpslista
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </div>
+
       <RecipeHeader 
         recipe={recipe}
         onBack={handleGoBack}
