@@ -1,6 +1,7 @@
 
 import React, { useEffect, useCallback, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Tag } from "lucide-react"; // Add the missing import
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { useRecipeDetail } from "@/hooks/useRecipeDetail";
 import { useMealPlan } from "@/hooks/useMealPlan";
