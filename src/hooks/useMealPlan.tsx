@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { Recipe } from "@/types/recipe";
 import { DayMeal, MealPlanState } from "@/types/mealPlan";
@@ -69,6 +68,8 @@ export const useMealPlan = () => {
         if (!day.recipe) return day;
         
         const updatedRecipe = recipes.find(r => r.id === day.recipe?.id);
+        // Keep the original recipe if not found in the updated list, but mark as potentially stale
+        // in the UI when displaying
         return {
           ...day,
           recipe: updatedRecipe || day.recipe
@@ -112,6 +113,20 @@ export const useMealPlan = () => {
     }
   }, [mealPlan, favoriteIds, historyIds, loading]);
 
+  // Clear a specific recipe from the meal plan
+  const clearRecipeFromMealPlan = useCallback((recipeId: string) => {
+    if (!recipeId) return;
+    
+    setMealPlan(prev => {
+      return prev.map(dayMeal => {
+        if (dayMeal.recipe && dayMeal.recipe.id === recipeId) {
+          return { ...dayMeal, recipe: null };
+        }
+        return dayMeal;
+      });
+    });
+  }, []);
+
   // Add a recipe to the meal plan for a specific day
   const addToMealPlan = useCallback((day: string, recipeId: string) => {
     setMealPlan(prev => {
@@ -154,6 +169,7 @@ export const useMealPlan = () => {
     previousRecipes, 
     loading,
     addToMealPlan,
+    clearRecipeFromMealPlan,
     toggleFavorite,
     favoriteIds
   };

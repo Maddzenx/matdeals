@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, ChevronRight } from "lucide-react";
+import { Plus, ChevronRight, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { DayMeal } from "@/types/mealPlan";
@@ -46,6 +46,9 @@ export const MealPlanDay: React.FC<MealPlanDayProps> = ({ day, onAddRecipe }) =>
     }
   };
 
+  // Check if recipe exists but might be problematic (lacks essential properties)
+  const isPotentiallyInvalidRecipe = day.recipe && (!day.recipe.title || !day.recipe.ingredients);
+
   return (
     <Card className={`overflow-hidden transition-all duration-200 ${isCurrentDay() ? 'border-[#DB2C17] shadow-md' : 'border-gray-200'}`}>
       <div className={`py-3 px-4 border-b ${isCurrentDay() ? 'bg-[#FEF3F2] text-[#DB2C17]' : 'bg-gray-50'}`}>
@@ -56,27 +59,34 @@ export const MealPlanDay: React.FC<MealPlanDayProps> = ({ day, onAddRecipe }) =>
           <div className="flex items-center">
             <div 
               className="h-20 w-20 bg-gray-100 rounded-md overflow-hidden mr-4 cursor-pointer shadow-sm transition-transform hover:scale-105"
-              onClick={handleNavigateToRecipe}
+              onClick={isPotentiallyInvalidRecipe ? undefined : handleNavigateToRecipe}
             >
               {day.recipe.image_url ? (
                 <img 
                   src={day.recipe.image_url} 
-                  alt={day.recipe.title} 
+                  alt={day.recipe.title || 'Recipe'} 
                   className="h-full w-full object-cover"
                   onError={handleImageError}
                 />
               ) : (
                 <div className="h-full w-full flex items-center justify-center text-gray-400 text-xs text-center p-1">
-                  {day.recipe.title}
+                  {day.recipe.title || 'Recept'}
                 </div>
               )}
             </div>
-            <div className="flex-1 cursor-pointer" onClick={handleNavigateToRecipe}>
+            <div className="flex-1 cursor-pointer" onClick={isPotentiallyInvalidRecipe ? undefined : handleNavigateToRecipe}>
               <h4 className="font-medium text-sm hover:text-[#DB2C17] transition-colors">
-                {day.recipe.title}
+                {day.recipe.title || 'Namnlöst recept'}
+                {isPotentiallyInvalidRecipe && (
+                  <span className="inline-flex items-center ml-2 text-amber-500">
+                    <AlertCircle size={14} className="mr-1" />
+                    Behöver uppdateras
+                  </span>
+                )}
               </h4>
               <p className="text-xs text-gray-500 mt-1">
-                {day.recipe.time_minutes} min • {day.recipe.servings} portioner
+                {day.recipe.time_minutes ? `${day.recipe.time_minutes} min • ` : ''}
+                {day.recipe.servings ? `${day.recipe.servings} portioner` : ''}
               </p>
               <div className="flex items-center mt-2">
                 <Button
@@ -90,17 +100,19 @@ export const MealPlanDay: React.FC<MealPlanDayProps> = ({ day, onAddRecipe }) =>
                 >
                   Byt recept
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 px-2 text-xs flex items-center gap-1"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNavigateToRecipe();
-                  }}
-                >
-                  Se detaljer <ChevronRight size={14} />
-                </Button>
+                {!isPotentiallyInvalidRecipe && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-2 text-xs flex items-center gap-1"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNavigateToRecipe();
+                    }}
+                  >
+                    Se detaljer <ChevronRight size={14} />
+                  </Button>
+                )}
               </div>
             </div>
           </div>

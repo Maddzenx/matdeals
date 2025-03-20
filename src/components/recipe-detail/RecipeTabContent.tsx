@@ -45,14 +45,14 @@ export const RecipeTabContent: React.FC<RecipeTabContentProps> = ({
       
       <TabsContent value="ingredients" className="animate-fade-in mt-0">
         <RecipeIngredients 
-          ingredients={recipe.ingredients} 
-          matchedProducts={recipe.matchedProducts}
-          servings={recipe.servings}
+          ingredients={recipe.ingredients || []} 
+          matchedProducts={recipe.matchedProducts || []}
+          servings={recipe.servings || 4}
         />
       </TabsContent>
       
       <TabsContent value="instructions" className="animate-fade-in mt-0">
-        <RecipeInstructions instructions={recipe.instructions} />
+        <RecipeInstructions instructions={recipe.instructions || []} />
       </TabsContent>
     </>
   );

@@ -30,6 +30,8 @@ const RecipeDetail = () => {
     recipe,
     loading,
     error,
+    refreshing,
+    refreshRecipe
   } = useRecipeDetail(id);
 
   const { 
@@ -69,10 +71,10 @@ const RecipeDetail = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  if (loading) {
+  if (loading || refreshing) {
     return (
       <div className="min-h-screen bg-white pb-20 flex flex-col items-center justify-center">
-        <LoadingIndicator message="Laddar recept..." />
+        <LoadingIndicator message={refreshing ? "Uppdaterar recept..." : "Laddar recept..."} />
       </div>
     );
   }
@@ -82,6 +84,7 @@ const RecipeDetail = () => {
       <RecipeError
         message={error?.message}
         onGoBack={handleGoBack}
+        onRetry={refreshRecipe}
       />
     );
   }

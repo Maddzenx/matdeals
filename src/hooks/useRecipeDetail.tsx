@@ -1,13 +1,15 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Recipe } from "./useRecipes";
+import { Recipe } from "@/types/recipe";
 import { useToast } from "@/hooks/use-toast";
+import { scrapeRecipesFromApi } from "@/services/recipeService";
 
 export const useRecipeDetail = (id: string | undefined) => {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const { toast } = useToast();
 
   const fetchRecipe = async (recipeId: string) => {
@@ -46,6 +48,43 @@ export const useRecipeDetail = (id: string | undefined) => {
     }
   };
 
+  const refreshRecipe = async () => {
+    if (!id) {
+      console.error("Cannot refresh recipe: No recipe ID provided");
+      return false;
+    }
+
+    try {
+      setRefreshing(true);
+      
+      console.log(`Attempting to refresh recipe with ID: ${id}`);
+      
+      // Call the edge function to scrape this specific recipe
+      const result = await scrapeRecipesFromApi(false, id);
+      
+      if (!result.success) {
+        console.error("Failed to refresh recipe:", result.error);
+        return false;
+      }
+      
+      if (result.recipe) {
+        console.log("Successfully refreshed recipe:", result.recipe.title);
+        setRecipe(result.recipe);
+        setError(null);
+        return true;
+      }
+      
+      // If we got success but no recipe, try fetching again
+      return await fetchRecipe(id);
+      
+    } catch (err) {
+      console.error("Error refreshing recipe:", err);
+      return false;
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   useEffect(() => {
     if (!id) {
       setError(new Error("No recipe ID provided"));
@@ -56,5 +95,11 @@ export const useRecipeDetail = (id: string | undefined) => {
     fetchRecipe(id);
   }, [id]);
 
-  return { recipe, loading, error };
+  return { 
+    recipe, 
+    loading, 
+    error, 
+    refreshing,
+    refreshRecipe
+  };
 };
