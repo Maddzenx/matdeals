@@ -29,12 +29,14 @@ export const RecipeTabs: React.FC<RecipeTabsProps> = ({
         className="w-full"
       >
         <RecipeTabList activeTab={activeTab} />
-        <RecipeTabContent 
-          activeTab={activeTab} 
-          recipe={recipe} 
-          onAddToCart={onAddToCart} 
-          hidePricing={hidePricing} 
-        />
+        <div className="pt-1">
+          <RecipeTabContent 
+            activeTab={activeTab} 
+            recipe={recipe} 
+            onAddToCart={onAddToCart} 
+            hidePricing={hidePricing} 
+          />
+        </div>
       </Tabs>
     </div>
   );
