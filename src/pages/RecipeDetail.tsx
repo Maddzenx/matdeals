@@ -1,4 +1,3 @@
-
 import React, { useCallback, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useNavigationState } from "@/hooks/useNavigationState";
@@ -14,6 +13,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { TopNavigationBar } from "@/components/recipe-detail/TopNavigationBar";
 import { useRecipeActions } from "@/hooks/useRecipeActions";
+import { Tag } from "lucide-react";
 
 const RecipeDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -36,31 +36,26 @@ const RecipeDetail = () => {
     handleAddToCartWithToast
   } = useRecipeActions();
 
-  // Handle back button click
   const handleGoBack = useCallback(() => {
     navigate(-1);
   }, [navigate]);
 
-  // Handle navigation selection
   const handleNavSelect = useCallback((id: string) => {
     navigate(`/${id}`);
   }, [navigate]);
 
-  // Handle favorite toggle
   const handleFavoriteToggle = useCallback(() => {
     if (recipe) {
       toggleFavorite(recipe.id);
     }
   }, [recipe, toggleFavorite]);
 
-  // Handle add to cart
   const handleAddToCart = useCallback(() => {
     if (recipe) {
       handleAddToCartWithToast(recipe, handleProductQuantityChange);
     }
   }, [recipe, handleAddToCartWithToast, handleProductQuantityChange]);
 
-  // Auto scroll to top on page load
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -96,7 +91,6 @@ const RecipeDetail = () => {
         onAddToCart={handleAddToCart}
       />
 
-      {/* Add top padding to prevent content from being hidden behind the fixed header */}
       <div className="pt-14">
         <RecipeHeader recipe={recipe} onBack={null} />
         
