@@ -25,6 +25,7 @@ interface ProductSectionProps {
   viewMode?: "grid" | "list";
   searchQuery?: string;
   supabaseProducts?: Product[];
+  fixedHeader?: boolean;
 }
 
 export const ProductSection: React.FC<ProductSectionProps> = ({
@@ -35,7 +36,8 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   onRemoveTag,
   viewMode = "grid",
   searchQuery = "",
-  supabaseProducts = []
+  supabaseProducts = [],
+  fixedHeader = false
 }) => {
   const { getProductsWithCategories } = useProductUtils(categories);
   const allLocalProducts = getProductsWithCategories();
@@ -129,6 +131,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
         allCategoryNames={allCategoryNames}
         onQuantityChange={handleQuantityChange}
         viewMode={viewMode}
+        fixedHeader={fixedHeader}
       />
     </div>
   );

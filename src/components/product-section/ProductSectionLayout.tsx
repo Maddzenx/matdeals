@@ -15,6 +15,7 @@ interface ProductSectionLayoutProps {
   allCategoryNames: string[];
   onQuantityChange: (productId: string, newQuantity: number, previousQuantity: number) => void;
   viewMode: "grid" | "list";
+  fixedHeader?: boolean;
 }
 
 export const ProductSectionLayout: React.FC<ProductSectionLayoutProps> = ({
@@ -26,7 +27,8 @@ export const ProductSectionLayout: React.FC<ProductSectionLayoutProps> = ({
   products,
   allCategoryNames,
   onQuantityChange,
-  viewMode
+  viewMode,
+  fixedHeader = false
 }) => {
   // Helper function to translate category names if needed
   const translateCategory = (name: string): string => {
@@ -75,34 +77,75 @@ export const ProductSectionLayout: React.FC<ProductSectionLayoutProps> = ({
 
   return (
     <>
-      <div className="px-4 pt-1 pb-0">
-        <StoreTags tags={storeTags} onRemove={onRemoveTag} />
-      </div>
-      <CategoryTabs
-        categories={categories}
-        activeCategory={activeCategory}
-        onSelect={onCategorySelect}
-      />
-      <main className="p-4">
-        {/* Display the active category name as a heading if it's not "All" */}
-        {activeCategory !== "all" && activeCategoryName && (
-          <h2 className="text-xl font-bold text-[#1C1C1C] mb-4">{translatedCategoryName}</h2>
-        )}
-        
-        {/* Debug output to troubleshoot */}
-        <div className="bg-gray-100 p-2 mb-4 rounded text-sm" style={{display: 'none'}}>
-          <p>Filtered products: {filteredCategoryProducts.length}</p>
-          <p>Active category: {activeCategory}</p>
-        </div>
-        
-        <ProductGrid
-          products={filteredCategoryProducts}
-          showCategoryHeaders={activeCategory === "all"} // Only show category headers in "All" view
-          onQuantityChange={onQuantityChange}
-          viewMode={viewMode}
-          allCategoryNames={allCategoryNames}
-        />
-      </main>
+      {fixedHeader ? (
+        <>
+          {/* Fixed part - category tabs only */}
+          <CategoryTabs
+            categories={categories}
+            activeCategory={activeCategory}
+            onSelect={onCategorySelect}
+          />
+          
+          {/* Scrollable part - content with spacing for fixed header */}
+          <div className="mt-[128px]">
+            <div className="px-4 pt-4 pb-0">
+              <StoreTags tags={storeTags} onRemove={onRemoveTag} />
+            </div>
+            <main className="p-4">
+              {/* Display the active category name as a heading if it's not "All" */}
+              {activeCategory !== "all" && activeCategoryName && (
+                <h2 className="text-xl font-bold text-[#1C1C1C] mb-4">{translatedCategoryName}</h2>
+              )}
+              
+              {/* Debug output to troubleshoot */}
+              <div className="bg-gray-100 p-2 mb-4 rounded text-sm" style={{display: 'none'}}>
+                <p>Filtered products: {filteredCategoryProducts.length}</p>
+                <p>Active category: {activeCategory}</p>
+              </div>
+              
+              <ProductGrid
+                products={filteredCategoryProducts}
+                showCategoryHeaders={activeCategory === "all"} // Only show category headers in "All" view
+                onQuantityChange={onQuantityChange}
+                viewMode={viewMode}
+                allCategoryNames={allCategoryNames}
+              />
+            </main>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Regular non-fixed layout */}
+          <div className="px-4 pt-1 pb-0">
+            <StoreTags tags={storeTags} onRemove={onRemoveTag} />
+          </div>
+          <CategoryTabs
+            categories={categories}
+            activeCategory={activeCategory}
+            onSelect={onCategorySelect}
+          />
+          <main className="p-4">
+            {/* Display the active category name as a heading if it's not "All" */}
+            {activeCategory !== "all" && activeCategoryName && (
+              <h2 className="text-xl font-bold text-[#1C1C1C] mb-4">{translatedCategoryName}</h2>
+            )}
+            
+            {/* Debug output to troubleshoot */}
+            <div className="bg-gray-100 p-2 mb-4 rounded text-sm" style={{display: 'none'}}>
+              <p>Filtered products: {filteredCategoryProducts.length}</p>
+              <p>Active category: {activeCategory}</p>
+            </div>
+            
+            <ProductGrid
+              products={filteredCategoryProducts}
+              showCategoryHeaders={activeCategory === "all"} // Only show category headers in "All" view
+              onQuantityChange={onQuantityChange}
+              viewMode={viewMode}
+              allCategoryNames={allCategoryNames}
+            />
+          </main>
+        </>
+      )}
     </>
   );
 };

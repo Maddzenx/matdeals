@@ -64,7 +64,7 @@ export const OffersPageContent: React.FC<OffersPageContentProps> = ({
         href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"
       />
       <div className="min-h-screen w-full bg-white pb-20">
-        <div className="z-30 bg-white">
+        <div className="fixed top-0 left-0 right-0 z-30 bg-white">
           <PageHeader 
             title={title}
             onRefresh={handleRefresh}
@@ -77,21 +77,29 @@ export const OffersPageContent: React.FC<OffersPageContentProps> = ({
             onStoreToggle={handleStoreToggle}
             onSearch={handleSearch}
           />
+          <div className="fixed-category-tabs">
+            <ProductSection
+              categories={categoriesData}
+              storeTags={filteredStoreTags}
+              activeStoreIds={activeStores}
+              onProductQuantityChange={handleProductQuantityChange}
+              onRemoveTag={handleRemoveTag}
+              viewMode={viewMode}
+              searchQuery={searchQuery}
+              supabaseProducts={supabaseProducts}
+              fixedHeader={true}
+            />
+          </div>
         </div>
         
         {loading ? (
-          <LoadingIndicator />
+          <div className="mt-[185px] flex justify-center">
+            <LoadingIndicator />
+          </div>
         ) : (
-          <ProductSection
-            categories={categoriesData}
-            storeTags={filteredStoreTags}
-            activeStoreIds={activeStores}
-            onProductQuantityChange={handleProductQuantityChange}
-            onRemoveTag={handleRemoveTag}
-            viewMode={viewMode}
-            searchQuery={searchQuery}
-            supabaseProducts={supabaseProducts}
-          />
+          <div className="fixed-content-spacing">
+            {/* Blank div for spacing, actual content is rendered within ProductSection */}
+          </div>
         )}
         <BottomNav items={navItems} onSelect={handleNavSelect} />
       </div>
