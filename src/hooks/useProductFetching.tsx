@@ -70,10 +70,11 @@ export const useProductFetching = () => {
     console.log("Fetching products from Supabase Hemköp table...");
     
     try {
-      console.log("About to query Hemkop table with: supabase.from('Hemkop').select('*')");
+      console.log("About to query Hemkop table with: supabase.from('hemkop').select('*')");
       
+      // Fix: Changed 'Hemkop' to 'hemkop' to match the actual table name in Supabase
       const { data: hemkopData, error: hemkopError } = await supabase
-        .from('Hemkop')
+        .from('hemkop')
         .select('*');
         
       if (hemkopError) {
