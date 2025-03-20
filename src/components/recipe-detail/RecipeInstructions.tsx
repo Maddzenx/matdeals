@@ -1,8 +1,7 @@
 
 import React, { useState, useEffect } from "react";
-import { Toggle } from "@/components/ui/toggle";
 import { Lightbulb } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Switch } from "@/components/ui/switch";
 
 interface RecipeInstructionsProps {
   instructions: string[] | null;
@@ -12,7 +11,6 @@ export const RecipeInstructions: React.FC<RecipeInstructionsProps> = ({
   instructions,
 }) => {
   const [keepScreenOn, setKeepScreenOn] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
     // Only run this effect when the toggle is switched
@@ -24,19 +22,8 @@ export const RecipeInstructions: React.FC<RecipeInstructionsProps> = ({
         try {
           // The Wake Lock API is used to prevent the screen from turning off
           wakeLockSentinel = await navigator.wakeLock.request("screen");
-          
-          toast({
-            title: "Skärmen hålls tänd",
-            description: "Skärmen kommer att förbli tänd medan du lagar mat",
-          });
         } catch (err) {
           console.error(`Failed to keep screen on: ${err}`);
-          
-          toast({
-            title: "Kunde inte hålla skärmen tänd",
-            description: "Din enhet stödjer eventuellt inte denna funktion",
-            variant: "destructive",
-          });
           
           // Reset the toggle if we couldn't get a wake lock
           setKeepScreenOn(false);
@@ -57,18 +44,10 @@ export const RecipeInstructions: React.FC<RecipeInstructionsProps> = ({
         }
       };
     }
-  }, [keepScreenOn, toast]);
+  }, [keepScreenOn]);
 
-  const handleToggleScreenOn = () => {
-    setKeepScreenOn(!keepScreenOn);
-    
-    // If we're turning it off, show a toast
-    if (keepScreenOn) {
-      toast({
-        title: "Skärmen kommer att släckas som vanligt",
-        description: "Automatisk skärmsläckning är aktiverad igen",
-      });
-    }
+  const handleToggleScreenOn = (checked: boolean) => {
+    setKeepScreenOn(checked);
   };
 
   if (!instructions || instructions.length === 0) {
@@ -79,15 +58,14 @@ export const RecipeInstructions: React.FC<RecipeInstructionsProps> = ({
     <div className="mb-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">Instruktioner</h2>
-        <Toggle 
-          pressed={keepScreenOn}
-          onPressedChange={handleToggleScreenOn}
-          aria-label="Håll skärmen tänd"
-          className="data-[state=on]:bg-[#DB2C17] data-[state=on]:text-white"
-        >
-          <Lightbulb size={18} className="mr-2" />
-          Håll skärmen tänd
-        </Toggle>
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Håll skärmen tänd</span>
+          <Switch 
+            checked={keepScreenOn}
+            onCheckedChange={handleToggleScreenOn}
+            className="data-[state=checked]:bg-[#DB2C17]"
+          />
+        </div>
       </div>
       
       <ol className="space-y-4">
