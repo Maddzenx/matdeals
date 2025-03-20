@@ -52,10 +52,11 @@ export const fetchRecipesByCategory = async (
   }
 };
 
+// Update the return type to include the recipe property
 export const scrapeRecipesFromApi = async (
   showNotification = true,
   recipeId?: string
-): Promise<{ success: boolean; count?: number; error?: string }> => {
+): Promise<{ success: boolean; count?: number; error?: string; recipe?: any }> => {
   try {
     console.log(recipeId 
       ? `Invoking scrape-recipes edge function for recipe: ${recipeId}` 
