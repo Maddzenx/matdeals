@@ -15,6 +15,7 @@ interface CompactRecipeCardProps {
   onAddToMealPlan: () => void;
   mealPlan?: DayMeal[];
   onSelectDay?: (day: string, recipeId: string) => void;
+  onSelectMultipleDays?: (days: string[], recipeId: string) => void;
 }
 
 export const CompactRecipeCard: React.FC<CompactRecipeCardProps> = ({
@@ -23,7 +24,8 @@ export const CompactRecipeCard: React.FC<CompactRecipeCardProps> = ({
   onToggleFavorite,
   onAddToMealPlan,
   mealPlan,
-  onSelectDay
+  onSelectDay,
+  onSelectMultipleDays
 }) => {
   const navigate = useNavigate();
   const [showMealPlanSelector, setShowMealPlanSelector] = useState(false);
@@ -111,6 +113,8 @@ export const CompactRecipeCard: React.FC<CompactRecipeCardProps> = ({
               onSelectDay={onSelectDay || (() => {
                 onAddToMealPlan();
               })}
+              onSelectMultipleDays={onSelectMultipleDays}
+              allowMultiple={!!onSelectMultipleDays}
               open={showMealPlanSelector}
               onOpenChange={setShowMealPlanSelector}
               trigger={<div className="hidden">Trigger</div>}

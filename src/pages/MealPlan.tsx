@@ -15,7 +15,7 @@ const MealPlan = () => {
   const navigate = useNavigate();
   const { navItems } = useNavigationState();
   const [activeTab, setActiveTab] = useState("weekly");
-  const { mealPlan, favorites, previousRecipes, loading, addToMealPlan, toggleFavorite } = useMealPlan();
+  const { mealPlan, favorites, previousRecipes, loading, addToMealPlan, addToMultipleDays, toggleFavorite } = useMealPlan();
 
   const handleNavSelect = (id: string) => {
     console.log("Selected nav:", id);
@@ -25,6 +25,13 @@ const MealPlan = () => {
   const handleSelectDay = (day: string, recipeId: string) => {
     addToMealPlan(day, recipeId);
     // Switch to weekly view after selecting a day
+    setActiveTab("weekly");
+  };
+
+  // Handle selecting multiple days for a recipe
+  const handleSelectMultipleDays = (days: string[], recipeId: string) => {
+    addToMultipleDays(days, recipeId);
+    // Switch to weekly view after selecting days
     setActiveTab("weekly");
   };
 
@@ -76,6 +83,7 @@ const MealPlan = () => {
               }}
               mealPlan={mealPlan}
               onSelectDay={handleSelectDay}
+              onSelectMultipleDays={handleSelectMultipleDays}
             />
           </TabsContent>
           
@@ -89,6 +97,7 @@ const MealPlan = () => {
               }}
               mealPlan={mealPlan}
               onSelectDay={handleSelectDay}
+              onSelectMultipleDays={handleSelectMultipleDays}
             />
           </TabsContent>
         </Tabs>
@@ -100,4 +109,3 @@ const MealPlan = () => {
 };
 
 export default MealPlan;
-

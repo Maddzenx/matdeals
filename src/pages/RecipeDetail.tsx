@@ -22,7 +22,7 @@ const RecipeDetail = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { navItems, handleProductQuantityChange } = useNavigationState();
-  const { toggleFavorite, favoriteIds, mealPlan, addToMealPlan } = useMealPlan();
+  const { toggleFavorite, favoriteIds, mealPlan, addToMealPlan, addToMultipleDays } = useMealPlan();
   const [activeTab, setActiveTab] = React.useState("overview");
   const [showMealPlanSelector, setShowMealPlanSelector] = useState(false);
   
@@ -146,6 +146,11 @@ const RecipeDetail = () => {
               handleAddToMealPlanWithToast(day, recipeId, addToMealPlan);
               setShowMealPlanSelector(false);
             }}
+            onSelectMultipleDays={(days, recipeId) => {
+              addToMultipleDays(days, recipeId);
+              setShowMealPlanSelector(false);
+            }}
+            allowMultiple={true}
             trigger={<div className="hidden">Trigger</div>}
             open={showMealPlanSelector}
             onOpenChange={setShowMealPlanSelector}

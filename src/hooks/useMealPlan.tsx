@@ -1,7 +1,9 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { Recipe } from "@/types/recipe";
 import { DayMeal, MealPlanState } from "@/types/mealPlan";
 import { useRecipes } from "@/hooks/useRecipes";
+import { toast } from "sonner";
 
 // Helper to get days of the week
 const getWeekDays = (): string[] => {
@@ -152,6 +154,33 @@ export const useMealPlan = () => {
     });
   }, [recipes, historyIds]);
 
+  // Add a recipe to multiple days at once
+  const addToMultipleDays = useCallback((days: string[], recipeId: string) => {
+    if (!recipeId || days.length === 0) return;
+    
+    // Find the recipe by ID
+    const recipe = recipes.find(r => r.id === recipeId);
+    if (!recipe) return;
+    
+    // Add to history if not already present
+    if (!historyIds.includes(recipeId)) {
+      setHistoryIds(prev => [...prev, recipeId]);
+    }
+    
+    // Update all selected days with the recipe
+    setMealPlan(prev => {
+      return prev.map(dayMeal => {
+        if (days.includes(dayMeal.day)) {
+          return { ...dayMeal, recipe };
+        }
+        return dayMeal;
+      });
+    });
+    
+    // Show a toast notification
+    toast.success(`Recept tillagt i ${days.length} dagar`);
+  }, [recipes, historyIds]);
+
   // Toggle a recipe as favorite
   const toggleFavorite = useCallback((recipeId: string) => {
     setFavoriteIds(prev => {
@@ -169,6 +198,7 @@ export const useMealPlan = () => {
     previousRecipes, 
     loading,
     addToMealPlan,
+    addToMultipleDays,
     clearRecipeFromMealPlan,
     toggleFavorite,
     favoriteIds

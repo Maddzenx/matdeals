@@ -14,6 +14,7 @@ interface RecipeCardActionsProps {
   recipeId: string;
   mealPlan?: DayMeal[];
   onSelectDay?: (day: string, recipeId: string) => void;
+  onSelectMultipleDays?: (days: string[], recipeId: string) => void;
 }
 
 export const RecipeCardActions: React.FC<RecipeCardActionsProps> = ({
@@ -24,6 +25,7 @@ export const RecipeCardActions: React.FC<RecipeCardActionsProps> = ({
   recipeId,
   mealPlan,
   onSelectDay,
+  onSelectMultipleDays,
 }) => {
   const navigate = useNavigate();
   const [showMealPlanSelector, setShowMealPlanSelector] = useState(false);
@@ -71,6 +73,8 @@ export const RecipeCardActions: React.FC<RecipeCardActionsProps> = ({
         onSelectDay={onSelectDay || ((day: string, recipeId: string) => {
           navigate("/meal-plan");
         })}
+        onSelectMultipleDays={onSelectMultipleDays}
+        allowMultiple={!!onSelectMultipleDays}
         open={showMealPlanSelector}
         onOpenChange={setShowMealPlanSelector}
         trigger={<div className="hidden">Trigger</div>}

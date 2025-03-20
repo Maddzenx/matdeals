@@ -5,25 +5,31 @@ import { Button } from "@/components/ui/button";
 import { DayMeal } from "@/types/mealPlan";
 import { Recipe } from "@/types/recipe";
 import { Check } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface DaySelectorProps {
   mealPlan: DayMeal[];
   recipe: Recipe | {id: string}; // Allow minimal recipe data with just ID
   onSelectDay: (day: string, recipeId: string) => void;
+  onSelectMultipleDays?: (days: string[], recipeId: string) => void;
   trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  allowMultiple?: boolean;
 }
 
 export const DaySelector: React.FC<DaySelectorProps> = ({ 
   mealPlan, 
   recipe, 
   onSelectDay,
+  onSelectMultipleDays,
   trigger,
   open,
-  onOpenChange
+  onOpenChange,
+  allowMultiple = false
 }) => {
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [internalOpen, setInternalOpen] = useState(false);
   
   const isControlled = open !== undefined && onOpenChange !== undefined;
@@ -43,11 +49,30 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
   };
 
   const handleSelectDay = (day: string) => {
-    setSelectedDay(day);
+    if (allowMultiple) {
+      setSelectedDays(prev => {
+        if (prev.includes(day)) {
+          return prev.filter(d => d !== day);
+        } else {
+          return [...prev, day];
+        }
+      });
+    } else {
+      setSelectedDay(day);
+    }
   };
 
   const handleConfirm = () => {
-    if (selectedDay) {
+    if (allowMultiple && selectedDays.length > 0 && onSelectMultipleDays) {
+      onSelectMultipleDays(selectedDays, recipe.id);
+      
+      // Update open state based on whether component is controlled or not
+      if (isControlled) {
+        onOpenChange(false);
+      } else {
+        setInternalOpen(false);
+      }
+    } else if (selectedDay) {
       onSelectDay(selectedDay, recipe.id);
       
       // Update open state based on whether component is controlled or not
@@ -70,6 +95,7 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
     if (!newOpen) {
       // Reset selected day when closing
       setSelectedDay(null);
+      setSelectedDays([]);
     }
   };
 
@@ -86,7 +112,9 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
       </SheetTrigger>
       <SheetContent side="bottom" className="rounded-t-lg z-[100] p-6 bg-[#1A1F2C]">
         <SheetHeader className="mb-6">
-          <SheetTitle className="text-left text-xl font-bold text-white">Välj dag för receptet</SheetTitle>
+          <SheetTitle className="text-left text-xl font-bold text-white">
+            {allowMultiple ? "Välj dagar för receptet" : "Välj dag för receptet"}
+          </SheetTitle>
         </SheetHeader>
         <div className="grid gap-3 py-2">
           {mealPlan.map((day) => (
@@ -94,17 +122,34 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
               key={day.day}
               onClick={() => handleSelectDay(day.day)}
               className={`w-full p-4 text-left rounded-md flex items-center justify-between
-                ${selectedDay === day.day 
-                  ? "bg-[#DB2C17] text-white" 
-                  : "bg-[#2c3446] text-white hover:bg-[#3a445c]"}`}
+                ${allowMultiple 
+                  ? "bg-[#2c3446] text-white hover:bg-[#3a445c]" 
+                  : selectedDay === day.day 
+                    ? "bg-[#DB2C17] text-white" 
+                    : "bg-[#2c3446] text-white hover:bg-[#3a445c]"}`}
             >
-              <span className="font-medium">{getDayName(day.day)}</span>
+              <div className="flex items-center">
+                {allowMultiple && (
+                  <div className="mr-3">
+                    <Checkbox 
+                      id={`day-${day.day}`} 
+                      checked={selectedDays.includes(day.day)}
+                      className="h-5 w-5 border-white data-[state=checked]:bg-[#DB2C17] data-[state=checked]:border-[#DB2C17]"
+                      onClick={(e) => e.stopPropagation()}
+                      onCheckedChange={() => handleSelectDay(day.day)}
+                    />
+                  </div>
+                )}
+                <span className="font-medium">{getDayName(day.day)}</span>
+              </div>
               {day.recipe && (
                 <span className="text-sm opacity-80">
-                  {selectedDay === day.day ? "(ersätter)" : "(upptagen)"}
+                  {(allowMultiple && selectedDays.includes(day.day)) || selectedDay === day.day 
+                    ? "(ersätter)" 
+                    : "(upptagen)"}
                 </span>
               )}
-              {selectedDay === day.day && <Check size={18} />}
+              {!allowMultiple && selectedDay === day.day && <Check size={18} />}
             </button>
           ))}
         </div>
@@ -116,7 +161,7 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
           <Button 
             className="bg-[#DB2C17] hover:bg-[#c02615] text-white"
             onClick={handleConfirm}
-            disabled={!selectedDay}
+            disabled={allowMultiple ? selectedDays.length === 0 : !selectedDay}
           >
             Bekräfta
           </Button>
