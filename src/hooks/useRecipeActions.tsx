@@ -53,6 +53,13 @@ export const useRecipeActions = () => {
       
       // Manually close dropdown after action
       setIsDropdownOpen(false);
+    } else {
+      // Show different toast if no products to add
+      toast({
+        title: "Inga ingredienser att lägga till",
+        description: "Det finns inga matchande produkter för detta recept.",
+        variant: "destructive"
+      });
     }
   }, [toast]);
 

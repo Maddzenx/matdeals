@@ -39,7 +39,12 @@ export const RecipeTabContent: React.FC<RecipeTabContentProps> = ({
         {recipe.matchedProducts && recipe.matchedProducts.length > 0 && (
           <div className="mt-4 mb-6">
             <button
-              onClick={onAddToCart}
+              onClick={(e) => {
+                if (e) {
+                  e.stopPropagation();
+                }
+                onAddToCart();
+              }}
               className="w-full py-3 px-4 bg-[#DB2C17] text-white rounded-lg font-medium flex items-center justify-center touch-feedback transition-fast"
             >
               Lägg till ingredienser i handlingslistan

@@ -61,7 +61,12 @@ export const RecipePricing: React.FC<RecipePricingProps> = ({
         </div>
         <Button 
           className="bg-[#DB2C17] hover:bg-[#c02615]"
-          onClick={onAddToCart}
+          onClick={(e) => {
+            if (e) {
+              e.stopPropagation();
+            }
+            onAddToCart();
+          }}
         >
           Lägg till handlingslista
         </Button>
