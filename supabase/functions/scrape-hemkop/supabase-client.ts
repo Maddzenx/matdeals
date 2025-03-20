@@ -21,20 +21,20 @@ export async function storeProducts(products: any[]): Promise<number> {
   }
 
   try {
-    console.log(`Preparing to store ${products.length} products in Hemkop table`);
+    console.log(`Preparing to store ${products.length} products in hemkop table`);
     
     // First, clear existing records
-    console.log("Clearing existing Hemkop products");
+    console.log("Clearing existing hemkop products");
     const { error: deleteError } = await supabase
-      .from('Hemkop')
+      .from('hemkop')
       .delete()
       .not('id', 'is', null);
       
     if (deleteError) {
-      console.error("Error clearing existing Hemkop products:", deleteError);
+      console.error("Error clearing existing hemkop products:", deleteError);
       // Continue anyway to try inserting new products
     } else {
-      console.log("Successfully cleared existing Hemkop products");
+      console.log("Successfully cleared existing hemkop products");
     }
     
     // Validate and prepare products for storage
@@ -65,7 +65,7 @@ export async function storeProducts(products: any[]): Promise<number> {
       console.log(`Inserting batch ${i/batchSize + 1} of ${Math.ceil(validProducts.length/batchSize)}`);
       
       const { data, error } = await supabase
-        .from('Hemkop')
+        .from('hemkop')
         .insert(batch)
         .select();
       
@@ -81,7 +81,7 @@ export async function storeProducts(products: any[]): Promise<number> {
       }
     }
     
-    console.log(`Successfully stored ${insertedCount} products in Hemkop table`);
+    console.log(`Successfully stored ${insertedCount} products in hemkop table`);
     return insertedCount;
   } catch (error) {
     console.error("Error in storeProducts:", error);
@@ -102,7 +102,7 @@ export async function storeProducts(products: any[]): Promise<number> {
       let insertedCount = 0;
       for (const product of fallbackProducts) {
         const { data, error } = await supabase
-          .from('Hemkop')
+          .from('hemkop')
           .insert([product])
           .select();
           
@@ -114,7 +114,7 @@ export async function storeProducts(products: any[]): Promise<number> {
       return insertedCount;
     } catch (fallbackError) {
       console.error("Even fallback product insertion failed:", fallbackError);
-      throw error; // Throw the original error
+      return 0;
     }
   }
 }

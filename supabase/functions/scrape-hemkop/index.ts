@@ -28,50 +28,49 @@ serve(async (req) => {
       console.log("No valid JSON body or forceRefresh flag");
     }
     
-    // Fetch HTML content using the utility function
-    const { document, fetchSuccess } = await fetchHtmlContent(HEMKOP_URLS, USER_AGENTS, forceRefresh);
-    
-    if (!fetchSuccess || !document) {
-      console.log("Failed to fetch and parse content from Hemköp website, using fallback products");
-      const sampleProducts = createSampleProducts();
-      const insertedCount = await storeProducts(sampleProducts);
+    // Try each URL in the config with different user agents
+    for (const url of HEMKOP_URLS) {
+      console.log(`Attempting to scrape from URL: ${url}`);
       
-      return createSuccessResponse(
-        `Failed to fetch Hemköp website. Using ${insertedCount} fallback products instead.`,
-        sampleProducts
-      );
-    }
-    
-    console.log("Document parsed successfully, extracting products...");
-    
-    // Extract products using the modular extractor
-    const products = extractProducts(document, BASE_URL);
-    
-    console.log(`Extracted ${products.length} products from page`);
-    
-    // If no products were found, use sample products
-    if (!products || products.length === 0) {
-      console.log("No products found. Using sample products...");
-      const sampleProducts = createSampleProducts();
+      // Fetch HTML content using the utility function
+      const { document, fetchSuccess } = await fetchHtmlContent([url], USER_AGENTS, forceRefresh);
       
-      // Store sample products in Supabase
-      const insertedCount = await storeProducts(sampleProducts);
-      
-      return createSuccessResponse(
-        `No products found on Hemköp website. Using ${insertedCount} sample products instead.`,
-        sampleProducts
-      );
-    }
-    
-    console.log("About to store products in database");
-    // Store products in Supabase
-    const insertedCount = await storeProducts(products);
-    console.log(`Stored ${insertedCount} products in database`);
+      if (fetchSuccess && document) {
+        console.log(`Successfully fetched content from ${url}, extracting products...`);
+        
+        // Extract products using the modular extractor
+        const products = extractProducts(document, BASE_URL);
+        
+        console.log(`Extracted ${products.length} products from page`);
+        
+        // If products were found, store them and return success
+        if (products && products.length > 0) {
+          console.log("About to store products in database");
+          // Store products in Supabase
+          const insertedCount = await storeProducts(products);
+          console.log(`Stored ${insertedCount} products in database`);
 
-    // Return success response
+          // Return success response
+          return createSuccessResponse(
+            `Successfully extracted and stored ${insertedCount} products from Hemköp website (${url}).`,
+            products
+          );
+        } else {
+          console.log(`No products found from ${url}, trying next URL...`);
+        }
+      } else {
+        console.log(`Failed to fetch content from ${url}, trying next URL...`);
+      }
+    }
+    
+    // If we've tried all URLs and no products were found, use sample products
+    console.log("Failed to fetch and extract products from all URLs, using fallback products");
+    const sampleProducts = createSampleProducts();
+    const insertedCount = await storeProducts(sampleProducts);
+    
     return createSuccessResponse(
-      `Successfully extracted and stored ${insertedCount} products from Hemköp website.`,
-      products
+      `Failed to fetch Hemköp website. Using ${insertedCount} fallback products instead.`,
+      sampleProducts
     );
 
   } catch (error) {

@@ -21,7 +21,8 @@ export async function fetchHtmlContent(
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
             'Accept-Language': 'sv-SE,sv;q=0.9,en-US;q=0.8,en;q=0.7',
             'Cache-Control': forceRefresh ? 'no-cache' : 'max-age=0',
-            'Pragma': forceRefresh ? 'no-cache' : ''
+            'Pragma': forceRefresh ? 'no-cache' : '',
+            'Referer': 'https://www.hemkop.se/' // Adding referer to appear more like a browser
           },
           redirect: 'follow'
         });
@@ -43,14 +44,27 @@ export async function fetchHtmlContent(
               console.log("Successfully parsed HTML document");
               
               // Check if we can find any product elements to confirm this is a useful page
-              const productElements = document.querySelectorAll('.product, .product-card, [class*="product"], article, .offer');
+              // Using a wider range of selectors to catch various product layouts
+              const productElements = document.querySelectorAll(
+                '.product, .product-card, [class*="product"], article, .offer, .campaign-item, ' +
+                '.price-card, .offer-card, .item, .goods, .product-item, .discount-item'
+              );
               console.log(`Found ${productElements.length} potential product elements`);
               
               if (productElements.length > 0) {
                 fetchSuccess = true;
                 break;
               } else {
-                console.log("No product elements found on this page, trying next URL");
+                console.log("No product elements found on this page, trying next selector approach");
+                
+                // Try to find any elements with price-related content
+                const priceElements = document.querySelectorAll('[class*="price"], [class*="Price"], [class*="kr"], [class*="erbjudande"]');
+                console.log(`Found ${priceElements.length} potential price elements`);
+                
+                if (priceElements.length > 5) { // If we find multiple price elements, it's likely a product page
+                  fetchSuccess = true;
+                  break;
+                }
               }
             }
           } else {

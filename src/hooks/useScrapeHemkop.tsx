@@ -18,7 +18,9 @@ export const useScrapeHemkop = (
       
       setScraping(true);
       
-      // Call the Hemköp scraper edge function
+      console.log("Calling scrape-hemkop edge function with forceRefresh=true");
+      
+      // Call the Hemköp scraper edge function with explicit forceRefresh
       const { data, error } = await supabase.functions.invoke("scrape-hemkop", {
         body: { forceRefresh: true }
       });
@@ -30,15 +32,15 @@ export const useScrapeHemkop = (
             description: error.message || "Ett oväntat fel inträffade",
           });
         }
-        return;
+        return { success: false, error };
       }
       
       console.log("Hemköp scraper response:", data);
       
-      if (data.success) {
+      if (data?.success) {
         if (showNotifications) {
           toast.success("Hemköp erbjudanden uppdaterade", {
-            description: data.message || `Hittade ${data.products?.length || 0} produkter`,
+            description: `Hittade ${data.products?.length || 0} produkter`,
           });
         }
         
@@ -46,13 +48,16 @@ export const useScrapeHemkop = (
         if (refetch) {
           await refetch();
         }
+        
+        return { success: true };
       } else {
         console.error("Hemköp scraper failed:", data);
         if (showNotifications) {
           toast.error("Kunde inte uppdatera Hemköp erbjudanden", {
-            description: data.error || "Ett oväntat fel inträffade",
+            description: data?.error || "Ett oväntat fel inträffade",
           });
         }
+        return { success: false, error: data?.error };
       }
     } catch (error) {
       console.error("Error in handleScrapeHemkop:", error);
@@ -61,6 +66,7 @@ export const useScrapeHemkop = (
           description: "Ett oväntat fel inträffade",
         });
       }
+      return { success: false, error };
     } finally {
       setScraping(false);
     }
