@@ -60,8 +60,7 @@ export const RecipeCardActions: React.FC<RecipeCardActionsProps> = ({
       <DaySelector
         mealPlan={mealPlan || []}
         recipe={{id: recipeId}}
-        onSelectDay={onSelectDay || (() => {
-          e.stopPropagation(); // Ensure the event doesn't bubble
+        onSelectDay={onSelectDay || ((day: string, recipeId: string) => {
           navigate("/meal-plan");
         })}
         trigger={
