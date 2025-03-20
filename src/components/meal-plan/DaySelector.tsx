@@ -12,17 +12,24 @@ interface DaySelectorProps {
   recipe: Recipe | {id: string}; // Allow minimal recipe data with just ID
   onSelectDay: (day: string, recipeId: string) => void;
   trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export const DaySelector: React.FC<DaySelectorProps> = ({ 
   mealPlan, 
   recipe, 
   onSelectDay,
-  trigger
+  trigger,
+  open,
+  onOpenChange
 }) => {
   const { toast } = useToast();
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  
+  const isControlled = open !== undefined && onOpenChange !== undefined;
+  const isOpen = isControlled ? open : internalOpen;
   
   const getDayName = (day: string) => {
     switch(day.toLowerCase()) {
@@ -44,12 +51,24 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
   const handleConfirm = () => {
     if (selectedDay) {
       onSelectDay(selectedDay, recipe.id);
-      setOpen(false);
+      
+      // Update open state based on whether component is controlled or not
+      if (isControlled) {
+        onOpenChange(false);
+      } else {
+        setInternalOpen(false);
+      }
     }
   };
 
   const handleOpenChange = (newOpen: boolean) => {
-    setOpen(newOpen);
+    // Update open state based on whether component is controlled or not
+    if (isControlled) {
+      onOpenChange(newOpen);
+    } else {
+      setInternalOpen(newOpen);
+    }
+    
     if (!newOpen) {
       // Reset selected day when closing
       setSelectedDay(null);
@@ -57,26 +76,26 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
   };
 
   return (
-    <Sheet open={open} onOpenChange={handleOpenChange}>
+    <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
       }}>
         {trigger || <Button onClick={(e) => e.stopPropagation()}>Välj dag</Button>}
       </SheetTrigger>
-      <SheetContent side="bottom" className="rounded-t-lg z-[1000] p-6 bg-white">
+      <SheetContent side="bottom" className="rounded-t-lg z-[1000] p-6 bg-[#1A1F2C]">
         <SheetHeader className="mb-6">
-          <SheetTitle className="text-left text-xl font-bold">Välj dag för receptet</SheetTitle>
+          <SheetTitle className="text-left text-xl font-bold text-white">Välj dag för receptet</SheetTitle>
         </SheetHeader>
         <div className="grid gap-3 py-2">
           {mealPlan.map((day) => (
             <button
               key={day.day}
               onClick={() => handleSelectDay(day.day)}
-              className={`w-full p-4 text-left rounded-md flex items-center justify-between 
+              className={`w-full p-4 text-left rounded-md flex items-center justify-between
                 ${selectedDay === day.day 
-                  ? "bg-[#1A1F2C] text-white" 
-                  : "bg-[#1A1F2C] text-white hover:bg-[#2c3446]"}`}
+                  ? "bg-[#DB2C17] text-white" 
+                  : "bg-[#2c3446] text-white hover:bg-[#3a445c]"}`}
             >
               <span className="font-medium">{getDayName(day.day)}</span>
               {day.recipe && (
@@ -89,8 +108,8 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
           ))}
         </div>
         <div className="mt-6 flex justify-end gap-3">
-          <Button variant="outline" onClick={() => setOpen(false)}
-            className="bg-white hover:bg-gray-50 border-gray-200">
+          <Button variant="outline" onClick={() => handleOpenChange(false)}
+            className="bg-[#2c3446] hover:bg-[#3a445c] text-white border-[#3a445c]">
             Avbryt
           </Button>
           <Button 

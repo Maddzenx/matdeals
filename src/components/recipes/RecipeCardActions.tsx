@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Heart, CalendarPlus, ShoppingCart } from "lucide-react";
 import { DaySelector } from "@/components/meal-plan/DaySelector";
@@ -28,6 +28,7 @@ export const RecipeCardActions: React.FC<RecipeCardActionsProps> = ({
 }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [showMealPlanSelector, setShowMealPlanSelector] = useState(false);
   
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation(); // Stop event from bubbling up to the card
@@ -45,6 +46,11 @@ export const RecipeCardActions: React.FC<RecipeCardActionsProps> = ({
     onFavoriteToggle(e);
   };
 
+  const handleMealPlanClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Stop event from bubbling up to the card
+    setShowMealPlanSelector(true);
+  };
+
   return (
     <div className="flex gap-1" onClick={e => e.stopPropagation()}>
       <Button
@@ -57,23 +63,25 @@ export const RecipeCardActions: React.FC<RecipeCardActionsProps> = ({
         <Heart size={18} className={isFavorite ? "text-[#DB2C17] fill-[#DB2C17]" : ""} />
       </Button>
       
+      <Button 
+        variant="ghost"
+        size="icon"
+        className="w-9 h-9 rounded-full"
+        aria-label="Lägg till i matsedel"
+        onClick={handleMealPlanClick}
+      >
+        <CalendarPlus size={18} />
+      </Button>
+      
       <DaySelector
         mealPlan={mealPlan || []}
         recipe={{id: recipeId}}
         onSelectDay={onSelectDay || ((day: string, recipeId: string) => {
           navigate("/meal-plan");
         })}
-        trigger={
-          <Button 
-            variant="ghost"
-            size="icon"
-            className="w-9 h-9 rounded-full"
-            aria-label="Lägg till i matsedel"
-            onClick={e => e.stopPropagation()} // Stop propagation on the trigger button
-          >
-            <CalendarPlus size={18} />
-          </Button>
-        }
+        open={showMealPlanSelector}
+        onOpenChange={setShowMealPlanSelector}
+        trigger={<div className="hidden">Trigger</div>}
       />
       
       <Button 

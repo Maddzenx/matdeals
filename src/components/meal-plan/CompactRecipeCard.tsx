@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart, Clock, Users } from "lucide-react";
@@ -26,6 +26,7 @@ export const CompactRecipeCard: React.FC<CompactRecipeCardProps> = ({
   onSelectDay
 }) => {
   const navigate = useNavigate();
+  const [showMealPlanSelector, setShowMealPlanSelector] = useState(false);
 
   const handleCardClick = () => {
     navigate(`/recipe/${recipe.id}`);
@@ -36,6 +37,11 @@ export const CompactRecipeCard: React.FC<CompactRecipeCardProps> = ({
     console.log(`Failed to load compact recipe image for ${recipe.title}, using fallback`);
     e.currentTarget.onerror = null; // Prevent infinite loop
     e.currentTarget.src = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'; // Food-related fallback
+  };
+
+  const handleAddToMealPlanClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    setShowMealPlanSelector(true);
   };
 
   return (
@@ -90,22 +96,24 @@ export const CompactRecipeCard: React.FC<CompactRecipeCardProps> = ({
           </div>
           
           <div className="mt-2 flex justify-end" onClick={e => e.stopPropagation()}>
+            <Button 
+              size="sm" 
+              variant="outline"
+              className="py-1 h-7 text-xs"
+              onClick={handleAddToMealPlanClick}
+            >
+              Lägg till i matsedel
+            </Button>
+            
             <DaySelector
               mealPlan={mealPlan || []}
               recipe={recipe}
               onSelectDay={onSelectDay || (() => {
                 onAddToMealPlan();
               })}
-              trigger={
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  className="py-1 h-7 text-xs"
-                  onClick={e => e.stopPropagation()}
-                >
-                  Lägg till i matsedel
-                </Button>
-              }
+              open={showMealPlanSelector}
+              onOpenChange={setShowMealPlanSelector}
+              trigger={<div className="hidden">Trigger</div>}
             />
           </div>
         </CardContent>

@@ -16,7 +16,6 @@ import { useRecipeActions } from "@/hooks/useRecipeActions";
 import { Tag } from "lucide-react";
 import { DaySelector } from "@/components/meal-plan/DaySelector";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const RecipeDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -134,7 +133,6 @@ const RecipeDetail = () => {
           </div>
         )}
         
-        {/* Use DaySelector instead of custom dialog */}
         {recipe && (
           <DaySelector
             mealPlan={mealPlan}
@@ -143,7 +141,9 @@ const RecipeDetail = () => {
               handleAddToMealPlanWithToast(day, recipeId, addToMealPlan);
               setShowMealPlanSelector(false);
             }}
-            trigger={<div className="hidden">Trigger</div>} // Hidden trigger, controlled by state
+            trigger={<div className="hidden">Trigger</div>}
+            open={showMealPlanSelector}
+            onOpenChange={setShowMealPlanSelector}
           />
         )}
         
