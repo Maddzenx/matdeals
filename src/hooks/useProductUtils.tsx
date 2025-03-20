@@ -50,7 +50,7 @@ export const useProductUtils = (categories: CategoryData[]) => {
     const element = document.getElementById(categoryName);
     if (element) {
       // Get header height (CategoryTabs + other fixed elements)
-      const headerHeight = 105 + 40; // 105px from the top sticky positioning + 40px for the tabs
+      const headerHeight = 105 + 65; // 105px from the top sticky positioning + 65px for the fixed tabs
       
       // Calculate the position to scroll to
       const elementPosition = element.getBoundingClientRect().top + window.scrollY;

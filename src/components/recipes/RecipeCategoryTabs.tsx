@@ -39,27 +39,29 @@ export const RecipeCategoryTabs: React.FC<RecipeCategoryTabsProps> = ({
   }, [activeCategory]);
 
   return (
-    <div className="px-4 pb-1">
-      <div 
-        ref={tabsRef}
-        className="flex space-x-6 overflow-x-auto pb-2 no-scrollbar"
-      >
-        {categories.map((category) => (
-          <button
-            key={category}
-            ref={activeCategory === category ? activeButtonRef : null}
-            className={`pb-2 px-1 font-medium text-sm whitespace-nowrap transition-colors ${
-              activeCategory === category 
-                ? "text-[#DB2C17] border-b-2 border-[#DB2C17]" 
-                : "text-gray-500"
-            }`}
-            onClick={() => onCategoryChange(category)}
-          >
-            {category}
-          </button>
-        ))}
+    <div className="fixed top-[70px] z-20 w-full bg-white">
+      <div className="px-4 pb-1">
+        <div 
+          ref={tabsRef}
+          className="flex space-x-6 overflow-x-auto pb-2 no-scrollbar"
+        >
+          {categories.map((category) => (
+            <button
+              key={category}
+              ref={activeCategory === category ? activeButtonRef : null}
+              className={`pb-2 px-1 font-medium text-sm whitespace-nowrap transition-colors ${
+                activeCategory === category 
+                  ? "text-[#DB2C17] border-b-2 border-[#DB2C17]" 
+                  : "text-gray-500"
+              }`}
+              onClick={() => onCategoryChange(category)}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+        <Separator />
       </div>
-      <Separator />
     </div>
   );
 };

@@ -118,16 +118,18 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   console.log("ProductSection rendering with categories:", nonEmptyCategories.length);
   
   return (
-    <ProductSectionLayout
-      storeTags={storeTags}
-      onRemoveTag={onRemoveTag}
-      categories={nonEmptyCategories.length > 0 ? nonEmptyCategories : categories}
-      activeCategory={activeCategory}
-      onCategorySelect={handleCategorySelect}
-      products={filteredProducts}
-      allCategoryNames={allCategoryNames}
-      onQuantityChange={handleQuantityChange}
-      viewMode={viewMode}
-    />
+    <div className="fixed-tabs-spacing">
+      <ProductSectionLayout
+        storeTags={storeTags}
+        onRemoveTag={onRemoveTag}
+        categories={nonEmptyCategories.length > 0 ? nonEmptyCategories : categories}
+        activeCategory={activeCategory}
+        onCategorySelect={handleCategorySelect}
+        products={filteredProducts}
+        allCategoryNames={allCategoryNames}
+        onQuantityChange={handleQuantityChange}
+        viewMode={viewMode}
+      />
+    </div>
   );
 };
