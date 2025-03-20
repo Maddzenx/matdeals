@@ -1,18 +1,16 @@
+
 import React, { useState, useEffect } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { useNavigate } from "react-router-dom";
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { ShoppingListHeader } from "@/components/ShoppingList/ShoppingListHeader";
 import { StorePriceComparison } from "@/components/ShoppingList/StorePriceComparison";
-import { ShoppingListItem } from "@/components/ShoppingList/ShoppingListItem";
-import { EmptyShoppingList } from "@/components/ShoppingList/EmptyShoppingList";
-import { StoreProductGroup } from "@/components/ShoppingList/StoreProductGroup";
-import { CategoryProductGroup } from "@/components/ShoppingList/CategoryProductGroup";
-import { ConnectedRecipes } from "@/components/ShoppingList/ConnectedRecipes";
+import { ShoppingListContent } from "@/components/ShoppingList/ShoppingListContent";
 import { useStorePriceCalculation } from "@/hooks/useStorePriceCalculation";
 import { useStoreGrouping } from "@/hooks/useStoreGrouping";
 import { useCategoryGrouping } from "@/hooks/useCategoryGrouping";
-import { toast } from "@/components/ui/use-toast";
+import { useShoppingListSharing } from "@/components/ShoppingList/ShoppingListSharing";
+import { useProductHandler } from "@/components/ShoppingList/useProductHandler";
 
 const ShoppingList = () => {
   const navigate = useNavigate();
@@ -28,6 +26,19 @@ const ShoppingList = () => {
   const { storePrices, bestStore } = useStorePriceCalculation(cartItems);
   const { groupedByStore, sortedStoreNames } = useStoreGrouping(cartItems);
   const { groupedByCategory, sortedCategoryNames } = useCategoryGrouping(cartItems);
+  
+  // Extract product handlers to a custom hook
+  const productHandlers = useProductHandler({
+    cartItems,
+    handleProductQuantityChange,
+    handleItemCheck
+  });
+
+  // Extract sharing functionality to a custom hook
+  const { handleShareList } = useShoppingListSharing({
+    cartItems,
+    storePrices
+  });
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -41,107 +52,6 @@ const ShoppingList = () => {
     } else {
       console.log("Selected nav:", id);
     }
-  };
-
-  const handleIncrement = (id: string) => {
-    const item = cartItems.find(item => item.id === id);
-    if (item) {
-      handleProductQuantityChange(
-        id, 
-        item.quantity + 1, 
-        item.quantity,
-        {
-          name: item.name,
-          details: item.details,
-          price: item.price,
-          image: item.image,
-          store: item.store,
-          recipeId: item.recipeId,
-          recipeTitle: item.recipeTitle
-        }
-      );
-    }
-  };
-
-  const handleDecrement = (id: string) => {
-    const item = cartItems.find(item => item.id === id);
-    if (item && item.quantity > 0) {
-      handleProductQuantityChange(
-        id, 
-        Math.max(0, item.quantity - 1), 
-        item.quantity,
-        {
-          name: item.name,
-          details: item.details,
-          price: item.price,
-          image: item.image,
-          store: item.store,
-          recipeId: item.recipeId,
-          recipeTitle: item.recipeTitle
-        }
-      );
-    }
-  };
-
-  const handleSetQuantity = (id: string, newQuantity: number) => {
-    const item = cartItems.find(item => item.id === id);
-    if (item) {
-      handleProductQuantityChange(
-        id, 
-        newQuantity, 
-        item.quantity,
-        {
-          name: item.name,
-          details: item.details,
-          price: item.price,
-          image: item.image,
-          store: item.store,
-          recipeId: item.recipeId,
-          recipeTitle: item.recipeTitle
-        }
-      );
-    }
-  };
-
-  const handleShareList = async () => {
-    const listText = cartItems.map(item => 
-      `${item.name} - ${item.quantity} st (${item.price})`
-    ).join('\n');
-    
-    const totalPrice = storePrices.length > 0 ? storePrices.reduce((acc, store) => acc + store.rawPrice, 0) : 0;
-    const wholePart = Math.floor(totalPrice);
-    const decimalPart = Math.round((totalPrice % 1) * 100).toString().padStart(2, '0');
-    const formattedTotal = `${wholePart}:${decimalPart} kr`;
-    
-    const shareData = {
-      title: 'Min inköpslista',
-      text: `Kolla in min inköpslista!\n\n${listText}\n\nTotalt: ${formattedTotal}`,
-      url: window.location.href
-    };
-
-    if (navigator.share && navigator.canShare(shareData)) {
-      try {
-        await navigator.share(shareData);
-        toast({
-          title: "Inköpslistan delad!",
-          description: "Din inköpslista har delats framgångsrikt",
-        });
-      } catch (err) {
-        console.error("Error sharing:", err);
-        shareViaEmail(shareData);
-      }
-    } else {
-      shareViaEmail(shareData);
-    }
-  };
-
-  const shareViaEmail = (shareData: { title: string, text: string }) => {
-    const mailtoLink = `mailto:?subject=${encodeURIComponent(shareData.title)}&body=${encodeURIComponent(shareData.text)}`;
-    window.open(mailtoLink);
-    toast({
-      title: "Inköpslistan öppnad i email!",
-      description: "Din inköpslista har förberetts för email",
-    });
   };
 
   return (
@@ -164,41 +74,18 @@ const ShoppingList = () => {
           bestStore={bestStore} 
         />
         
-        <div className="space-y-0 px-4 mt-4">
-          {cartItems.length === 0 ? (
-            <EmptyShoppingList />
-          ) : activeTab === "stores" ? (
-            <>
-              {sortedStoreNames.map((storeName) => (
-                <StoreProductGroup
-                  key={storeName}
-                  storeName={storeName}
-                  items={groupedByStore[storeName]}
-                  onItemCheck={handleItemCheck}
-                  onIncrement={handleIncrement}
-                  onDecrement={handleDecrement}
-                  onSetQuantity={handleSetQuantity}
-                />
-              ))}
-              <ConnectedRecipes cartItems={cartItems} />
-            </>
-          ) : (
-            <>
-              {sortedCategoryNames.map((categoryName) => (
-                <CategoryProductGroup
-                  key={categoryName}
-                  categoryName={categoryName}
-                  items={groupedByCategory[categoryName]}
-                  onItemCheck={handleItemCheck}
-                  onIncrement={handleIncrement}
-                  onDecrement={handleDecrement}
-                  onSetQuantity={handleSetQuantity}
-                />
-              ))}
-              <ConnectedRecipes cartItems={cartItems} />
-            </>
-          )}
-        </div>
+        <ShoppingListContent
+          activeTab={activeTab}
+          cartItems={cartItems}
+          handleItemCheck={productHandlers.handleItemCheck}
+          handleIncrement={productHandlers.handleIncrement}
+          handleDecrement={productHandlers.handleDecrement}
+          handleSetQuantity={productHandlers.handleSetQuantity}
+          groupedByStore={groupedByStore}
+          sortedStoreNames={sortedStoreNames}
+          groupedByCategory={groupedByCategory}
+          sortedCategoryNames={sortedCategoryNames}
+        />
       </div>
       
       <BottomNav items={navItems} onSelect={handleNavSelect} />
