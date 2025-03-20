@@ -32,6 +32,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const { cartItems } = useNavigationState();
   const [quantity, setQuantity] = useState(0);
   
+  // Determine if we should display the offer badge
+  const shouldDisplayBadge = offerBadge && 
+    offerBadge.trim() !== "" && 
+    offerBadge.toLowerCase() !== "erbjudande" && // Don't show generic "offer" labels
+    offerBadge !== "veckans erbjudande"; // Don't show generic "weekly offer" labels
+  
   // Sync with global cart state
   useEffect(() => {
     const item = cartItems.find(item => item.id === id);
@@ -79,7 +85,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         currentPrice={currentPrice}
         originalPrice={originalPrice}
         store={store}
-        offerBadge={offerBadge}
+        offerBadge={shouldDisplayBadge ? offerBadge : undefined}
         quantity={quantity}
         onAdd={handleAdd}
         onIncrement={handleIncrement}
@@ -98,7 +104,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       currentPrice={currentPrice}
       originalPrice={originalPrice}
       store={store}
-      offerBadge={offerBadge}
+      offerBadge={shouldDisplayBadge ? offerBadge : undefined}
       quantity={quantity}
       onAdd={handleAdd}
       onIncrement={handleIncrement}
