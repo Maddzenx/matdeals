@@ -9,7 +9,14 @@ export const useStoreGrouping = (cartItems: CartItem[]) => {
     
     return cartItems.reduce((acc, item) => {
       // Use the item's store property, and only default to "Övriga produkter" if it's explicitly undefined or empty
-      const storeName = item.store && item.store.trim() !== "" ? item.store : "Övriga produkter";
+      let storeName = item.store && item.store.trim() !== "" ? item.store : "Övriga produkter";
+      
+      // Properly capitalize store names
+      if (storeName.toLowerCase() === "ica") {
+        storeName = "ICA";
+      } else if (storeName.toLowerCase() === "willys") {
+        storeName = "Willys";
+      }
       
       if (!acc[storeName]) {
         acc[storeName] = [];

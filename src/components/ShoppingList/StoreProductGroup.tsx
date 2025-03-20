@@ -2,7 +2,6 @@
 import React from "react";
 import { CartItem } from "@/hooks/useCartState";
 import { ShoppingListItem } from "./ShoppingListItem";
-import { ShoppingBag } from "lucide-react";
 
 interface StoreProductGroupProps {
   storeName: string;
@@ -23,7 +22,6 @@ export const StoreProductGroup: React.FC<StoreProductGroupProps> = ({
     <div className="mt-3">
       <div className="sticky top-[116px] bg-white py-2 z-10 border-b border-gray-200">
         <h2 className="text-base font-semibold text-[#1C1C1C] flex items-center gap-2 px-4">
-          <ShoppingBag size={18} className="text-gray-600" />
           {storeName}
         </h2>
       </div>
