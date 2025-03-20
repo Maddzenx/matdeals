@@ -44,6 +44,13 @@ export const ListProductCard: React.FC<ListProductCardProps> = ({
     onClick();
   };
 
+  // Function to properly capitalize store names
+  const formatStoreName = (storeName: string): string => {
+    if (storeName.toLowerCase() === "ica") return "ICA";
+    if (storeName.toLowerCase() === "willys") return "Willys";
+    return storeName.charAt(0).toUpperCase() + storeName.slice(1).toLowerCase();
+  };
+
   return (
     <div 
       className="shadow-sm relative bg-white p-3 rounded-lg flex justify-between items-center border border-neutral-100 cursor-pointer transition-all hover:shadow-md"
@@ -73,7 +80,7 @@ export const ListProductCard: React.FC<ListProductCardProps> = ({
               )}
             </div>
             <span className="text-xs font-semibold text-[#1C1C1C] bg-neutral-100 px-1.5 py-0.5 rounded-sm ml-1 truncate max-w-[80px]">
-              {store}
+              {formatStoreName(store)}
             </span>
           </div>
         </div>

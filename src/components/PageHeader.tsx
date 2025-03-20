@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Grid2X2, List, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,20 +17,23 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   viewMode, 
   onToggleViewMode 
 }) => {
+  // We're keeping the onRefresh and isRefreshing props to not break the interface,
+  // but we're not using them in the UI anymore as requested
+  
+  // Fire onRefresh in the background when component mounts
+  React.useEffect(() => {
+    // Use a small timeout to not impact initial rendering
+    const timer = setTimeout(() => {
+      onRefresh();
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, [onRefresh]);
+
   return (
     <div className="flex items-center justify-between px-4 pt-3 pb-1">
       <h1 className="text-2xl font-bold text-[#1C1C1C]">{title}</h1>
       <div className="flex items-center gap-2">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={onRefresh} 
-          disabled={isRefreshing}
-          className="flex items-center gap-1"
-        >
-          <RefreshCw size={16} className={isRefreshing ? "animate-spin" : ""} />
-          <span className="hidden sm:inline">Uppdatera ICA</span>
-        </Button>
         <button 
           onClick={onToggleViewMode}
           className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"

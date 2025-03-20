@@ -44,6 +44,13 @@ export const GridProductCard: React.FC<GridProductCardProps> = ({
     onClick();
   };
 
+  // Function to properly capitalize store names
+  const formatStoreName = (storeName: string): string => {
+    if (storeName.toLowerCase() === "ica") return "ICA";
+    if (storeName.toLowerCase() === "willys") return "Willys";
+    return storeName.charAt(0).toUpperCase() + storeName.slice(1).toLowerCase();
+  };
+
   return (
     <div 
       className="shadow-sm relative bg-white p-3 rounded-lg max-sm:p-2.5 border border-neutral-100 cursor-pointer transition-all hover:shadow-md"
@@ -69,7 +76,7 @@ export const GridProductCard: React.FC<GridProductCardProps> = ({
           )}
         </div>
         <div className="text-xs font-semibold text-[#1C1C1C] text-center bg-neutral-100 mx-0 my-1 px-1 py-0.5 rounded-sm w-full truncate">
-          {store}
+          {formatStoreName(store)}
         </div>
 
         <QuantityControls
