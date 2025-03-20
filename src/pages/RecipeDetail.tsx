@@ -94,14 +94,16 @@ const RecipeDetail = () => {
     );
   }
 
+  const hasDiscountedIngredients = recipe.matchedProducts && recipe.matchedProducts.length > 0;
+
   return (
-    <div className="min-h-screen bg-white pb-20">
+    <div className="min-h-screen bg-white pb-24">
       <RecipeHeader 
         recipe={recipe}
         onBack={handleGoBack}
       />
       
-      <div className="px-4">
+      <div className="px-4 mt-4">
         <RecipeMetrics 
           time_minutes={recipe.time_minutes}
           servings={recipe.servings}
@@ -122,8 +124,21 @@ const RecipeDetail = () => {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onAddToCart={handleAddToCart}
-        hidePricing={true}
+        hidePricing={false}
       />
+      
+      {hasDiscountedIngredients && activeTab === "ingredients" && (
+        <div className="px-4 mb-6 mt-2">
+          <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+            <p className="text-sm text-gray-700 flex items-center">
+              <Tag size={14} className="mr-2 text-[#DB2C17]" />
+              <span>
+                {recipe.matchedProducts?.length} ingrediens{recipe.matchedProducts?.length !== 1 ? 'er' : ''} på REA!
+              </span>
+            </p>
+          </div>
+        </div>
+      )}
       
       <BottomNav items={navItems} onSelect={handleNavSelect} />
     </div>
