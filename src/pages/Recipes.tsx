@@ -37,7 +37,7 @@ const Recipes = () => {
       try {
         console.log("Auto refreshing recipes on page load...");
         setIsRefreshing(true);
-        await scrapeRecipes(false);
+        await scrapeRecipes();
       } catch (error) {
         console.error("Error during auto recipe refresh:", error);
       } finally {
@@ -52,7 +52,7 @@ const Recipes = () => {
   const handleRefreshButton = async () => {
     try {
       setIsRefreshing(true);
-      await scrapeRecipes(true);
+      await scrapeRecipes();
     } catch (err) {
       console.error("Error refreshing recipes:", err);
     } finally {
