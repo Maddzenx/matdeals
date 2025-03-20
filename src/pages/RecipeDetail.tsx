@@ -15,6 +15,7 @@ import { TopNavigationBar } from "@/components/recipe-detail/TopNavigationBar";
 import { useRecipeActions } from "@/hooks/useRecipeActions";
 import { Tag } from "lucide-react";
 import { DaySelector } from "@/components/meal-plan/DaySelector";
+import { Button } from "@/components/ui/button";
 
 const RecipeDetail = () => {
   const { id } = useParams<{ id: string }>();
