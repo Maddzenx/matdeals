@@ -50,8 +50,6 @@ export const useProductSection = (
   const [activeCategory, setActiveCategory] = useState('all'); // Start with 'all' as default
   const scrolledToCategoryRef = useRef(false);
   const initialScrollRef = useRef(false);
-  const isUserScrolling = useRef(false);
-  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   const allCategoryNames = getAllCategoryNames();
 
@@ -74,29 +72,13 @@ export const useProductSection = (
 
   useEffect(() => {
     const handleScroll = () => {
-      // If programmatic scroll, skip updating the active category
       if (scrolledToCategoryRef.current) {
         scrolledToCategoryRef.current = false;
         return;
       }
 
-      // Set user scrolling flag
-      isUserScrolling.current = true;
-      
-      // Clear existing timeout
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-      
-      // Set timeout to detect when scrolling stops
-      scrollTimeoutRef.current = setTimeout(() => {
-        isUserScrolling.current = false;
-      }, 150);
-
-      // Get all category elements
       const categoryElements = allCategoryNames.map(name => document.getElementById(name));
       
-      // Filter for valid elements and get their positions
       const validElements = categoryElements
         .filter(el => el !== null)
         .map(el => ({
@@ -104,37 +86,19 @@ export const useProductSection = (
           position: el!.getBoundingClientRect().top
         }));
 
-      // Account for header height in calculations
       const headerHeight = 120;
 
-      // Find closest element above the header
       const closestElement = validElements
         .filter(el => el.position <= headerHeight + 100)
         .sort((a, b) => b.position - a.position)[0];
 
-      // Update active category if we found a match and it differs from current
       if (closestElement && closestElement.id !== activeCategory) {
-        console.log(`Scroll detected - Setting active category to: ${closestElement.id}`);
         setActiveCategory(closestElement.id);
       }
     };
 
-    // Debounced scroll handler for better performance
-    const debouncedScroll = () => {
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-      
-      scrollTimeoutRef.current = setTimeout(handleScroll, 50);
-    };
-
-    window.addEventListener('scroll', debouncedScroll);
-    return () => {
-      window.removeEventListener('scroll', debouncedScroll);
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [allCategoryNames, nonEmptyCategories, activeCategory]);
 
   // Log activeStoreIds and storeTags for debugging

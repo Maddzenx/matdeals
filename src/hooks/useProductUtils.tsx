@@ -37,34 +37,20 @@ export const useProductUtils = (categories: CategoryData[]) => {
   // Scroll to a category when it's selected - with improved smoothness
   const scrollToCategory = useCallback((categoryId: string) => {
     const categoryName = categories.find(c => c.id === categoryId)?.name || "";
-    
-    // Handle "all" category specially - scroll to top
-    if (categoryId === "all") {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-      return;
-    }
-    
     const element = document.getElementById(categoryName);
     if (element) {
-      // Get header height (fixed elements)
-      const headerHeight = 128; // Height of fixed header elements (header + search + tabs)
+      // Get header height (CategoryTabs + other fixed elements)
+      const headerHeight = 105 + 40; // 105px from the top sticky positioning + 40px for the tabs
       
       // Calculate the position to scroll to
       const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-      const offsetPosition = elementPosition - headerHeight;
+      const offsetPosition = elementPosition - headerHeight - 8; // Slightly less spacing (8px) for better visual balance
       
-      // Scroll to the element with the offset - use smooth scrolling for better UX
+      // Scroll to the element with the offset - use requestAnimationFrame for smoother transition
       window.scrollTo({
         top: offsetPosition,
         behavior: 'smooth'
       });
-      
-      console.log(`Scrolled to category: ${categoryName} (${categoryId}) at position ${offsetPosition}px`);
-    } else {
-      console.warn(`Category element not found: ${categoryName} (${categoryId})`);
     }
   }, [categories]);
 

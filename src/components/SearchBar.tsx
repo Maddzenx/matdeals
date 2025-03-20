@@ -33,8 +33,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   };
 
   return (
-    <div className="sticky top-0 z-20 bg-white flex gap-3 items-center px-4 py-2 border-b border-gray-100">
-      <div className="flex items-center flex-1 gap-2 bg-neutral-100 px-3.5 py-2.5 rounded-full">
+    <div className="sticky top-0 z-20 bg-white flex gap-3 items-center px-4 py-3">
+      <div className="flex items-center flex-1 gap-2 bg-neutral-100 px-3.5 py-3 rounded-full">
         <i className="ti ti-search text-[#6E6E6E]" />
         <input
           type="text"

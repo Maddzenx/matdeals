@@ -25,7 +25,6 @@ interface ProductSectionProps {
   viewMode?: "grid" | "list";
   searchQuery?: string;
   supabaseProducts?: Product[];
-  fixedHeader?: boolean;
 }
 
 export const ProductSection: React.FC<ProductSectionProps> = ({
@@ -36,8 +35,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   onRemoveTag,
   viewMode = "grid",
   searchQuery = "",
-  supabaseProducts = [],
-  fixedHeader = false
+  supabaseProducts = []
 }) => {
   const { getProductsWithCategories } = useProductUtils(categories);
   const allLocalProducts = getProductsWithCategories();
@@ -120,19 +118,16 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   console.log("ProductSection rendering with categories:", nonEmptyCategories.length);
   
   return (
-    <div>
-      <ProductSectionLayout
-        storeTags={storeTags}
-        onRemoveTag={onRemoveTag}
-        categories={nonEmptyCategories.length > 0 ? nonEmptyCategories : categories}
-        activeCategory={activeCategory}
-        onCategorySelect={handleCategorySelect}
-        products={filteredProducts}
-        allCategoryNames={allCategoryNames}
-        onQuantityChange={handleQuantityChange}
-        viewMode={viewMode}
-        fixedHeader={fixedHeader}
-      />
-    </div>
+    <ProductSectionLayout
+      storeTags={storeTags}
+      onRemoveTag={onRemoveTag}
+      categories={nonEmptyCategories.length > 0 ? nonEmptyCategories : categories}
+      activeCategory={activeCategory}
+      onCategorySelect={handleCategorySelect}
+      products={filteredProducts}
+      allCategoryNames={allCategoryNames}
+      onQuantityChange={handleQuantityChange}
+      viewMode={viewMode}
+    />
   );
 };
