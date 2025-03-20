@@ -115,7 +115,11 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
         Object.entries(groupedProducts).map(([category, categoryProducts]) => (
           <div key={category || "uncategorized"}>
             {showCategoryHeaders && category && categoryProducts.length > 0 && (
-              <h3 id={category} className="text-xl font-bold text-[#1C1C1C] mt-5 mb-4 scroll-mt-[160px]">
+              <h3 
+                id={category} 
+                className="text-xl font-bold text-[#1C1C1C] mt-5 mb-4 scroll-mt-[160px]"
+                data-category-header="true"
+              >
                 {translateCategory(category)}
               </h3>
             )}
