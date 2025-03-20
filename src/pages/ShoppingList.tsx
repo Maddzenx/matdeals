@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { useNavigate } from "react-router-dom";
@@ -7,14 +8,16 @@ import { StorePriceComparison } from "@/components/ShoppingList/StorePriceCompar
 import { ShoppingListItem } from "@/components/ShoppingList/ShoppingListItem";
 import { EmptyShoppingList } from "@/components/ShoppingList/EmptyShoppingList";
 import { StoreProductGroup } from "@/components/ShoppingList/StoreProductGroup";
+import { CategoryProductGroup } from "@/components/ShoppingList/CategoryProductGroup";
 import { ConnectedRecipes } from "@/components/ShoppingList/ConnectedRecipes";
 import { useStorePriceCalculation } from "@/hooks/useStorePriceCalculation";
 import { useStoreGrouping } from "@/hooks/useStoreGrouping";
+import { useCategoryGrouping } from "@/hooks/useCategoryGrouping";
 import { toast } from "@/components/ui/use-toast";
 
 const ShoppingList = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<"recent" | "stores">("stores");
+  const [activeTab, setActiveTab] = useState<"category" | "stores">("stores");
   
   const { 
     navItems, 
@@ -25,6 +28,7 @@ const ShoppingList = () => {
 
   const { storePrices, bestStore } = useStorePriceCalculation(cartItems);
   const { groupedByStore, sortedStoreNames } = useStoreGrouping(cartItems);
+  const { groupedByCategory, sortedCategoryNames } = useCategoryGrouping(cartItems);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -156,10 +160,11 @@ const ShoppingList = () => {
             </>
           ) : (
             <>
-              {cartItems.map((item) => (
-                <ShoppingListItem
-                  key={item.id}
-                  item={item}
+              {sortedCategoryNames.map((categoryName) => (
+                <CategoryProductGroup
+                  key={categoryName}
+                  categoryName={categoryName}
+                  items={groupedByCategory[categoryName]}
                   onItemCheck={handleItemCheck}
                   onIncrement={handleIncrement}
                   onDecrement={handleDecrement}

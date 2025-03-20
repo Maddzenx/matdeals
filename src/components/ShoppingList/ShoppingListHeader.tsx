@@ -4,8 +4,8 @@ import { CartItem } from "@/hooks/useCartState";
 import { ShoppingListTabs } from "./ShoppingListTabs";
 
 interface ShoppingListHeaderProps {
-  activeTab: "recent" | "stores";
-  onTabChange: (tab: "recent" | "stores") => void;
+  activeTab: "category" | "stores";
+  onTabChange: (tab: "category" | "stores") => void;
   cartItems: CartItem[];
   onShare?: () => void;
 }
