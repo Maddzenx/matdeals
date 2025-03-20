@@ -31,6 +31,8 @@ const App = () => (
           <Route path="/menu" element={<Navigate replace to="/meal-plan" />} />
           {/* Redirect /offers to root since that's our home page */}
           <Route path="/offers" element={<Navigate replace to="/" />} />
+          {/* Redirect /cart to /shopping-list to fix 404 errors */}
+          <Route path="/cart" element={<Navigate replace to="/shopping-list" />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
