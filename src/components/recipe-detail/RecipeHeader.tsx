@@ -1,11 +1,10 @@
 
 import React from "react";
-import { ArrowLeft } from "lucide-react";
 import { Recipe } from "@/types/recipe";
 
 interface RecipeHeaderProps {
   recipe: Recipe;
-  onBack: () => void;
+  onBack: (() => void) | null;
 }
 
 export const RecipeHeader: React.FC<RecipeHeaderProps> = ({
@@ -22,12 +21,6 @@ export const RecipeHeader: React.FC<RecipeHeaderProps> = ({
           backgroundImage: `url(${imageUrl})`,
         }}
       >
-        <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/60 to-transparent p-4">
-          <button onClick={onBack} className="flex items-center text-white">
-            <ArrowLeft size={20} className="mr-1" />
-            <span>Tillbaka</span>
-          </button>
-        </div>
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
           <h1 className="text-2xl font-bold text-white">{recipe.title}</h1>
         </div>

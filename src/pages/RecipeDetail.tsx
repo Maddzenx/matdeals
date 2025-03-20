@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect } from "react";
+
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { useRecipeDetail } from "@/hooks/useRecipeDetail";
@@ -14,6 +15,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { TopNavigationBar } from "@/components/recipe-detail/TopNavigationBar";
 import { useRecipeActions } from "@/hooks/useRecipeActions";
 import { Tag } from "lucide-react";
+import { DaySelector } from "@/components/meal-plan/DaySelector";
 
 const RecipeDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -22,6 +24,7 @@ const RecipeDetail = () => {
   const { navItems, handleProductQuantityChange } = useNavigationState();
   const { toggleFavorite, favoriteIds, mealPlan, addToMealPlan } = useMealPlan();
   const [activeTab, setActiveTab] = React.useState("overview");
+  const [showMealPlanSelector, setShowMealPlanSelector] = useState(false);
   
   const {
     recipe,
@@ -56,6 +59,10 @@ const RecipeDetail = () => {
     }
   }, [recipe, handleAddToCartWithToast, handleProductQuantityChange]);
 
+  const handleAddToMealPlanClick = useCallback(() => {
+    setShowMealPlanSelector(true);
+  }, []);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -89,6 +96,7 @@ const RecipeDetail = () => {
         onGoBack={handleGoBack}
         onFavoriteToggle={handleFavoriteToggle}
         onAddToCart={handleAddToCart}
+        onAddToMealPlanClick={handleAddToMealPlanClick}
       />
 
       <div className="pt-14">
@@ -129,6 +137,18 @@ const RecipeDetail = () => {
               </p>
             </div>
           </div>
+        )}
+        
+        {showMealPlanSelector && (
+          <DaySelector
+            mealPlan={mealPlan}
+            recipe={recipe}
+            onSelectDay={(day, recipeId) => {
+              handleAddToMealPlanWithToast(day, recipeId, addToMealPlan);
+              setShowMealPlanSelector(false);
+            }}
+            trigger={null}
+          />
         )}
         
         <BottomNav items={navItems} onSelect={handleNavSelect} />

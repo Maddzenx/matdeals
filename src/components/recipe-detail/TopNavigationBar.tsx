@@ -1,11 +1,12 @@
 
 import React from "react";
-import { ArrowLeft, Heart, MoreVertical, ChevronRight } from "lucide-react";
+import { ArrowLeft, Heart, MoreVertical, CalendarDays, ShoppingCart } from "lucide-react";
 import { 
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 import { Recipe } from "@/types/recipe";
 
@@ -17,6 +18,7 @@ interface TopNavigationBarProps {
   onGoBack: () => void;
   onFavoriteToggle: () => void;
   onAddToCart: () => void;
+  onAddToMealPlanClick: () => void;
 }
 
 export const TopNavigationBar: React.FC<TopNavigationBarProps> = ({
@@ -27,6 +29,7 @@ export const TopNavigationBar: React.FC<TopNavigationBarProps> = ({
   onGoBack,
   onFavoriteToggle,
   onAddToCart,
+  onAddToMealPlanClick,
 }) => {
   return (
     <div className="fixed top-0 left-0 right-0 bg-white z-50 border-b border-gray-200 shadow-sm">
@@ -59,22 +62,18 @@ export const TopNavigationBar: React.FC<TopNavigationBarProps> = ({
             <DropdownMenuContent align="end" className="w-56 z-[100] bg-white">
               <DropdownMenuItem 
                 className="flex items-center cursor-pointer"
-                onSelect={(e) => {
-                  e.preventDefault();
-                  document.getElementById('meal-plan-trigger')?.click();
-                }}
+                onClick={onAddToMealPlanClick}
               >
+                <CalendarDays size={16} className="mr-2" />
                 <span>Lägg till i matsedel</span>
-                <ChevronRight size={16} className="ml-auto" />
               </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem
-                className="cursor-pointer"
-                onSelect={(e) => {
-                  e.preventDefault();
-                  onAddToCart();
-                }}
+                className="flex items-center cursor-pointer"
+                onClick={onAddToCart}
               >
-                Lägg till i inköpslista
+                <ShoppingCart size={16} className="mr-2" />
+                <span>Lägg till i inköpslista</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
