@@ -1,7 +1,7 @@
 
 import React from "react";
 import { ShoppingCart, Search, BookOpen, Percent, User, Calendar } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export interface NavItem {
   id: string;
@@ -18,6 +18,7 @@ interface BottomNavProps {
 
 export const BottomNav: React.FC<BottomNavProps> = ({ items, onSelect }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const getIcon = (iconName: string) => {
     switch (iconName) {
@@ -44,7 +45,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ items, onSelect }) => {
         navigate("/recipes");
         break;
       case "offers":
-        navigate("/"); // Changed from "/offers" to "/" since the offers page is the home page
+        navigate("/");
         break;
       case "cart":
         navigate("/shopping-list");
