@@ -53,15 +53,19 @@ export const fetchRecipesByCategory = async (
 };
 
 export const scrapeRecipesFromApi = async (
-  showNotification = true
+  showNotification = true,
+  recipeId?: string
 ): Promise<{ success: boolean; count?: number; error?: string }> => {
   try {
-    console.log("Invoking scrape-recipes edge function...");
+    console.log(recipeId 
+      ? `Invoking scrape-recipes edge function for recipe: ${recipeId}` 
+      : "Invoking scrape-recipes edge function for all recipes..."
+    );
     
-    // Call the Supabase Edge Function with empty body
+    // Call the Supabase Edge Function
     const { data, error: functionError } = await supabase.functions.invoke("scrape-recipes", {
       method: 'POST',
-      body: {} // Required for POST
+      body: recipeId ? { recipeId } : {} // Pass recipe ID if specified
     });
     
     console.log("Edge function response:", data);
@@ -77,7 +81,11 @@ export const scrapeRecipesFromApi = async (
       throw new Error(errorMsg);
     }
     
-    return { success: true, count: data.recipesCount };
+    return { 
+      success: true, 
+      count: data.recipesCount,
+      recipe: data.recipe
+    };
   } catch (err) {
     console.error('Error scraping recipes:', err);
     
