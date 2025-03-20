@@ -22,7 +22,7 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
 }) => {
   const { toast } = useToast();
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true); // Open by default when no trigger is provided
   
   const getDayName = (day: string) => {
     switch(day.toLowerCase()) {
@@ -62,6 +62,53 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
   const sheetStyles = {
     zIndex: 1000,
   };
+
+  // If no trigger is provided and open is true, render just the content
+  if (!trigger && open) {
+    return (
+      <div className="fixed inset-0 bg-black/50 z-[999]" onClick={() => setOpen(false)}>
+        <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-xl z-[1000]" 
+             onClick={(e) => e.stopPropagation()}
+             style={sheetStyles}>
+          <div className="p-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Välj dag för receptet</h3>
+            </div>
+            <div className="grid gap-3 py-2">
+              {mealPlan.map((day) => (
+                <Button
+                  key={day.day}
+                  variant={selectedDay === day.day ? "default" : "outline"}
+                  className={`w-full justify-between ${selectedDay === day.day ? "bg-[#DB2C17] hover:bg-[#c02615]" : ""}`}
+                  onClick={() => handleSelectDay(day.day)}
+                >
+                  <span>{getDayName(day.day)}</span>
+                  {day.recipe && (
+                    <span className="text-xs">
+                      {selectedDay === day.day ? "(ersätter)" : "(upptagen)"}
+                    </span>
+                  )}
+                  {selectedDay === day.day && <Check size={18} />}
+                </Button>
+              ))}
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setOpen(false)}>
+                Avbryt
+              </Button>
+              <Button 
+                className="bg-[#DB2C17] hover:bg-[#c02615]"
+                onClick={handleConfirm}
+                disabled={!selectedDay}
+              >
+                Bekräfta
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
