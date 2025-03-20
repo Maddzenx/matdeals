@@ -44,7 +44,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ items, onSelect }) => {
         navigate("/recipes");
         break;
       case "offers":
-        navigate("/");
+        navigate("/"); // Changed from "/offers" to "/" since the offers page is the home page
         break;
       case "cart":
         navigate("/shopping-list");
