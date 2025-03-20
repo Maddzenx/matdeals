@@ -4,7 +4,6 @@ import { TabsContent } from "@/components/ui/tabs";
 import { RecipeOverview } from "@/components/recipe-detail/RecipeOverview";
 import { RecipeIngredients } from "@/components/recipe-detail/RecipeIngredients";
 import { RecipeInstructions } from "@/components/recipe-detail/RecipeInstructions";
-import { RecipePricing } from "@/components/recipe-detail/RecipePricing";
 import { Recipe } from "@/types/recipe";
 
 interface RecipeTabContentProps {
@@ -27,15 +26,6 @@ export const RecipeTabContent: React.FC<RecipeTabContentProps> = ({
           description={recipe.description} 
           source_url={recipe.source_url} 
         />
-        {!hidePricing && (
-          <RecipePricing 
-            price={recipe.price}
-            originalPrice={recipe.original_price}
-            onAddToCart={onAddToCart} 
-            matchedProducts={recipe.matchedProducts}
-            savings={recipe.savings}
-          />
-        )}
         {recipe.matchedProducts && recipe.matchedProducts.length > 0 && (
           <div className="mt-4 mb-6">
             <button
