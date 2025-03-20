@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from "react";
 interface Category {
   id: string;
@@ -53,9 +54,26 @@ export const CategoryTabs: React.FC<CategoryTabsProps> = ({
       });
     }
   }, [activeCategory]);
-  return <div ref={tabsRef} className="<div class=\"fixed top-[70px] z-20 bg-white flex overflow-x-auto gap-4 px-4 py-4 no-scrollbar shadow-sm\">\nsticky top-[70px] z-20 bg-white flex overflow-x-auto gap-4 px-4 py-4 no-scrollbar shadow-sm</div>">
-      {categories.map(category => <button key={category.id} ref={activeCategory === category.id ? activeButtonRef : null} onClick={() => onSelect(category.id)} className={`text-sm font-bold whitespace-nowrap px-2 py-1 transition-all rounded-md ${activeCategory === category.id ? "text-[#191919] border-b-2 border-[#191919] bg-neutral-100" : "text-[#6E6E6E] hover:text-[#4a4a4a] hover:bg-neutral-50"}`}>
+  
+  return (
+    <div 
+      ref={tabsRef} 
+      className="sticky top-[70px] z-20 bg-white flex overflow-x-auto gap-4 px-4 py-4 no-scrollbar shadow-sm"
+    >
+      {categories.map(category => (
+        <button 
+          key={category.id} 
+          ref={activeCategory === category.id ? activeButtonRef : null} 
+          onClick={() => onSelect(category.id)} 
+          className={`text-sm font-bold whitespace-nowrap px-2 py-1 transition-all rounded-md ${
+            activeCategory === category.id 
+              ? "text-[#191919] border-b-2 border-[#191919] bg-neutral-100" 
+              : "text-[#6E6E6E] hover:text-[#4a4a4a] hover:bg-neutral-50"
+          }`}
+        >
           {translateCategory(category.name)}
-        </button>)}
-    </div>;
+        </button>
+      ))}
+    </div>
+  );
 };
