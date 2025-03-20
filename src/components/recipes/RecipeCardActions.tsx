@@ -51,33 +51,22 @@ export const RecipeCardActions: React.FC<RecipeCardActionsProps> = ({
         <Heart size={18} className={isFavorite ? "text-[#DB2C17] fill-[#DB2C17]" : ""} />
       </Button>
       
-      {mealPlan && onSelectDay ? (
-        <DaySelector
-          mealPlan={mealPlan}
-          recipe={{id: recipeId}}
-          onSelectDay={onSelectDay}
-          trigger={
-            <Button 
-              variant="ghost"
-              size="icon"
-              className="w-9 h-9 rounded-full"
-              aria-label="Lägg till i matsedel"
-            >
-              <CalendarPlus size={18} />
-            </Button>
-          }
-        />
-      ) : (
-        <Button 
-          variant="ghost"
-          size="icon"
-          className="w-9 h-9 rounded-full"
-          onClick={onAddToMealPlan}
-          aria-label="Lägg till i matsedel"
-        >
-          <CalendarPlus size={18} />
-        </Button>
-      )}
+      {/* Always use DaySelector if mealPlan and onSelectDay are provided */}
+      <DaySelector
+        mealPlan={mealPlan || []}
+        recipe={{id: recipeId}}
+        onSelectDay={onSelectDay || (() => navigate("/meal-plan"))}
+        trigger={
+          <Button 
+            variant="ghost"
+            size="icon"
+            className="w-9 h-9 rounded-full"
+            aria-label="Lägg till i matsedel"
+          >
+            <CalendarPlus size={18} />
+          </Button>
+        }
+      />
       
       <Button 
         className="bg-[#DB2C17] hover:bg-[#c02615] w-9 h-9 rounded-full"

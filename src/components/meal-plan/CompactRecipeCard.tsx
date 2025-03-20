@@ -90,35 +90,24 @@ export const CompactRecipeCard: React.FC<CompactRecipeCardProps> = ({
           </div>
           
           <div className="mt-2 flex justify-end">
-            {mealPlan && onSelectDay ? (
-              <DaySelector
-                mealPlan={mealPlan}
-                recipe={recipe}
-                onSelectDay={onSelectDay}
-                trigger={
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    className="py-1 h-7 text-xs"
-                  >
-                    Lägg till i matsedel
-                  </Button>
-                }
-              />
-            ) : (
-              <Button 
-                size="sm" 
-                variant="outline"
-                className="py-1 h-7 text-xs"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate("/meal-plan");
-                  onAddToMealPlan();
-                }}
-              >
-                Lägg till i matsedel
-              </Button>
-            )}
+            {/* Always use DaySelector component for meal plan selection */}
+            <DaySelector
+              mealPlan={mealPlan || []}
+              recipe={recipe}
+              onSelectDay={onSelectDay || (() => {
+                navigate("/meal-plan");
+                onAddToMealPlan();
+              })}
+              trigger={
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  className="py-1 h-7 text-xs"
+                >
+                  Lägg till i matsedel
+                </Button>
+              }
+            />
           </div>
         </CardContent>
       </div>
