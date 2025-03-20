@@ -1,4 +1,3 @@
-
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useNavigationState } from "@/hooks/useNavigationState";
@@ -111,13 +110,15 @@ const RecipeDetail = () => {
           {/* RecipeActions component has been removed */}
         </div>
         
-        <RecipeTabs 
-          recipe={recipe}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          onAddToCart={handleAddToCart}
-          hidePricing={false}
-        />
+        <div className="mt-4">
+          <RecipeTabs 
+            recipe={recipe}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            onAddToCart={handleAddToCart}
+            hidePricing={false}
+          />
+        </div>
         
         {hasDiscountedIngredients && activeTab === "ingredients" && (
           <div className="px-4 mb-6 mt-2">

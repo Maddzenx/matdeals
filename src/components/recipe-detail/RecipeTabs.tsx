@@ -21,8 +21,13 @@ export const RecipeTabs: React.FC<RecipeTabsProps> = ({
   hidePricing = false,
 }) => {
   return (
-    <div className="px-4">
-      <Tabs defaultValue="overview" onValueChange={onTabChange} value={activeTab}>
+    <div className="px-4 pt-2">
+      <Tabs 
+        defaultValue="overview" 
+        onValueChange={onTabChange} 
+        value={activeTab}
+        className="w-full"
+      >
         <RecipeTabList activeTab={activeTab} />
         <RecipeTabContent 
           activeTab={activeTab} 
