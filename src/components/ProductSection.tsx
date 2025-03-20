@@ -118,7 +118,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   console.log("ProductSection rendering with categories:", nonEmptyCategories.length);
   
   return (
-    <div className="fixed-tabs-spacing">
+    <div>
       <ProductSectionLayout
         storeTags={storeTags}
         onRemoveTag={onRemoveTag}

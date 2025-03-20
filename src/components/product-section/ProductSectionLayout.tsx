@@ -75,7 +75,7 @@ export const ProductSectionLayout: React.FC<ProductSectionLayoutProps> = ({
 
   return (
     <>
-      <div className="px-4 pt-2">
+      <div className="px-4 pt-1 pb-0">
         <StoreTags tags={storeTags} onRemove={onRemoveTag} />
       </div>
       <CategoryTabs
@@ -83,7 +83,7 @@ export const ProductSectionLayout: React.FC<ProductSectionLayoutProps> = ({
         activeCategory={activeCategory}
         onSelect={onCategorySelect}
       />
-      <main className="p-4 mt-4">
+      <main className="p-4">
         {/* Display the active category name as a heading if it's not "All" */}
         {activeCategory !== "all" && activeCategoryName && (
           <h2 className="text-xl font-bold text-[#1C1C1C] mb-4">{translatedCategoryName}</h2>

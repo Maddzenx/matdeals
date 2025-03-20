@@ -64,7 +64,7 @@ export const OffersPageContent: React.FC<OffersPageContentProps> = ({
         href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"
       />
       <div className="min-h-screen w-full bg-white pb-20">
-        <div className="sticky top-0 z-30 bg-white">
+        <div className="z-30 bg-white">
           <PageHeader 
             title={title}
             onRefresh={handleRefresh}
