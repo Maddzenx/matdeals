@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { useViewMode } from "@/hooks/useViewMode";
@@ -9,7 +9,6 @@ import { useProductRefresh } from "@/hooks/useProductRefresh";
 import { useInitialStoreSetup } from "@/hooks/useInitialStoreSetup";
 import { useAuthCheck } from "@/hooks/useAuthCheck";
 import { OffersPageContent } from "@/components/offers/OffersPageContent";
-import { toast } from "@/components/ui/use-toast";
 import { storeTagsData } from "@/data/productData";
 
 const Index = () => {
@@ -24,25 +23,8 @@ const Index = () => {
   useAuthCheck();
   useInitialStoreSetup(activeStores, addStoreIfNeeded, handleStoreToggle, supabaseProducts);
 
-  // Auto refresh products when the application loads, but don't show notifications
-  useEffect(() => {
-    const autoRefreshProducts = async () => {
-      try {
-        console.log("Auto refreshing products on application load...");
-        await handleRefresh(false); // Pass false to suppress notification
-      } catch (error) {
-        console.error("Error during auto refresh:", error);
-      }
-    };
-    
-    autoRefreshProducts();
-  }, []);
-
-  useEffect(() => {
-    if (error) {
-      console.error("Supabase error:", error);
-    }
-  }, [error]);
+  // Auto refresh handling is now controlled by the useProductRefresh hook
+  // using the useAppSession to track first load, so we don't need to trigger it here
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -63,9 +45,9 @@ const Index = () => {
   // Get navigation items from navigation state
   const { navItems } = useNavigationState();
 
-  // Handler for button press - we'll still show notifications here to give user feedback
+  // Handler for refresh button (if needed in the future)
   const handleRefreshButton = () => {
-    handleRefresh(true); // Pass true to show notifications
+    handleRefresh(true); // Pass true to show notifications if we decide to re-add this button
   };
 
   return (

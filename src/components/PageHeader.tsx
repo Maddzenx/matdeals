@@ -1,6 +1,6 @@
+
 import React from "react";
-import { Grid2X2, List, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Grid2X2, List } from "lucide-react";
 
 interface PageHeaderProps {
   title: string;
@@ -12,24 +12,12 @@ interface PageHeaderProps {
 
 export const PageHeader: React.FC<PageHeaderProps> = ({ 
   title, 
-  onRefresh, 
-  isRefreshing, 
+  onRefresh, // Kept for API compatibility but not used
+  isRefreshing, // Kept for API compatibility but not used
   viewMode, 
   onToggleViewMode 
 }) => {
-  // We're keeping the onRefresh and isRefreshing props to not break the interface,
-  // but we're not using them in the UI anymore as requested
-  
-  // Fire onRefresh in the background when component mounts
-  React.useEffect(() => {
-    // Use a small timeout to not impact initial rendering
-    const timer = setTimeout(() => {
-      onRefresh();
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, [onRefresh]);
-
+  // No longer trigger refresh on component mount
   return (
     <div className="flex items-center justify-between px-4 pt-3 pb-1">
       <h1 className="text-2xl font-bold text-[#1C1C1C]">{title}</h1>

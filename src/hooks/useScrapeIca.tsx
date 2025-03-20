@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -19,7 +18,6 @@ export const useScrapeIca = (refetchProducts: () => Promise<{ success: boolean; 
       
       console.log("Starting ICA scraping process");
       
-      // Create invocation with timeout handler
       const { data, error } = await invokeScraperWithTimeout('scrape-ica', { forceRefresh: true });
       
       if (error) {
@@ -33,7 +31,6 @@ export const useScrapeIca = (refetchProducts: () => Promise<{ success: boolean; 
         throw new Error(data.error || "Okänt fel i skrapningsfunktionen");
       }
       
-      // Refresh the products after scraping
       console.log("ICA scraping completed, now refreshing products");
       const refreshResult = await refetchProducts();
       
@@ -43,19 +40,12 @@ export const useScrapeIca = (refetchProducts: () => Promise<{ success: boolean; 
       }
       
       const productsCount = data.products?.length || 0;
-      
-      if (showNotification) {
-        toast({
-          title: "Lyckades!",
-          description: `Uppdaterade ${productsCount} produkter från ICA.`,
-        });
-      }
+      console.log(`Updated ${productsCount} products from ICA`);
       
       return data;
     } catch (err: any) {
       console.error("Fel vid skrapning av ICA:", err);
       
-      // Try to refresh products even after error
       try {
         console.log("Attempting to refresh products despite error");
         await refetchProducts();
@@ -85,19 +75,13 @@ export const useScrapeIca = (refetchProducts: () => Promise<{ success: boolean; 
     }
   };
 
-  /**
-   * Invokes a Supabase function with a timeout
-   */
   const invokeScraperWithTimeout = async (functionName: string, body: any, timeoutMs: number = 120000) => {
-    // Set up a timeout for the request
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => reject(new Error('Förfrågan tog för lång tid (120 sekunder)')), timeoutMs);
     });
     
-    // Create the invocation promise
     const invocationPromise = supabase.functions.invoke(functionName, { body });
     
-    // Race between timeout and invocation
     return await Promise.race([
       invocationPromise,
       timeoutPromise.then(() => { 

@@ -10,6 +10,7 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
     try {
       setScraping(true);
       
+      // Only show the "starting" notification, not success notifications
       if (showNotification) {
         toast({
           title: "Hämtar Willys-produkter",
@@ -58,13 +59,9 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
       }
       
       const productsCount = data.products?.length || 0;
+      console.log(`Updated ${productsCount} products from Willys`);
       
-      if (showNotification) {
-        toast({
-          title: "Lyckades!",
-          description: `Uppdaterade ${productsCount} produkter från Willys.`,
-        });
-      }
+      // Success notifications are removed as requested
       
       return data;
     } catch (err: any) {
