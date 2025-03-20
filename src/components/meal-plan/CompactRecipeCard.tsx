@@ -31,12 +31,6 @@ export const CompactRecipeCard: React.FC<CompactRecipeCardProps> = ({
     navigate(`/recipe/${recipe.id}`);
   };
 
-  const handleMealPlanClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    navigate("/meal-plan");
-    onAddToMealPlan();
-  };
-
   // Function to handle image errors
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     console.log(`Failed to load compact recipe image for ${recipe.title}, using fallback`);
@@ -116,7 +110,11 @@ export const CompactRecipeCard: React.FC<CompactRecipeCardProps> = ({
                 size="sm" 
                 variant="outline"
                 className="py-1 h-7 text-xs"
-                onClick={handleMealPlanClick}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate("/meal-plan");
+                  onAddToMealPlan();
+                }}
               >
                 Lägg till i matsedel
               </Button>

@@ -5,7 +5,6 @@ import { Heart } from "lucide-react";
 import { Recipe } from "@/types/recipe";
 import { DaySelector } from "@/components/meal-plan/DaySelector";
 import { DayMeal } from "@/types/mealPlan";
-import { useNavigate } from "react-router-dom";
 
 interface RecipeActionsProps {
   recipe: Recipe;
@@ -22,13 +21,6 @@ export const RecipeActions: React.FC<RecipeActionsProps> = ({
   onFavoriteToggle,
   onAddToMealPlan,
 }) => {
-  const navigate = useNavigate();
-
-  // Direct navigation to meal plan page if user just clicks the button without selecting a day
-  const handleDirectNavToMealPlan = () => {
-    navigate("/meal-plan");
-  };
-
   return (
     <div className="px-4 mb-4 flex justify-between">
       <Button 
@@ -49,13 +41,6 @@ export const RecipeActions: React.FC<RecipeActionsProps> = ({
           <Button 
             variant="outline" 
             size="sm"
-            onClick={(e) => {
-              // If selector is closed and user clicks anywhere else on the button
-              // still make sure we navigate properly
-              if (!document.querySelector('[role="dialog"]')) {
-                handleDirectNavToMealPlan();
-              }
-            }}
           >
             Lägg till i matsedel
           </Button>

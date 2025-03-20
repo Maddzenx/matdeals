@@ -39,18 +39,6 @@ export const RecipeCardActions: React.FC<RecipeCardActionsProps> = ({
     });
   };
 
-  const handleAddToMealPlan = (e: React.MouseEvent) => {
-    if (onSelectDay && mealPlan) {
-      // Use the DaySelector component
-      return;
-    } else {
-      // Directly navigate to the meal plan page
-      e.stopPropagation();
-      navigate("/meal-plan");
-      onAddToMealPlan(e);
-    }
-  };
-
   return (
     <div className="flex gap-1">
       <Button
@@ -84,7 +72,7 @@ export const RecipeCardActions: React.FC<RecipeCardActionsProps> = ({
           variant="ghost"
           size="icon"
           className="w-9 h-9 rounded-full"
-          onClick={handleAddToMealPlan}
+          onClick={onAddToMealPlan}
           aria-label="Lägg till i matsedel"
         >
           <CalendarPlus size={18} />
