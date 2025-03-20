@@ -59,10 +59,13 @@ export const TopNavigationBar: React.FC<TopNavigationBarProps> = ({
                 <MoreVertical size={22} className="text-gray-600" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 z-[100] bg-white">
+            <DropdownMenuContent align="end" className="w-56 z-[60] bg-white">
               <DropdownMenuItem 
                 className="flex items-center cursor-pointer"
-                onClick={onAddToMealPlanClick}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddToMealPlanClick();
+                }}
               >
                 <CalendarDays size={16} className="mr-2" />
                 <span>Lägg till i matsedel</span>
@@ -70,7 +73,10 @@ export const TopNavigationBar: React.FC<TopNavigationBarProps> = ({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="flex items-center cursor-pointer"
-                onClick={onAddToCart}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddToCart();
+                }}
               >
                 <ShoppingCart size={16} className="mr-2" />
                 <span>Lägg till i inköpslista</span>

@@ -78,12 +78,15 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
   return (
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
+        // Prevent default and stop propagation to avoid triggering other click handlers
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
       }}>
         {trigger || <Button onClick={(e) => e.stopPropagation()}>Välj dag</Button>}
       </SheetTrigger>
-      <SheetContent side="bottom" className="rounded-t-lg z-[1000] p-6 bg-[#1A1F2C]">
+      <SheetContent side="bottom" className="rounded-t-lg z-[100] p-6 bg-[#1A1F2C]">
         <SheetHeader className="mb-6">
           <SheetTitle className="text-left text-xl font-bold text-white">Välj dag för receptet</SheetTitle>
         </SheetHeader>

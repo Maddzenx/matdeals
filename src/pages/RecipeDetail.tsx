@@ -61,7 +61,9 @@ const RecipeDetail = () => {
 
   const handleAddToMealPlanClick = useCallback(() => {
     setShowMealPlanSelector(true);
-  }, []);
+    // Important: Close the dropdown when opening the sheet
+    handleDropdownChange(false);
+  }, [handleDropdownChange]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
