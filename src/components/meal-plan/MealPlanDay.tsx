@@ -98,7 +98,7 @@ export const MealPlanDay: React.FC<MealPlanDayProps> = ({ day, onAddRecipe }) =>
                     onAddRecipe("");
                   }}
                 >
-                  Byt recept
+                  Ta bort recept
                 </Button>
                 {!isPotentiallyInvalidRecipe && (
                   <Button
