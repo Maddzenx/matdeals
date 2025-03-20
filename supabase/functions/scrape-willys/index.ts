@@ -1,9 +1,9 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { DOMParser } from "https://deno.land/x/deno_dom/deno-dom-wasm.ts";
 import { corsHeaders } from "./cors.ts";
 import { storeProducts } from "./supabase-client.ts";
 import { extractProducts } from "./products-extractor.ts";
+import { createSampleProducts } from "./extractors/fallback-extractor.ts";
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -126,7 +126,7 @@ serve(async (req) => {
     
     console.log("Document parsed successfully, extracting products...");
     
-    // Extract products using the dedicated extractor
+    // Extract products using the modular extractor
     const baseUrl = "https://www.willys.se";
     const products = extractProducts(document, baseUrl);
     
@@ -201,7 +201,6 @@ serve(async (req) => {
   }
 });
 
-// Function to create sample products when scraping fails
 function createSampleProducts() {
   return [
     {
