@@ -1,7 +1,7 @@
 
 import React, { useEffect, useCallback, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Tag, ArrowLeft, Heart, MoreVertical, ChevronRight } from "lucide-react"; // Add the missing imports
+import { Tag, ArrowLeft, Heart, MoreVertical, ChevronRight } from "lucide-react"; 
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { useRecipeDetail } from "@/hooks/useRecipeDetail";
 import { useMealPlan } from "@/hooks/useMealPlan";
@@ -13,6 +13,7 @@ import { RecipeError } from "@/components/recipe-detail/RecipeError";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { BottomNav } from "@/components/BottomNav";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -24,9 +25,11 @@ const RecipeDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { toast } = useToast();
   const { navItems, handleProductQuantityChange } = useNavigationState();
   const { toggleFavorite, favoriteIds, mealPlan, addToMealPlan } = useMealPlan();
   const [activeTab, setActiveTab] = useState("overview");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   const {
     recipe,
@@ -54,7 +57,16 @@ const RecipeDetail = () => {
   // Handle adding to meal plan
   const handleAddToMealPlanDay = useCallback((day: string, recipeId: string) => {
     addToMealPlan(day, recipeId);
-  }, [addToMealPlan]);
+    
+    // Add toast notification
+    toast({
+      title: "Tillagd i matsedel",
+      description: `Receptet har lagts till i matsedeln.`,
+    });
+    
+    // Manually close dropdown after action
+    setIsDropdownOpen(false);
+  }, [addToMealPlan, toast]);
 
   // Handle add to cart
   const handleAddToCart = useCallback(() => {
@@ -75,13 +87,27 @@ const RecipeDetail = () => {
           }
         );
       });
+      
+      // Add toast notification
+      toast({
+        title: "Tillagd i inköpslistan",
+        description: `Ingredienser från "${recipe.title}" har lagts till i inköpslistan.`,
+      });
+      
+      // Manually close dropdown after action
+      setIsDropdownOpen(false);
     }
-  }, [recipe, handleProductQuantityChange]);
+  }, [recipe, handleProductQuantityChange, toast]);
 
   // Auto scroll to top on page load
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  // Function to handle dropdown open state
+  const handleDropdownChange = (open: boolean) => {
+    setIsDropdownOpen(open);
+  };
 
   if (loading) {
     return (
@@ -127,17 +153,18 @@ const RecipeDetail = () => {
               />
             </button>
             
-            <DropdownMenu>
+            <DropdownMenu open={isDropdownOpen} onOpenChange={handleDropdownChange}>
               <DropdownMenuTrigger asChild>
                 <button className="p-2 rounded-full">
                   <MoreVertical size={22} className="text-gray-600" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent align="end" className="w-56 z-[100] bg-white">
                 <DropdownMenuItem 
                   className="flex items-center cursor-pointer"
-                  onClick={() => {
-                    // Open meal plan day selector
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    // Trigger meal plan selector
                     document.getElementById('meal-plan-trigger')?.click();
                   }}
                 >
@@ -146,7 +173,10 @@ const RecipeDetail = () => {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="cursor-pointer"
-                  onClick={handleAddToCart}
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    handleAddToCart();
+                  }}
                 >
                   Lägg till i inköpslista
                 </DropdownMenuItem>

@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { DayMeal } from "@/types/mealPlan";
@@ -21,8 +21,8 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
   trigger
 }) => {
   const { toast } = useToast();
-  const [selectedDay, setSelectedDay] = React.useState<string | null>(null);
-  const [open, setOpen] = React.useState(false);
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
   
   const getDayName = (day: string) => {
     switch(day.toLowerCase()) {
@@ -46,11 +46,7 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
       onSelectDay(selectedDay, recipe.id);
       setOpen(false);
       
-      // Show success toast
-      toast({
-        title: "Receptet lades till",
-        description: `Receptet lades till i matsedeln för ${getDayName(selectedDay)}`,
-      });
+      // We'll let the parent component handle the toast now
     }
   };
 
@@ -62,17 +58,20 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
     }
   };
 
-  // Use CSS to ensure dialog appears above the card
+  // Use CSS to ensure dialog appears above the card with a higher z-index
   const sheetStyles = {
     zIndex: 1000,
   };
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetTrigger asChild onClick={e => e.stopPropagation()}>
-        {trigger || <Button onClick={e => e.stopPropagation()}>Välj dag</Button>}
+      <SheetTrigger asChild onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}>
+        {trigger || <Button onClick={(e) => e.stopPropagation()}>Välj dag</Button>}
       </SheetTrigger>
-      <SheetContent side="bottom" className="rounded-t-lg" style={sheetStyles}>
+      <SheetContent side="bottom" className="rounded-t-lg z-[1000]" style={sheetStyles}>
         <SheetHeader className="mb-4">
           <SheetTitle>Välj dag för receptet</SheetTitle>
         </SheetHeader>
