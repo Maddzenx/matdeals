@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { DayMeal } from "@/types/mealPlan";
 import { Recipe } from "@/types/recipe";
 import { Check } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 
 interface DaySelectorProps {
   mealPlan: DayMeal[];
@@ -24,7 +23,6 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
   open,
   onOpenChange
 }) => {
-  const { toast } = useToast();
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [internalOpen, setInternalOpen] = useState(false);
   

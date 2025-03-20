@@ -1,6 +1,6 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
 
 export const useScrapeIca = (refetchProducts: () => Promise<{ success: boolean; error?: any }>) => {
   const [scraping, setScraping] = useState(false);
@@ -9,26 +9,19 @@ export const useScrapeIca = (refetchProducts: () => Promise<{ success: boolean; 
     try {
       setScraping(true);
       
-      if (showNotification) {
-        toast({
-          title: "Hämtar ICA-produkter",
-          description: "Vänta medan vi hämtar de senaste erbjudandena...",
-        });
-      }
-      
       console.log("Starting ICA scraping process");
       
       const { data, error } = await invokeScraperWithTimeout('scrape-ica', { forceRefresh: true });
       
       if (error) {
-        console.error("Funktionsfel:", error);
+        console.error("Function error:", error);
         throw error;
       }
       
-      console.log("Skrapningsresultat från ICA:", data);
+      console.log("Scraping results from ICA:", data);
       
       if (!data.success) {
-        throw new Error(data.error || "Okänt fel i skrapningsfunktionen");
+        throw new Error(data.error || "Unknown error in scraping function");
       }
       
       console.log("ICA scraping completed, now refreshing products");
@@ -36,7 +29,7 @@ export const useScrapeIca = (refetchProducts: () => Promise<{ success: boolean; 
       
       if (!refreshResult.success) {
         console.error("Refresh error:", refreshResult.error);
-        throw new Error("Kunde inte uppdatera produkter efter skrapning");
+        throw new Error("Could not update products after scraping");
       }
       
       const productsCount = data.products?.length || 0;
@@ -44,29 +37,13 @@ export const useScrapeIca = (refetchProducts: () => Promise<{ success: boolean; 
       
       return data;
     } catch (err: any) {
-      console.error("Fel vid skrapning av ICA:", err);
+      console.error("Error scraping ICA:", err);
       
       try {
         console.log("Attempting to refresh products despite error");
         await refetchProducts();
       } catch (refreshErr) {
         console.error("Could not refresh products after error:", refreshErr);
-      }
-      
-      if (showNotification) {
-        let errorMessage = "Kunde inte hämta ICA-produkter. Försök igen senare.";
-        
-        if (err instanceof Error) {
-          if (err.message && typeof err.message === 'string') {
-            errorMessage = `Fel: ${err.message}`;
-          }
-        }
-        
-        toast({
-          title: "Fel",
-          description: errorMessage,
-          variant: "destructive"
-        });
       }
       
       throw err;
@@ -77,7 +54,7 @@ export const useScrapeIca = (refetchProducts: () => Promise<{ success: boolean; 
 
   const invokeScraperWithTimeout = async (functionName: string, body: any, timeoutMs: number = 120000) => {
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Förfrågan tog för lång tid (120 sekunder)')), timeoutMs);
+      setTimeout(() => reject(new Error('Request took too long (120 seconds)')), timeoutMs);
     });
     
     const invocationPromise = supabase.functions.invoke(functionName, { body });
@@ -85,7 +62,7 @@ export const useScrapeIca = (refetchProducts: () => Promise<{ success: boolean; 
     return await Promise.race([
       invocationPromise,
       timeoutPromise.then(() => { 
-        throw new Error('Förfrågan tog för lång tid (120 sekunder)');
+        throw new Error('Request took too long (120 seconds)');
       })
     ]);
   };

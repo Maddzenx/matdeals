@@ -2,8 +2,6 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/data/types";
-import { toast } from "@/components/ui/use-toast";
-import { showNoIcaProductsWarning, showFetchErrorNotification } from "@/utils/productNotifications";
 
 export const useProductFetching = () => {
   const [loading, setLoading] = useState(true);
@@ -27,22 +25,11 @@ export const useProductFetching = () => {
         console.log("Sample ICA item:", icaData[0]);
       } else {
         console.warn("No ICA data found in database");
-        
-        // If no data in the database, provide a clear message to the user only if requested
-        if (showNotifications) {
-          showNoIcaProductsWarning();
-        }
       }
       
       return icaData || [];
     } catch (error) {
       console.error("Error in fetchIcaProducts:", error);
-      
-      // Show a toast message about the error only if requested
-      if (showNotifications) {
-        showFetchErrorNotification(error);
-      }
-      
       throw error;
     }
   }, []);
@@ -69,27 +56,12 @@ export const useProductFetching = () => {
         console.log("Sample Willys item:", willysData[0]);
       } else {
         console.warn("No Willys data found in database");
-        
-        // If no data in the database, provide a clear message to the user only if requested
-        if (showNotifications) {
-          toast({
-            title: "Inga Willys-erbjudanden",
-            description: "Det finns inga Willys-erbjudanden i databasen. Klicka på uppdatera för att hämta nya erbjudanden.",
-            variant: "default"
-          });
-        }
       }
       
       return willysData || [];
     } catch (error) {
       console.error("Error in fetchWillysProducts:", error);
       console.error("Error details:", JSON.stringify(error));
-      
-      // Show a toast message about the error only if requested
-      if (showNotifications) {
-        showFetchErrorNotification(error);
-      }
-      
       return [];
     }
   }, []);

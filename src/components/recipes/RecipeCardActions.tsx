@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Heart, CalendarPlus, ShoppingCart } from "lucide-react";
 import { DaySelector } from "@/components/meal-plan/DaySelector";
 import { DayMeal } from "@/types/mealPlan";
-import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
 interface RecipeCardActionsProps {
@@ -26,19 +25,12 @@ export const RecipeCardActions: React.FC<RecipeCardActionsProps> = ({
   mealPlan,
   onSelectDay,
 }) => {
-  const { toast } = useToast();
   const navigate = useNavigate();
   const [showMealPlanSelector, setShowMealPlanSelector] = useState(false);
   
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation(); // Stop event from bubbling up to the card
     onAddToCart(e);
-    
-    // Show toast notification
-    toast({
-      title: "Varor tillagda",
-      description: "Ingredienserna lades till i inköpslistan",
-    });
   };
 
   const handleFavoriteToggle = (e: React.MouseEvent) => {
