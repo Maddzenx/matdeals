@@ -2,12 +2,14 @@
 import { useState, useEffect } from "react";
 import { useScrapeIca } from "@/hooks/useScrapeIca";
 import { useScrapeWillys } from "@/hooks/useScrapeWillys";
+import { useScrapeHemkop } from "@/hooks/useScrapeHemkop";
 import { useAppSession } from "@/hooks/useAppSession";
 
 export const useProductRefresh = (refetch: () => Promise<{ success: boolean; error?: any }>) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { scraping: scrapingIca, handleScrapeIca } = useScrapeIca(refetch);
   const { scraping: scrapingWillys, handleScrapeWillys } = useScrapeWillys(refetch);
+  const { scraping: scrapingHemkop, handleScrapeHemkop } = useScrapeHemkop(refetch);
   const { isFirstLoad } = useAppSession();
 
   // Auto-refresh data only on first app load
@@ -30,7 +32,7 @@ export const useProductRefresh = (refetch: () => Promise<{ success: boolean; err
     setIsRefreshing(true);
     
     try {
-      console.log("Starting refresh of both ICA and Willys data");
+      console.log("Starting refresh of ICA, Willys, and Hemköp data");
       
       await Promise.all([
         handleScrapeIca(false).catch(err => { // Always use false to disable notifications
@@ -38,6 +40,9 @@ export const useProductRefresh = (refetch: () => Promise<{ success: boolean; err
         }),
         handleScrapeWillys(false).catch(err => { // Always use false to disable notifications
           console.error("Error scraping Willys:", err);
+        }),
+        handleScrapeHemkop(false).catch(err => { // Always use false to disable notifications
+          console.error("Error scraping Hemköp:", err);
         })
       ]);
       
@@ -50,7 +55,7 @@ export const useProductRefresh = (refetch: () => Promise<{ success: boolean; err
   };
 
   return {
-    isRefreshing: isRefreshing || scrapingIca || scrapingWillys,
+    isRefreshing: isRefreshing || scrapingIca || scrapingWillys || scrapingHemkop,
     handleRefresh
   };
 };

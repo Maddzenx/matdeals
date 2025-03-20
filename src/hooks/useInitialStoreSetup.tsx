@@ -10,16 +10,20 @@ export const useInitialStoreSetup = (
 ) => {
   // Initialize store filters
   useEffect(() => {
-    // Make sure both stores are available in the store filter by default
+    // Make sure all stores are available in the store filter by default
     addStoreIfNeeded('ica', 'ICA', storeTagsData);
     addStoreIfNeeded('willys', 'Willys', storeTagsData);
+    addStoreIfNeeded('hemkop', 'Hemköp', storeTagsData);
     
-    // Make sure both stores are selected by default
+    // Make sure all stores are selected by default
     if (!activeStores.includes('ica')) {
       handleStoreToggle('ica');
     }
     if (!activeStores.includes('willys')) {
       handleStoreToggle('willys');
+    }
+    if (!activeStores.includes('hemkop')) {
+      handleStoreToggle('hemkop');
     }
   }, []);
   
@@ -42,6 +46,7 @@ export const useInitialStoreSetup = (
         if (store !== 'unknown') {
           const storeName = store === 'ica' ? 'ICA' : 
                            store === 'willys' ? 'Willys' : 
+                           store === 'hemkop' ? 'Hemköp' :
                            store.charAt(0).toUpperCase() + store.slice(1);
           addStoreIfNeeded(store, storeName, storeTagsData);
         }

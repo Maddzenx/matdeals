@@ -66,6 +66,37 @@ export const useProductFetching = () => {
     }
   }, []);
 
+  const fetchHemkopProducts = useCallback(async (showNotifications = false) => {
+    console.log("Fetching products from Supabase Hemköp table...");
+    
+    try {
+      console.log("About to query Hemkop table with: supabase.from('Hemkop').select('*')");
+      
+      const { data: hemkopData, error: hemkopError } = await supabase
+        .from('Hemkop')
+        .select('*');
+        
+      if (hemkopError) {
+        console.error("Supabase Hemköp query error:", hemkopError);
+        console.error("Error details:", JSON.stringify(hemkopError));
+        throw hemkopError;
+      }
+      
+      console.log("Raw Hemköp data:", hemkopData?.length || 0, "items");
+      if (hemkopData && hemkopData.length > 0) {
+        console.log("Sample Hemköp item:", hemkopData[0]);
+      } else {
+        console.warn("No Hemköp data found in database");
+      }
+      
+      return hemkopData || [];
+    } catch (error) {
+      console.error("Error in fetchHemkopProducts:", error);
+      console.error("Error details:", JSON.stringify(error));
+      return [];
+    }
+  }, []);
+
   const refreshProducts = useCallback(async (showNotifications = false) => {
     try {
       setLoading(true);
@@ -73,7 +104,7 @@ export const useProductFetching = () => {
       
       console.log("Starting refreshProducts function...");
       
-      const [icaData, willysData] = await Promise.all([
+      const [icaData, willysData, hemkopData] = await Promise.all([
         fetchIcaProducts(showNotifications).catch(err => {
           console.error("Error fetching ICA products during refresh:", err);
           return [];
@@ -81,12 +112,16 @@ export const useProductFetching = () => {
         fetchWillysProducts(showNotifications).catch(err => {
           console.error("Error fetching Willys products during refresh:", err);
           return [];
+        }),
+        fetchHemkopProducts(showNotifications).catch(err => {
+          console.error("Error fetching Hemköp products during refresh:", err);
+          return [];
         })
       ]);
       
-      console.log(`Refreshed products - ICA: ${icaData.length}, Willys: ${willysData.length}`);
+      console.log(`Refreshed products - ICA: ${icaData.length}, Willys: ${willysData.length}, Hemköp: ${hemkopData.length}`);
       
-      return { icaData, willysData };
+      return { icaData, willysData, hemkopData };
     } catch (error) {
       console.error("Error in refreshProducts:", error);
       setError(error instanceof Error ? error : new Error('Unknown error'));
@@ -94,11 +129,12 @@ export const useProductFetching = () => {
     } finally {
       setLoading(false);
     }
-  }, [fetchIcaProducts, fetchWillysProducts]);
+  }, [fetchIcaProducts, fetchWillysProducts, fetchHemkopProducts]);
 
   return {
     fetchIcaProducts,
     fetchWillysProducts,
+    fetchHemkopProducts,
     refreshProducts,
     loading,
     setLoading,
