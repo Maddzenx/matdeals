@@ -9,6 +9,7 @@ interface StoreProductGroupProps {
   onItemCheck: (id: string) => void;
   onIncrement: (id: string) => void;
   onDecrement: (id: string) => void;
+  onSetQuantity?: (id: string, quantity: number) => void;
 }
 
 export const StoreProductGroup: React.FC<StoreProductGroupProps> = ({
@@ -16,16 +17,27 @@ export const StoreProductGroup: React.FC<StoreProductGroupProps> = ({
   items,
   onItemCheck,
   onIncrement,
-  onDecrement
+  onDecrement,
+  onSetQuantity,
 }) => {
+  // Format store names consistently
+  const formatStoreName = (name: string) => {
+    switch (name.toLowerCase()) {
+      case "ica":
+        return "ICA";
+      case "willys":
+        return "Willys";
+      default:
+        return name.charAt(0).toUpperCase() + name.slice(1);
+    }
+  };
+
   return (
-    <div className="mt-3">
-      <div className="sticky top-[116px] bg-white py-2 z-10 border-b border-gray-200">
-        <h2 className="text-base font-semibold text-[#1C1C1C] flex items-center gap-2 px-4">
-          {storeName}
-        </h2>
+    <div className="py-2">
+      <div className="py-2 sticky top-[120px] bg-white z-10">
+        <h2 className="text-lg font-bold">{formatStoreName(storeName)}</h2>
       </div>
-      <div className="divide-y divide-gray-200 px-4">
+      <div>
         {items.map((item) => (
           <ShoppingListItem
             key={item.id}
@@ -33,6 +45,7 @@ export const StoreProductGroup: React.FC<StoreProductGroupProps> = ({
             onItemCheck={onItemCheck}
             onIncrement={onIncrement}
             onDecrement={onDecrement}
+            onSetQuantity={onSetQuantity}
           />
         ))}
       </div>

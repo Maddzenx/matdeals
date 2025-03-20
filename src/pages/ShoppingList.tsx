@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { useNavigate } from "react-router-dom";
@@ -84,7 +83,6 @@ const ShoppingList = () => {
     }
   };
 
-  // New function to directly update quantity
   const handleSetQuantity = (id: string, newQuantity: number) => {
     const item = cartItems.find(item => item.id === id);
     if (item) {
@@ -179,6 +177,7 @@ const ShoppingList = () => {
                   onItemCheck={handleItemCheck}
                   onIncrement={handleIncrement}
                   onDecrement={handleDecrement}
+                  onSetQuantity={handleSetQuantity}
                 />
               ))}
               <ConnectedRecipes cartItems={cartItems} />
@@ -193,6 +192,7 @@ const ShoppingList = () => {
                   onItemCheck={handleItemCheck}
                   onIncrement={handleIncrement}
                   onDecrement={handleDecrement}
+                  onSetQuantity={handleSetQuantity}
                 />
               ))}
               <ConnectedRecipes cartItems={cartItems} />

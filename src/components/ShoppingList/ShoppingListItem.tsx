@@ -10,6 +10,7 @@ interface ShoppingListItemProps {
   onItemCheck: (id: string) => void;
   onIncrement: (id: string) => void;
   onDecrement: (id: string) => void;
+  onSetQuantity?: (id: string, quantity: number) => void;
 }
 
 export const ShoppingListItem: React.FC<ShoppingListItemProps> = ({
@@ -17,10 +18,16 @@ export const ShoppingListItem: React.FC<ShoppingListItemProps> = ({
   onItemCheck,
   onIncrement,
   onDecrement,
+  onSetQuantity,
 }) => {
   // Direct update function for quantity changes
   const handleQuantityChange = (newQuantity: number) => {
-    if (newQuantity > item.quantity) {
+    // If we have the direct set quantity function, use it
+    if (onSetQuantity) {
+      onSetQuantity(item.id, newQuantity);
+    } 
+    // Fall back to increment/decrement if needed
+    else if (newQuantity > item.quantity) {
       // Use the existing product data when updating
       const productData = {
         name: item.name,
@@ -31,9 +38,6 @@ export const ShoppingListItem: React.FC<ShoppingListItemProps> = ({
         recipeId: item.recipeId,
         recipeTitle: item.recipeTitle
       };
-      
-      // Access the handleProductQuantityChange from context/state
-      // The functions we have access to here are onIncrement/onDecrement which call this internally
       
       // We're going to trigger onIncrement once, which will correctly pass product data to the underlying
       // handleProductQuantityChange function with the new quantity
