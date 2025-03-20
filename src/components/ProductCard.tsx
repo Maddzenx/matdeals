@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { GridProductCard } from "./product/GridProductCard";
 import { ListProductCard } from "./product/ListProductCard";
+import { ProductDetailsDialog } from "./product/ProductDetailsDialog";
 
 interface ProductCardProps {
   id: string;
@@ -31,6 +32,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const { cartItems } = useNavigationState();
   const [quantity, setQuantity] = useState(0);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   // Enhanced check for meaningful offer badges
   // Filter out generic badges that don't provide useful information
@@ -74,10 +76,57 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     }
   };
 
+  const handleCardClick = () => {
+    setIsDialogOpen(true);
+  };
+
+  const productData = {
+    id,
+    image,
+    name,
+    details,
+    currentPrice,
+    originalPrice,
+    store,
+    offerBadge: shouldDisplayBadge ? offerBadge : undefined
+  };
+
   // Choose between grid and list view
   if (viewMode === "grid") {
     return (
-      <GridProductCard
+      <>
+        <GridProductCard
+          id={id}
+          image={image}
+          name={name}
+          details={details}
+          currentPrice={currentPrice}
+          originalPrice={originalPrice}
+          store={store}
+          offerBadge={shouldDisplayBadge ? offerBadge : undefined}
+          quantity={quantity}
+          onAdd={handleAdd}
+          onIncrement={handleIncrement}
+          onDecrement={handleDecrement}
+          onClick={handleCardClick}
+        />
+        <ProductDetailsDialog
+          open={isDialogOpen}
+          onOpenChange={setIsDialogOpen}
+          product={productData}
+          quantity={quantity}
+          onAdd={handleAdd}
+          onIncrement={handleIncrement}
+          onDecrement={handleDecrement}
+        />
+      </>
+    );
+  }
+
+  // Default to list view
+  return (
+    <>
+      <ListProductCard
         id={id}
         image={image}
         name={name}
@@ -90,25 +139,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         onAdd={handleAdd}
         onIncrement={handleIncrement}
         onDecrement={handleDecrement}
+        onClick={handleCardClick}
       />
-    );
-  }
-
-  // Default to list view
-  return (
-    <ListProductCard
-      id={id}
-      image={image}
-      name={name}
-      details={details}
-      currentPrice={currentPrice}
-      originalPrice={originalPrice}
-      store={store}
-      offerBadge={shouldDisplayBadge ? offerBadge : undefined}
-      quantity={quantity}
-      onAdd={handleAdd}
-      onIncrement={handleIncrement}
-      onDecrement={handleDecrement}
-    />
+      <ProductDetailsDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        product={productData}
+        quantity={quantity}
+        onAdd={handleAdd}
+        onIncrement={handleIncrement}
+        onDecrement={handleDecrement}
+      />
+    </>
   );
 };

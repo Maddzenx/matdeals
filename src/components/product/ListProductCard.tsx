@@ -16,6 +16,7 @@ interface ListProductCardProps {
   onAdd: () => void;
   onIncrement: () => void;
   onDecrement: () => void;
+  onClick: () => void;
 }
 
 export const ListProductCard: React.FC<ListProductCardProps> = ({
@@ -30,9 +31,24 @@ export const ListProductCard: React.FC<ListProductCardProps> = ({
   onAdd,
   onIncrement,
   onDecrement,
+  onClick,
 }) => {
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Prevent click event from firing when interacting with quantity controls
+    if (
+      e.target instanceof Element && 
+      (e.target.closest('button') || e.target.tagName === 'BUTTON')
+    ) {
+      return;
+    }
+    onClick();
+  };
+
   return (
-    <div className="shadow-sm relative bg-white p-3 rounded-lg flex justify-between items-center border border-neutral-100">
+    <div 
+      className="shadow-sm relative bg-white p-3 rounded-lg flex justify-between items-center border border-neutral-100 cursor-pointer transition-all hover:shadow-md"
+      onClick={handleCardClick}
+    >
       <div className="flex items-center gap-3 flex-grow pr-2">
         <ProductImage 
           src={image} 

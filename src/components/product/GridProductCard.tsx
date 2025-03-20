@@ -16,6 +16,7 @@ interface GridProductCardProps {
   onAdd: () => void;
   onIncrement: () => void;
   onDecrement: () => void;
+  onClick: () => void;
 }
 
 export const GridProductCard: React.FC<GridProductCardProps> = ({
@@ -30,9 +31,24 @@ export const GridProductCard: React.FC<GridProductCardProps> = ({
   onAdd,
   onIncrement,
   onDecrement,
+  onClick,
 }) => {
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Prevent click event from firing when interacting with quantity controls
+    if (
+      e.target instanceof Element && 
+      (e.target.closest('button') || e.target.tagName === 'BUTTON')
+    ) {
+      return;
+    }
+    onClick();
+  };
+
   return (
-    <div className="shadow-sm relative bg-white p-3 rounded-lg max-sm:p-2.5 border border-neutral-100">
+    <div 
+      className="shadow-sm relative bg-white p-3 rounded-lg max-sm:p-2.5 border border-neutral-100 cursor-pointer transition-all hover:shadow-md"
+      onClick={handleCardClick}
+    >
       <ProductImage 
         src={image} 
         alt={name} 
