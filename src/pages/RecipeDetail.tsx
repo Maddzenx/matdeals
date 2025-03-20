@@ -6,7 +6,6 @@ import { useRecipeDetail } from "@/hooks/useRecipeDetail";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import { RecipeHeader } from "@/components/recipe-detail/RecipeHeader";
 import { RecipeMetrics } from "@/components/recipe-detail/RecipeMetrics";
-import { RecipeActions } from "@/components/recipe-detail/RecipeActions";
 import { RecipeTabs } from "@/components/recipe-detail/RecipeTabs";
 import { RecipeError } from "@/components/recipe-detail/RecipeError";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
@@ -109,13 +108,7 @@ const RecipeDetail = () => {
             difficulty={recipe.difficulty}
           />
           
-          <RecipeActions 
-            recipe={recipe}
-            favoriteIds={favoriteIds}
-            mealPlan={mealPlan}
-            onFavoriteToggle={handleFavoriteToggle}
-            onAddToMealPlan={(day, recipeId) => handleAddToMealPlanWithToast(day, recipeId, addToMealPlan)}
-          />
+          {/* RecipeActions component has been removed */}
         </div>
         
         <RecipeTabs 
