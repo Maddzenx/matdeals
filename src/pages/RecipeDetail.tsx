@@ -1,5 +1,5 @@
 
-import React, { useEffect, useCallback, useState, useRef } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Tag, ArrowLeft, Heart, MoreVertical, ChevronRight } from "lucide-react"; // Add the missing imports
 import { useNavigationState } from "@/hooks/useNavigationState";
@@ -27,25 +27,12 @@ const RecipeDetail = () => {
   const { navItems, handleProductQuantityChange } = useNavigationState();
   const { toggleFavorite, favoriteIds, mealPlan, addToMealPlan } = useMealPlan();
   const [activeTab, setActiveTab] = useState("overview");
-  const [showTopPanel, setShowTopPanel] = useState(false);
   
   const {
     recipe,
     loading,
     error,
   } = useRecipeDetail(id);
-
-  // Handle scroll events
-  useEffect(() => {
-    const handleScroll = () => {
-      // Show the top panel when scrolled past a certain point (e.g., 100px)
-      const scrollPosition = window.scrollY;
-      setShowTopPanel(scrollPosition > 100);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Handle back button click
   const handleGoBack = useCallback(() => {
@@ -118,12 +105,8 @@ const RecipeDetail = () => {
 
   return (
     <div className="min-h-screen bg-white pb-24 relative">
-      {/* Floating top panel that appears on scroll */}
-      <div 
-        className={`fixed top-0 left-0 right-0 bg-white z-50 border-b border-gray-200 transition-transform duration-200 ease-in-out ${
-          showTopPanel ? 'translate-y-0 shadow-md' : '-translate-y-full'
-        }`}
-      >
+      {/* Top navigation bar - always visible */}
+      <div className="fixed top-0 left-0 right-0 bg-white z-50 border-b border-gray-200 shadow-sm">
         <div className="px-4 py-3 flex items-center justify-between">
           <button onClick={handleGoBack} className="text-[#DB2C17]">
             <ArrowLeft size={24} />
@@ -173,49 +156,52 @@ const RecipeDetail = () => {
         </div>
       </div>
 
-      <RecipeHeader 
-        recipe={recipe}
-        onBack={handleGoBack}
-      />
-      
-      <div className="px-4 mt-4">
-        <RecipeMetrics 
-          time_minutes={recipe.time_minutes}
-          servings={recipe.servings}
-          difficulty={recipe.difficulty}
+      {/* Add top padding to prevent content from being hidden behind the fixed header */}
+      <div className="pt-14">
+        <RecipeHeader 
+          recipe={recipe}
+          onBack={null} // Removing the back button from RecipeHeader
         />
         
-        <RecipeActions 
-          recipe={recipe}
-          favoriteIds={favoriteIds}
-          mealPlan={mealPlan}
-          onFavoriteToggle={handleFavoriteToggle}
-          onAddToMealPlan={handleAddToMealPlanDay}
-        />
-      </div>
-      
-      <RecipeTabs 
-        recipe={recipe}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        onAddToCart={handleAddToCart}
-        hidePricing={false}
-      />
-      
-      {hasDiscountedIngredients && activeTab === "ingredients" && (
-        <div className="px-4 mb-6 mt-2">
-          <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-            <p className="text-sm text-gray-700 flex items-center">
-              <Tag size={14} className="mr-2 text-[#DB2C17]" />
-              <span>
-                {recipe.matchedProducts?.length} ingrediens{recipe.matchedProducts?.length !== 1 ? 'er' : ''} på REA!
-              </span>
-            </p>
-          </div>
+        <div className="px-4 mt-4">
+          <RecipeMetrics 
+            time_minutes={recipe.time_minutes}
+            servings={recipe.servings}
+            difficulty={recipe.difficulty}
+          />
+          
+          <RecipeActions 
+            recipe={recipe}
+            favoriteIds={favoriteIds}
+            mealPlan={mealPlan}
+            onFavoriteToggle={handleFavoriteToggle}
+            onAddToMealPlan={handleAddToMealPlanDay}
+          />
         </div>
-      )}
-      
-      <BottomNav items={navItems} onSelect={handleNavSelect} />
+        
+        <RecipeTabs 
+          recipe={recipe}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          onAddToCart={handleAddToCart}
+          hidePricing={false}
+        />
+        
+        {hasDiscountedIngredients && activeTab === "ingredients" && (
+          <div className="px-4 mb-6 mt-2">
+            <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+              <p className="text-sm text-gray-700 flex items-center">
+                <Tag size={14} className="mr-2 text-[#DB2C17]" />
+                <span>
+                  {recipe.matchedProducts?.length} ingrediens{recipe.matchedProducts?.length !== 1 ? 'er' : ''} på REA!
+                </span>
+              </p>
+            </div>
+          </div>
+        )}
+        
+        <BottomNav items={navItems} onSelect={handleNavSelect} />
+      </div>
     </div>
   );
 };
