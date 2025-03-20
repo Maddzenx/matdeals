@@ -62,12 +62,17 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
     }
   };
 
+  // Use CSS to ensure dialog appears above the card
+  const sheetStyles = {
+    zIndex: 1000,
+  };
+
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetTrigger asChild>
-        {trigger || <Button>Välj dag</Button>}
+      <SheetTrigger asChild onClick={e => e.stopPropagation()}>
+        {trigger || <Button onClick={e => e.stopPropagation()}>Välj dag</Button>}
       </SheetTrigger>
-      <SheetContent side="bottom" className="rounded-t-lg">
+      <SheetContent side="bottom" className="rounded-t-lg" style={sheetStyles}>
         <SheetHeader className="mb-4">
           <SheetTitle>Välj dag för receptet</SheetTitle>
         </SheetHeader>

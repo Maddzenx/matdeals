@@ -30,6 +30,7 @@ export const RecipeCardActions: React.FC<RecipeCardActionsProps> = ({
   const navigate = useNavigate();
   
   const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Stop event from bubbling up to the card
     onAddToCart(e);
     
     // Show toast notification
@@ -39,29 +40,37 @@ export const RecipeCardActions: React.FC<RecipeCardActionsProps> = ({
     });
   };
 
+  const handleFavoriteToggle = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Stop event from bubbling up to the card
+    onFavoriteToggle(e);
+  };
+
   return (
-    <div className="flex gap-1">
+    <div className="flex gap-1" onClick={e => e.stopPropagation()}>
       <Button
         variant="ghost"
         size="icon"
         className="w-9 h-9 rounded-full"
-        onClick={onFavoriteToggle}
+        onClick={handleFavoriteToggle}
         aria-label={isFavorite ? "Ta bort från favoriter" : "Lägg till i favoriter"}
       >
         <Heart size={18} className={isFavorite ? "text-[#DB2C17] fill-[#DB2C17]" : ""} />
       </Button>
       
-      {/* Always use DaySelector if mealPlan and onSelectDay are provided */}
       <DaySelector
         mealPlan={mealPlan || []}
         recipe={{id: recipeId}}
-        onSelectDay={onSelectDay || (() => navigate("/meal-plan"))}
+        onSelectDay={onSelectDay || (() => {
+          e.stopPropagation(); // Ensure the event doesn't bubble
+          navigate("/meal-plan");
+        })}
         trigger={
           <Button 
             variant="ghost"
             size="icon"
             className="w-9 h-9 rounded-full"
             aria-label="Lägg till i matsedel"
+            onClick={e => e.stopPropagation()} // Stop propagation on the trigger button
           >
             <CalendarPlus size={18} />
           </Button>
