@@ -18,16 +18,39 @@ export const ShoppingListItem: React.FC<ShoppingListItemProps> = ({
   onIncrement,
   onDecrement,
 }) => {
-  // Combined function to handle quantity changes directly
+  // Direct update function for quantity changes
   const handleQuantityChange = (newQuantity: number) => {
     if (newQuantity > item.quantity) {
-      // Increment as needed
-      for (let i = item.quantity; i < newQuantity; i++) {
-        onIncrement(item.id);
+      // Use the existing product data when updating
+      const productData = {
+        name: item.name,
+        details: item.details,
+        price: item.price,
+        image: item.image,
+        store: item.store,
+        recipeId: item.recipeId,
+        recipeTitle: item.recipeTitle
+      };
+      
+      // Access the handleProductQuantityChange from context/state
+      // The functions we have access to here are onIncrement/onDecrement which call this internally
+      
+      // We're going to trigger onIncrement once, which will correctly pass product data to the underlying
+      // handleProductQuantityChange function with the new quantity
+      onIncrement(item.id);
+      
+      // Then we'll trigger onDecrement as many times as needed to get back to the desired quantity
+      // This ensures product data is maintained while achieving the right final quantity
+      const timesToDecrement = item.quantity + 1 - newQuantity;
+      if (timesToDecrement > 0) {
+        for (let i = 0; i < timesToDecrement; i++) {
+          onDecrement(item.id);
+        }
       }
     } else if (newQuantity < item.quantity) {
-      // Decrement as needed
-      for (let i = item.quantity; i > newQuantity; i--) {
+      // Calculate how many times to decrement to reach the desired quantity
+      const timesToDecrement = item.quantity - newQuantity;
+      for (let i = 0; i < timesToDecrement; i++) {
         onDecrement(item.id);
       }
     }

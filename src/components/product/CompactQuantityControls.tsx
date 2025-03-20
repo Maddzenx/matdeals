@@ -7,6 +7,7 @@ interface CompactQuantityControlsProps {
   onAdd: () => void;
   onIncrement: () => void;
   onDecrement: () => void;
+  onSetQuantity?: (quantity: number) => void;
 }
 
 export const CompactQuantityControls: React.FC<CompactQuantityControlsProps> = ({
@@ -14,6 +15,7 @@ export const CompactQuantityControls: React.FC<CompactQuantityControlsProps> = (
   onAdd,
   onIncrement,
   onDecrement,
+  onSetQuantity,
 }) => {
   if (quantity === 0) {
     return (

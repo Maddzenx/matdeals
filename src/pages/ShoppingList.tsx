@@ -56,7 +56,9 @@ const ShoppingList = () => {
           details: item.details,
           price: item.price,
           image: item.image,
-          store: item.store
+          store: item.store,
+          recipeId: item.recipeId,
+          recipeTitle: item.recipeTitle
         }
       );
     }
@@ -74,7 +76,30 @@ const ShoppingList = () => {
           details: item.details,
           price: item.price,
           image: item.image,
-          store: item.store
+          store: item.store,
+          recipeId: item.recipeId,
+          recipeTitle: item.recipeTitle
+        }
+      );
+    }
+  };
+
+  // New function to directly update quantity
+  const handleSetQuantity = (id: string, newQuantity: number) => {
+    const item = cartItems.find(item => item.id === id);
+    if (item) {
+      handleProductQuantityChange(
+        id, 
+        newQuantity, 
+        item.quantity,
+        {
+          name: item.name,
+          details: item.details,
+          price: item.price,
+          image: item.image,
+          store: item.store,
+          recipeId: item.recipeId,
+          recipeTitle: item.recipeTitle
         }
       );
     }
