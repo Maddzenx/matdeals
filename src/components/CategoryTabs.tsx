@@ -1,5 +1,6 @@
 
 import React, { useRef, useEffect } from "react";
+import { Separator } from "@/components/ui/separator";
 
 interface Category {
   id: string;
@@ -60,24 +61,29 @@ export const CategoryTabs: React.FC<CategoryTabsProps> = ({
   }, [activeCategory]);
 
   return (
-    <div 
-      ref={tabsRef}
-      className="sticky top-[120px] z-20 bg-white flex overflow-x-auto gap-4 px-4 py-4 no-scrollbar shadow-sm"
-    >
-      {categories.map((category) => (
-        <button
-          key={category.id}
-          ref={activeCategory === category.id ? activeButtonRef : null}
-          onClick={() => onSelect(category.id)}
-          className={`text-sm font-bold whitespace-nowrap px-2 py-1 transition-all rounded-md ${
-            activeCategory === category.id 
-              ? "text-[#191919] border-b-2 border-[#191919] bg-neutral-100" 
-              : "text-[#6E6E6E] hover:text-[#4a4a4a] hover:bg-neutral-50"
-          }`}
+    <div className="sticky top-[120px] z-20 bg-white">
+      <div className="px-4 pb-1">
+        <div 
+          ref={tabsRef}
+          className="flex space-x-6 overflow-x-auto pb-2 no-scrollbar"
         >
-          {translateCategory(category.name)}
-        </button>
-      ))}
+          {categories.map((category) => (
+            <button
+              key={category.id}
+              ref={activeCategory === category.id ? activeButtonRef : null}
+              className={`pb-2 px-1 font-medium text-sm whitespace-nowrap transition-colors ${
+                activeCategory === category.id 
+                  ? "text-[#DB2C17] border-b-2 border-[#DB2C17]" 
+                  : "text-gray-500"
+              }`}
+              onClick={() => onSelect(category.id)}
+            >
+              {translateCategory(category.name)}
+            </button>
+          ))}
+        </div>
+        <Separator />
+      </div>
     </div>
   );
 };
