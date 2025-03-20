@@ -7,11 +7,13 @@ import { useRecipes } from "@/hooks/useRecipes";
 import { RecipeListHeader } from "@/components/recipes/RecipeListHeader";
 import { RecipeList } from "@/components/recipes/RecipeList";
 import { useMealPlan } from "@/hooks/useMealPlan";
+import { useAppSession } from "@/hooks/useAppSession";
 
 const Recipes = () => {
   const navigate = useNavigate();
   const { navItems } = useNavigationState();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const { isFirstLoad } = useAppSession();
   
   const {
     recipes,
@@ -31,34 +33,24 @@ const Recipes = () => {
     console.log("Selected nav:", id);
   };
 
-  // Auto refresh recipes when the page loads, never show notifications
+  // Auto refresh recipes only on first app load
   useEffect(() => {
-    const autoRefreshRecipes = async () => {
-      try {
-        console.log("Auto refreshing recipes on page load...");
-        setIsRefreshing(true);
-        await scrapeRecipes();
-      } catch (error) {
-        console.error("Error during auto recipe refresh:", error);
-      } finally {
-        setIsRefreshing(false);
-      }
-    };
-    
-    autoRefreshRecipes();
-  }, [scrapeRecipes]);
-
-  // Handler for button press - only show notifications for explicit user actions
-  const handleRefreshButton = async () => {
-    try {
-      setIsRefreshing(true);
-      await scrapeRecipes();
-    } catch (err) {
-      console.error("Error refreshing recipes:", err);
-    } finally {
-      setIsRefreshing(false);
+    if (isFirstLoad) {
+      const autoRefreshRecipes = async () => {
+        try {
+          console.log("Auto refreshing recipes on first app load...");
+          setIsRefreshing(true);
+          await scrapeRecipes();
+        } catch (error) {
+          console.error("Error during auto recipe refresh:", error);
+        } finally {
+          setIsRefreshing(false);
+        }
+      };
+      
+      autoRefreshRecipes();
     }
-  };
+  }, [isFirstLoad, scrapeRecipes]);
 
   return (
     <div className="min-h-screen pb-20 bg-white">
@@ -71,7 +63,7 @@ const Recipes = () => {
         categories={categories}
         activeCategory={activeCategory}
         onCategoryChange={changeCategory}
-        onRefresh={handleRefreshButton}
+        onRefresh={() => {}} // Keeping the prop to avoid TypeScript errors, but it's unused now
         isRefreshing={isRefreshing}
         isLoading={loading}
       />
@@ -81,7 +73,7 @@ const Recipes = () => {
           recipes={recipes}
           loading={loading}
           error={error}
-          onRefresh={handleRefreshButton}
+          onRefresh={() => {}} // Keeping the prop to avoid TypeScript errors, but it's unused now
         />
       </div>
 
