@@ -12,6 +12,7 @@ interface PreviousRecipesProps {
   onAddToMealPlan: (recipeId: string) => void;
   mealPlan?: DayMeal[];
   onSelectDay?: (day: string, recipeId: string) => void;
+  onSelectMultipleDays?: (days: string[], recipeId: string) => void;
 }
 
 export const PreviousRecipes: React.FC<PreviousRecipesProps> = ({
@@ -20,7 +21,8 @@ export const PreviousRecipes: React.FC<PreviousRecipesProps> = ({
   onToggleFavorite,
   onAddToMealPlan,
   mealPlan,
-  onSelectDay
+  onSelectDay,
+  onSelectMultipleDays
 }) => {
   if (loading) {
     return <LoadingIndicator message="Laddar tidigare recept..." />;
@@ -48,6 +50,7 @@ export const PreviousRecipes: React.FC<PreviousRecipesProps> = ({
           onAddToMealPlan={() => onAddToMealPlan(recipe.id)}
           mealPlan={mealPlan}
           onSelectDay={onSelectDay}
+          onSelectMultipleDays={onSelectMultipleDays}
         />
       ))}
     </div>

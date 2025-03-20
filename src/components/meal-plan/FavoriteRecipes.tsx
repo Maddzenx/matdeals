@@ -12,6 +12,7 @@ interface FavoriteRecipesProps {
   onAddToMealPlan: (recipeId: string) => void;
   mealPlan?: DayMeal[];
   onSelectDay?: (day: string, recipeId: string) => void;
+  onSelectMultipleDays?: (days: string[], recipeId: string) => void;
 }
 
 export const FavoriteRecipes: React.FC<FavoriteRecipesProps> = ({
@@ -20,7 +21,8 @@ export const FavoriteRecipes: React.FC<FavoriteRecipesProps> = ({
   onToggleFavorite,
   onAddToMealPlan,
   mealPlan,
-  onSelectDay
+  onSelectDay,
+  onSelectMultipleDays
 }) => {
   if (loading) {
     return <LoadingIndicator message="Laddar favoritrecept..." />;
@@ -48,6 +50,7 @@ export const FavoriteRecipes: React.FC<FavoriteRecipesProps> = ({
           onAddToMealPlan={() => onAddToMealPlan(recipe.id)}
           mealPlan={mealPlan}
           onSelectDay={onSelectDay}
+          onSelectMultipleDays={onSelectMultipleDays}
         />
       ))}
     </div>
