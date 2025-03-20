@@ -59,8 +59,8 @@ export const CategoryTabs: React.FC<CategoryTabsProps> = ({
   
   return (
     <div 
-      ref={tabsRef} 
-      className="fixed top-[70px] z-20 bg-white flex overflow-x-auto gap-4 px-4 py-4 no-scrollbar shadow-sm w-full"
+      className="sticky top-[100px] z-20 bg-white flex overflow-x-auto gap-4 px-4 py-4 no-scrollbar shadow-sm w-full"
+      ref={tabsRef}
     >
       {categories.map(category => (
         <button 

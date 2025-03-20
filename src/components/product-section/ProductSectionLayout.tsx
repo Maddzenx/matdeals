@@ -83,7 +83,7 @@ export const ProductSectionLayout: React.FC<ProductSectionLayoutProps> = ({
         activeCategory={activeCategory}
         onSelect={onCategorySelect}
       />
-      <main className="p-4 mt-[120px]">
+      <main className="p-4 mt-4">
         {/* Display the active category name as a heading if it's not "All" */}
         {activeCategory !== "all" && activeCategoryName && (
           <h2 className="text-xl font-bold text-[#1C1C1C] mb-4">{translatedCategoryName}</h2>
