@@ -110,9 +110,9 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
       }}>
         {trigger || <Button onClick={(e) => e.stopPropagation()}>Välj dag</Button>}
       </SheetTrigger>
-      <SheetContent side="bottom" className="rounded-t-lg z-[100] p-6 bg-[#1A1F2C]">
+      <SheetContent side="bottom" className="rounded-t-lg z-[100] p-6 bg-white">
         <SheetHeader className="mb-6">
-          <SheetTitle className="text-left text-xl font-bold text-white">
+          <SheetTitle className="text-left text-xl font-bold text-gray-800">
             {allowMultiple ? "Välj dagar för receptet" : "Välj dag för receptet"}
           </SheetTitle>
         </SheetHeader>
@@ -123,10 +123,10 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
               onClick={() => handleSelectDay(day.day)}
               className={`w-full p-4 text-left rounded-md flex items-center justify-between
                 ${allowMultiple 
-                  ? "bg-[#2c3446] text-white hover:bg-[#3a445c]" 
+                  ? "bg-gray-50 text-gray-800 hover:bg-gray-100 border border-gray-200" 
                   : selectedDay === day.day 
-                    ? "bg-[#DB2C17] text-white" 
-                    : "bg-[#2c3446] text-white hover:bg-[#3a445c]"}`}
+                    ? "bg-[#DB2C17] text-white border border-[#DB2C17]" 
+                    : "bg-gray-50 text-gray-800 hover:bg-gray-100 border border-gray-200"}`}
             >
               <div className="flex items-center">
                 {allowMultiple && (
@@ -134,7 +134,10 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
                     <Checkbox 
                       id={`day-${day.day}`} 
                       checked={selectedDays.includes(day.day)}
-                      className="h-5 w-5 border-white data-[state=checked]:bg-[#DB2C17] data-[state=checked]:border-[#DB2C17]"
+                      className={`h-5 w-5 border-gray-300 
+                        ${selectedDays.includes(day.day) 
+                          ? "data-[state=checked]:bg-[#DB2C17] data-[state=checked]:border-[#DB2C17]" 
+                          : "data-[state=unchecked]:bg-white"}`}
                       onClick={(e) => e.stopPropagation()}
                       onCheckedChange={() => handleSelectDay(day.day)}
                     />
@@ -149,13 +152,13 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
                     : "(upptagen)"}
                 </span>
               )}
-              {!allowMultiple && selectedDay === day.day && <Check size={18} />}
+              {!allowMultiple && selectedDay === day.day && <Check size={18} className="text-white" />}
             </button>
           ))}
         </div>
         <div className="mt-6 flex justify-end gap-3">
           <Button variant="outline" onClick={() => handleOpenChange(false)}
-            className="bg-[#2c3446] hover:bg-[#3a445c] text-white border-[#3a445c]">
+            className="border-gray-300 text-gray-700 hover:bg-gray-100">
             Avbryt
           </Button>
           <Button 
