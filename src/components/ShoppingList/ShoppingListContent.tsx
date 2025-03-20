@@ -36,7 +36,7 @@ export const ShoppingListContent: React.FC<ShoppingListContentProps> = ({
   }
 
   return (
-    <div className="space-y-0 px-4 mt-4">
+    <div className="space-y-0 px-5 mt-5">
       {activeTab === "stores" ? (
         <>
           {sortedStoreNames.map((storeName) => (

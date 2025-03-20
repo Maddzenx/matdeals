@@ -11,10 +11,10 @@ export const ShoppingListTabs: React.FC<ShoppingListTabsProps> = ({
   onTabChange,
 }) => {
   return (
-    <div className="px-4 mb-4">
-      <div className="flex rounded-full bg-gray-100 p-1 shadow-sm">
+    <div className="px-5 mb-4">
+      <div className="flex rounded-full bg-gray-100 p-1.5 shadow-sm">
         <button
-          className={`flex-1 py-2.5 rounded-full text-center font-medium text-sm transition-colors ${
+          className={`flex-1 py-3 rounded-full text-center font-medium text-base transition-colors ${
             activeTab === "category" ? "bg-white shadow-sm" : "text-gray-600"
           }`}
           onClick={() => onTabChange("category")}
@@ -22,7 +22,7 @@ export const ShoppingListTabs: React.FC<ShoppingListTabsProps> = ({
           Kategori
         </button>
         <button
-          className={`flex-1 py-2.5 rounded-full text-center font-medium text-sm transition-colors ${
+          className={`flex-1 py-3 rounded-full text-center font-medium text-base transition-colors ${
             activeTab === "stores" ? "bg-white shadow-sm" : "text-gray-600"
           }`}
           onClick={() => onTabChange("stores")}

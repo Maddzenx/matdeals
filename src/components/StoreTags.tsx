@@ -29,19 +29,19 @@ export const StoreTags: React.FC<StoreTagsProps> = ({ tags, onRemove }) => {
   if (tags.length === 0) return null;
   
   return (
-    <div className="flex gap-2 overflow-x-auto whitespace-nowrap mb-3 px-4 py-0 no-scrollbar mt-2">
+    <div className="flex gap-2 overflow-x-auto whitespace-nowrap mb-3 px-5 py-0 no-scrollbar mt-3">
       {tags.map((tag) => (
         <div
           key={tag.id}
-          className="flex-shrink-0 flex items-center gap-2 text-sm font-medium text-[#191919] bg-neutral-100 px-3.5 py-2 rounded-full"
+          className="flex-shrink-0 flex items-center gap-2 text-base font-medium text-[#191919] bg-neutral-100 px-4 py-2.5 rounded-full"
         >
           <span className="truncate">{translateStore(tag.name)}</span>
           <button
             onClick={() => onRemove(tag.id)}
-            className="focus:outline-none hover:bg-neutral-200 rounded-full w-5 h-5 flex items-center justify-center"
+            className="focus:outline-none hover:bg-neutral-200 rounded-full w-6 h-6 flex items-center justify-center"
             aria-label={`Ta bort ${translateStore(tag.name)}`}
           >
-            <i className="ti ti-x text-sm" />
+            <i className="ti ti-x text-base" />
           </button>
         </div>
       ))}

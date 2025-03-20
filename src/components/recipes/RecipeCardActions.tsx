@@ -46,25 +46,25 @@ export const RecipeCardActions: React.FC<RecipeCardActionsProps> = ({
   };
 
   return (
-    <div className="flex gap-1" onClick={e => e.stopPropagation()}>
+    <div className="flex gap-2" onClick={e => e.stopPropagation()}>
       <Button
         variant="ghost"
         size="icon"
-        className="w-9 h-9 rounded-full"
+        className="w-10 h-10 rounded-full"
         onClick={handleFavoriteToggle}
         aria-label={isFavorite ? "Ta bort från favoriter" : "Lägg till i favoriter"}
       >
-        <Heart size={18} className={isFavorite ? "text-[#DB2C17] fill-[#DB2C17]" : ""} />
+        <Heart size={20} className={isFavorite ? "text-[#DB2C17] fill-[#DB2C17]" : ""} />
       </Button>
       
       <Button 
         variant="ghost"
         size="icon"
-        className="w-9 h-9 rounded-full"
+        className="w-10 h-10 rounded-full"
         aria-label="Lägg till i matsedel"
         onClick={handleMealPlanClick}
       >
-        <CalendarPlus size={18} />
+        <CalendarPlus size={20} />
       </Button>
       
       <DaySelector
@@ -81,12 +81,12 @@ export const RecipeCardActions: React.FC<RecipeCardActionsProps> = ({
       />
       
       <Button 
-        className="bg-[#DB2C17] hover:bg-[#c02615] w-9 h-9 rounded-full"
+        className="bg-[#DB2C17] hover:bg-[#c02615] w-10 h-10 rounded-full"
         onClick={handleAddToCart}
         size="icon"
         aria-label="Lägg till varor i inköpslistan"
       >
-        <ShoppingCart size={18} />
+        <ShoppingCart size={20} />
       </Button>
     </div>
   );

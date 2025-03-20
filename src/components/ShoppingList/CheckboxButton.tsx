@@ -14,7 +14,7 @@ export const CheckboxButton: React.FC<CheckboxButtonProps> = ({
   return (
     <button
       onClick={onCheck}
-      className={`w-6 h-6 rounded-full border-2 mr-3 flex-shrink-0 transition-colors duration-200 ${
+      className={`w-7 h-7 rounded-full border-2 mr-3 flex-shrink-0 transition-colors duration-200 ${
         checked 
           ? 'border-green-500 bg-green-500/10 active:bg-green-500/20' 
           : 'border-gray-300 active:border-gray-400'
@@ -23,7 +23,7 @@ export const CheckboxButton: React.FC<CheckboxButtonProps> = ({
     >
       {checked && (
         <span className="flex items-center justify-center w-full h-full">
-          <Check size={14} className="text-green-500" strokeWidth={2.5} />
+          <Check size={16} className="text-green-500" strokeWidth={2.5} />
         </span>
       )}
     </button>

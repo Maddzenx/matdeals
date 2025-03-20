@@ -32,7 +32,7 @@ export const RecipePricing: React.FC<RecipePricingProps> = ({
   const hasDiscountedIngredients = matchedProducts && matchedProducts.length > 0;
 
   return (
-    <div className="bg-gray-50 p-4 rounded-lg mt-6 mb-4">
+    <div className="bg-gray-50 p-5 rounded-lg mt-6 mb-4">
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
           <span className="text-gray-500 text-sm">Uppskattat pris</span>
@@ -42,25 +42,25 @@ export const RecipePricing: React.FC<RecipePricingProps> = ({
                 {formatPrice(originalPrice)}
               </span>
             )}
-            <span className="text-[#DB2C17] font-bold text-lg">
+            <span className="text-[#DB2C17] font-bold text-xl">
               {formatPrice(price)}
             </span>
             {savings && savings > 0 && (
-              <span className="ml-2 text-green-600 text-xs font-semibold">
+              <span className="ml-2 text-green-600 text-sm font-semibold">
                 (spara {savings} kr)
               </span>
             )}
           </div>
           
           {hasDiscountedIngredients && (
-            <div className="mt-1 flex items-center text-xs text-green-600">
-              <ShoppingBag size={12} className="mr-1" />
+            <div className="mt-1 flex items-center text-sm text-green-600">
+              <ShoppingBag size={14} className="mr-1" />
               <span>{matchedProducts.length} ingredienser på rea!</span>
             </div>
           )}
         </div>
         <Button 
-          className="bg-[#DB2C17] hover:bg-[#c02615]"
+          className="bg-[#DB2C17] hover:bg-[#c02615] text-base py-6 px-5"
           onClick={(e) => {
             if (e) {
               e.stopPropagation();

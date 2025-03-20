@@ -76,16 +76,16 @@ export const StoreSelector: React.FC<StoreSelectorProps> = ({
     <div className={cn("relative", className)} data-store-selector>
       <button
         onClick={toggleDropdown}
-        className="w-10 h-10 flex items-center justify-center bg-neutral-100 rounded-[100px]"
+        className="w-12 h-12 flex items-center justify-center bg-neutral-100 rounded-[100px]"
         aria-label="Select stores"
         aria-expanded={isOpen}
       >
-        <i className="ti ti-adjustments" />
+        <i className="ti ti-adjustments text-xl" />
       </button>
 
       {isOpen && (
         <div 
-          className="absolute right-0 bg-white rounded-md shadow-lg py-1 border border-gray-200 w-64" 
+          className="absolute right-0 bg-white rounded-md shadow-lg py-1 border border-gray-200 w-72" 
           style={{ 
             zIndex: 999,
             top: "calc(100% + 8px)",
@@ -93,51 +93,51 @@ export const StoreSelector: React.FC<StoreSelectorProps> = ({
             overflowY: "auto"
           }}
         >
-          <div className="px-4 py-3 text-sm font-semibold text-gray-800 border-b border-gray-200 sticky top-0 bg-white">
+          <div className="px-4 py-3 text-base font-semibold text-gray-800 border-b border-gray-200 sticky top-0 bg-white">
             Välj butiker
           </div>
           
-          <div className="px-4 py-2 sticky top-[44px] bg-white border-b border-gray-100">
+          <div className="px-4 py-2 sticky top-[50px] bg-white border-b border-gray-100">
             <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
               <Input
                 type="text"
                 placeholder="Sök butiker..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 h-9 text-sm"
+                className="pl-10 h-11 text-base"
               />
             </div>
           </div>
           
           <div className="max-h-[calc(100vh-240px)] overflow-y-auto">
-            <div className="px-4 py-2.5 border-b border-gray-100">
+            <div className="px-4 py-3 border-b border-gray-100">
               <label className="flex items-center space-x-3 cursor-pointer">
                 <Checkbox
                   id="select-all"
                   checked={allSelected}
                   onCheckedChange={handleSelectAll}
-                  className="data-[state=checked]:bg-blue-600"
+                  className="data-[state=checked]:bg-blue-600 h-5 w-5"
                 />
-                <span className="text-sm font-medium text-gray-700">Välj alla</span>
+                <span className="text-base font-medium text-gray-700">Välj alla</span>
               </label>
             </div>
             
             {filteredStores.length > 0 ? (
               filteredStores.map((store) => (
-                <div key={store.id} className="px-4 py-2.5">
+                <div key={store.id} className="px-4 py-3">
                   <label className="flex items-center space-x-3 cursor-pointer">
                     <Checkbox
                       checked={activeStoreIds.includes(store.id)}
                       onCheckedChange={() => onStoreToggle(store.id)}
-                      className="data-[state=checked]:bg-blue-600"
+                      className="data-[state=checked]:bg-blue-600 h-5 w-5"
                     />
-                    <span className="text-sm font-medium text-gray-700">{store.name}</span>
+                    <span className="text-base font-medium text-gray-700">{store.name}</span>
                   </label>
                 </div>
               ))
             ) : (
-              <div className="px-4 py-3 text-sm text-gray-500 text-center">
+              <div className="px-4 py-3 text-base text-gray-500 text-center">
                 Inga butiker hittades
               </div>
             )}

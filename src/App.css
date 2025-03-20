@@ -17,14 +17,15 @@ a,
 [role="button"],
 input[type="button"],
 input[type="submit"] {
-  min-height: 44px;
-  min-width: 44px;
+  min-height: 48px;
+  min-width: 48px;
   touch-action: manipulation;
 }
 
 /* Improve form elements for mobile */
 input, select, textarea {
   font-size: 16px; /* Prevents zoom on iOS */
+  padding: 12px;
 }
 
 /* Hide scrollbars but keep functionality */

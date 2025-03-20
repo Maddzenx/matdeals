@@ -92,7 +92,7 @@ export const TapToEditQuantity: React.FC<TapToEditQuantityProps> = ({
 
   return (
     <>
-      <div className="min-w-[40px] text-center">
+      <div className="min-w-[45px] text-center">
         {isEditing ? (
           <Input
             ref={inputRef}
@@ -100,7 +100,7 @@ export const TapToEditQuantity: React.FC<TapToEditQuantityProps> = ({
             onChange={(e) => setInputValue(e.target.value)}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
-            className={`w-14 h-8 p-1 text-center transition-all ${isChecked ? 'text-gray-400' : ''}`}
+            className={`w-16 h-10 p-1 text-center text-base transition-all ${isChecked ? 'text-gray-400' : ''}`}
             type="number"
             min="0"
             inputMode="numeric"
@@ -109,14 +109,14 @@ export const TapToEditQuantity: React.FC<TapToEditQuantityProps> = ({
         ) : (
           <div
             onClick={handleStartEditing}
-            className={`flex items-center justify-center py-1 px-2 rounded-md transition-colors cursor-pointer ${
+            className={`flex items-center justify-center py-2 px-3 rounded-md transition-colors cursor-pointer ${
               isChecked ? 'text-gray-500' : 'hover:bg-gray-100'
             }`}
             role="button"
             tabIndex={0}
             aria-label="Redigera antal"
           >
-            <span className={`font-medium ${isChecked ? 'text-gray-500' : ''}`}>
+            <span className={`font-medium text-base ${isChecked ? 'text-gray-500' : ''}`}>
               {quantity}
             </span>
           </div>
@@ -132,8 +132,8 @@ export const TapToEditQuantity: React.FC<TapToEditQuantityProps> = ({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={cancelRemoval}>Avbryt</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmRemoval}>Ta bort</AlertDialogAction>
+            <AlertDialogCancel onClick={cancelRemoval} className="text-base">Avbryt</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRemoval} className="text-base">Ta bort</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
