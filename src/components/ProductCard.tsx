@@ -32,11 +32,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const { cartItems } = useNavigationState();
   const [quantity, setQuantity] = useState(0);
   
-  // Determine if we should display the offer badge
+  // Enhanced check for meaningful offer badges
+  // Filter out generic badges that don't provide useful information
   const shouldDisplayBadge = offerBadge && 
     offerBadge.trim() !== "" && 
-    offerBadge.toLowerCase() !== "erbjudande" && // Don't show generic "offer" labels
-    offerBadge !== "veckans erbjudande"; // Don't show generic "weekly offer" labels
+    !["erbjudande", "veckans erbjudande", "weekly offer", "offer"].includes(offerBadge.toLowerCase().trim());
   
   // Sync with global cart state
   useEffect(() => {
