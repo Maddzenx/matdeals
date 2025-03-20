@@ -23,9 +23,6 @@ const Index = () => {
   useAuthCheck();
   useInitialStoreSetup(activeStores, addStoreIfNeeded, handleStoreToggle, supabaseProducts);
 
-  // Auto refresh handling is now controlled by the useProductRefresh hook
-  // using the useAppSession to track first load, so we don't need to trigger it here
-
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   };
@@ -45,11 +42,6 @@ const Index = () => {
   // Get navigation items from navigation state
   const { navItems } = useNavigationState();
 
-  // Handler for refresh button (if needed in the future)
-  const handleRefreshButton = () => {
-    handleRefresh(true); // Pass true to show notifications if we decide to re-add this button
-  };
-
   return (
     <OffersPageContent
       title="Erbjudanden"
@@ -61,7 +53,7 @@ const Index = () => {
       navItems={navItems}
       storeTags={storeTagsData}
       supabaseProducts={supabaseProducts}
-      handleRefresh={handleRefreshButton}
+      handleRefresh={() => {}} // Empty function since we don't want manual refresh anymore
       toggleViewMode={toggleViewMode}
       handleSearch={handleSearch}
       handleNavSelect={handleNavSelect}

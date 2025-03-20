@@ -16,7 +16,7 @@ export const useProductRefresh = (refetch: () => Promise<{ success: boolean; err
     if (isFirstLoad) {
       const autoRefresh = async () => {
         // Don't show notifications for background refresh
-        await handleRefresh(false);
+        await handleRefresh();
       };
       
       // Add a small delay to not impact initial rendering
@@ -26,7 +26,7 @@ export const useProductRefresh = (refetch: () => Promise<{ success: boolean; err
     }
   }, [isFirstLoad]);
 
-  const handleRefresh = async (showNotification = false) => {
+  const handleRefresh = async () => {
     setIsRefreshing(true);
     
     try {

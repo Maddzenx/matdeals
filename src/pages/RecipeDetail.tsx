@@ -25,8 +25,6 @@ const RecipeDetail = () => {
     recipe,
     loading,
     error,
-    scrapeRecipe,
-    refreshing
   } = useRecipeDetail(id);
 
   // Handle back button click
@@ -73,22 +71,15 @@ const RecipeDetail = () => {
     }
   }, [recipe, handleProductQuantityChange]);
 
-  // Handle refreshing recipe details
-  const handleRefreshRecipe = useCallback(() => {
-    if (id) {
-      scrapeRecipe(id);
-    }
-  }, [id, scrapeRecipe]);
-
   // Auto scroll to top on page load
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  if (loading || refreshing) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-white pb-20 flex flex-col items-center justify-center">
-        <LoadingIndicator message={refreshing ? "Uppdaterar recept..." : "Laddar recept..."} />
+        <LoadingIndicator message="Laddar recept..." />
       </div>
     );
   }
@@ -98,7 +89,7 @@ const RecipeDetail = () => {
       <RecipeError
         message={error?.message}
         onGoBack={handleGoBack}
-        onRetry={handleRefreshRecipe}
+        onRetry={() => {}} // Empty function since we removed the retry functionality
       />
     );
   }
@@ -108,8 +99,6 @@ const RecipeDetail = () => {
       <RecipeHeader 
         recipe={recipe}
         onBack={handleGoBack}
-        onRefresh={handleRefreshRecipe}
-        showRefreshButton={true}
       />
       
       <div className="px-4">

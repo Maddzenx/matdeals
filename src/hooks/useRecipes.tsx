@@ -7,6 +7,7 @@ import {
   scrapeRecipesFromApi 
 } from "@/services/recipeService";
 import { fetchRecipeCategories } from "@/utils/recipeCategories";
+import { useAppSession } from "@/hooks/useAppSession";
 
 export type { Recipe } from "@/types/recipe";
 
@@ -16,6 +17,7 @@ export const useRecipes = (initialCategory: string = "Middag") => {
   const [error, setError] = useState<Error | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>(initialCategory);
   const [categories, setCategories] = useState<string[]>([]);
+  const { isFirstLoad } = useAppSession();
   
   // Get products for matching with ingredients
   const { products } = useSupabaseProducts();
@@ -47,11 +49,11 @@ export const useRecipes = (initialCategory: string = "Middag") => {
     }
   }, [activeCategory]);
 
-  const scrapeRecipes = useCallback(async (showNotification = false) => {
+  const scrapeRecipes = useCallback(async () => {
     try {
       setLoading(true);
       
-      const result = await scrapeRecipesFromApi(showNotification);
+      const result = await scrapeRecipesFromApi(false); // Don't show notifications
       
       // Refresh categories and recipes after scraping
       await fetchCategories();
@@ -65,6 +67,18 @@ export const useRecipes = (initialCategory: string = "Middag") => {
       setLoading(false);
     }
   }, [activeCategory, fetchCategories, fetchRecipes]);
+
+  // Auto scrape recipes on first app load
+  useEffect(() => {
+    if (isFirstLoad) {
+      console.log("First load of app, auto-scraping recipes");
+      const timer = setTimeout(() => {
+        scrapeRecipes();
+      }, 3000); // Delay to not impact initial rendering
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isFirstLoad, scrapeRecipes]);
 
   const changeCategory = useCallback((category: string) => {
     setActiveCategory(category);

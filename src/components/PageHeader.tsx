@@ -4,20 +4,17 @@ import { Grid2X2, List } from "lucide-react";
 
 interface PageHeaderProps {
   title: string;
-  onRefresh: () => void;
-  isRefreshing: boolean;
   viewMode: "grid" | "list";
   onToggleViewMode: () => void;
+  isRefreshing?: boolean; // Keeping this as optional prop for API compatibility, but not using it
+  onRefresh?: () => void; // Keeping this as optional prop for API compatibility, but not using it
 }
 
 export const PageHeader: React.FC<PageHeaderProps> = ({ 
   title, 
-  onRefresh, // Kept for API compatibility but not used
-  isRefreshing, // Kept for API compatibility but not used
   viewMode, 
   onToggleViewMode 
 }) => {
-  // No longer trigger refresh on component mount
   return (
     <div className="flex items-center justify-between px-4 pt-3 pb-1">
       <h1 className="text-2xl font-bold text-[#1C1C1C]">{title}</h1>
