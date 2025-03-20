@@ -13,7 +13,7 @@ export const useNavigationState = () => {
     handleItemCheck
   } = useCartState();
   
-  const { navItems, setNavItems } = useNavItems(cartItems.length);
+  const { navItems, setNavItems } = useNavItems(cartItems);
 
   return { 
     navItems, 

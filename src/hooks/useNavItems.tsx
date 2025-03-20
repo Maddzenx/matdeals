@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { NavItem } from "@/components/BottomNav";
 import { useLocation } from "react-router-dom";
 
-export const useNavItems = (cartCount: number) => {
+export const useNavItems = (cartItems: any[]) => {
   const location = useLocation();
   
   const [navItems, setNavItems] = useState<NavItem[]>([
@@ -38,16 +38,19 @@ export const useNavItems = (cartCount: number) => {
     setNavItems(updatedItems);
   }, [location.pathname]);
 
-  // Update nav items when cart count changes
+  // Update nav items with total quantity of items in cart
   useEffect(() => {
+    // Calculate total quantity of items in the cart
+    const totalQuantity = cartItems.reduce((total, item) => total + item.quantity, 0);
+    
     setNavItems(prev => 
       prev.map(item => 
         item.id === "cart" 
-          ? { ...item, badge: cartCount > 0 ? cartCount : undefined } 
+          ? { ...item, badge: totalQuantity > 0 ? totalQuantity : undefined } 
           : item
       )
     );
-  }, [cartCount]);
+  }, [cartItems]);
 
   return { navItems, setNavItems };
 };
