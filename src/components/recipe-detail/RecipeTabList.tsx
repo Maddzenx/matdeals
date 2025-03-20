@@ -14,18 +14,21 @@ export const RecipeTabList: React.FC<RecipeTabListProps> = ({
       <TabsTrigger 
         value="overview" 
         className="py-3 rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:font-medium transition-all"
+        style={{ margin: '2px' }}
       >
         Översikt
       </TabsTrigger>
       <TabsTrigger 
         value="ingredients" 
         className="py-3 rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:font-medium transition-all"
+        style={{ margin: '2px' }}
       >
         Ingredienser
       </TabsTrigger>
       <TabsTrigger 
         value="instructions" 
         className="py-3 rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:font-medium transition-all"
+        style={{ margin: '2px' }}
       >
         Tillagning
       </TabsTrigger>
