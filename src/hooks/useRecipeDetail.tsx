@@ -20,6 +20,8 @@ export const useRecipeDetail = (id: string | undefined) => {
         setLoading(true);
         setError(null);
 
+        console.log(`Fetching recipe with ID: ${id}`);
+        
         const { data, error: queryError } = await supabase
           .from('recipes')
           .select('*')
@@ -32,9 +34,11 @@ export const useRecipeDetail = (id: string | undefined) => {
         }
 
         if (data) {
+          console.log("Recipe data found:", data.title);
           setRecipe(data as Recipe);
         } else {
-          setError(new Error("Recipe not found"));
+          console.error(`Recipe with ID ${id} not found in database`);
+          setError(new Error(`Recipe with ID ${id} not found`));
         }
       } catch (err) {
         console.error("Error fetching recipe details:", err);

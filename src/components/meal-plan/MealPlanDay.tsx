@@ -39,6 +39,13 @@ export const MealPlanDay: React.FC<MealPlanDayProps> = ({ day, onAddRecipe }) =>
     e.currentTarget.src = 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'; // Food-related fallback
   };
 
+  const handleNavigateToRecipe = () => {
+    if (day.recipe && day.recipe.id) {
+      console.log(`Navigating to recipe with ID: ${day.recipe.id}`);
+      navigate(`/recipe/${day.recipe.id}`);
+    }
+  };
+
   return (
     <Card className={`overflow-hidden transition-all duration-200 ${isCurrentDay() ? 'border-[#DB2C17] shadow-md' : 'border-gray-200'}`}>
       <div className={`py-3 px-4 border-b ${isCurrentDay() ? 'bg-[#FEF3F2] text-[#DB2C17]' : 'bg-gray-50'}`}>
@@ -49,7 +56,7 @@ export const MealPlanDay: React.FC<MealPlanDayProps> = ({ day, onAddRecipe }) =>
           <div className="flex items-center">
             <div 
               className="h-20 w-20 bg-gray-100 rounded-md overflow-hidden mr-4 cursor-pointer shadow-sm transition-transform hover:scale-105"
-              onClick={() => navigate(`/recipe/${day.recipe.id}`)}
+              onClick={handleNavigateToRecipe}
             >
               {day.recipe.image_url ? (
                 <img 
@@ -64,7 +71,7 @@ export const MealPlanDay: React.FC<MealPlanDayProps> = ({ day, onAddRecipe }) =>
                 </div>
               )}
             </div>
-            <div className="flex-1 cursor-pointer" onClick={() => navigate(`/recipe/${day.recipe.id}`)}>
+            <div className="flex-1 cursor-pointer" onClick={handleNavigateToRecipe}>
               <h4 className="font-medium text-sm hover:text-[#DB2C17] transition-colors">
                 {day.recipe.title}
               </h4>
@@ -89,7 +96,7 @@ export const MealPlanDay: React.FC<MealPlanDayProps> = ({ day, onAddRecipe }) =>
                   className="h-8 px-2 text-xs flex items-center gap-1"
                   onClick={(e) => {
                     e.stopPropagation();
-                    navigate(`/recipe/${day.recipe.id}`);
+                    handleNavigateToRecipe();
                   }}
                 >
                   Se detaljer <ChevronRight size={14} />
