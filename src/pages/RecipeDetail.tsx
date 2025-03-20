@@ -1,7 +1,6 @@
 
-import React, { useEffect, useCallback, useState } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Tag, ArrowLeft, Heart, MoreVertical, ChevronRight } from "lucide-react"; 
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { useRecipeDetail } from "@/hooks/useRecipeDetail";
 import { useMealPlan } from "@/hooks/useMealPlan";
@@ -13,23 +12,16 @@ import { RecipeError } from "@/components/recipe-detail/RecipeError";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { BottomNav } from "@/components/BottomNav";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useToast } from "@/hooks/use-toast";
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
+import { TopNavigationBar } from "@/components/recipe-detail/TopNavigationBar";
+import { useRecipeActions } from "@/hooks/useRecipeActions";
 
 const RecipeDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const { toast } = useToast();
   const { navItems, handleProductQuantityChange } = useNavigationState();
   const { toggleFavorite, favoriteIds, mealPlan, addToMealPlan } = useMealPlan();
-  const [activeTab, setActiveTab] = useState("overview");
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [activeTab, setActiveTab] = React.useState("overview");
   
   const {
     recipe,
@@ -37,15 +29,22 @@ const RecipeDetail = () => {
     error,
   } = useRecipeDetail(id);
 
+  const { 
+    isDropdownOpen, 
+    handleDropdownChange,
+    handleAddToMealPlanWithToast,
+    handleAddToCartWithToast
+  } = useRecipeActions();
+
   // Handle back button click
   const handleGoBack = useCallback(() => {
     navigate(-1);
   }, [navigate]);
 
   // Handle navigation selection
-  const handleNavSelect = (id: string) => {
+  const handleNavSelect = useCallback((id: string) => {
     navigate(`/${id}`);
-  };
+  }, [navigate]);
 
   // Handle favorite toggle
   const handleFavoriteToggle = useCallback(() => {
@@ -54,60 +53,17 @@ const RecipeDetail = () => {
     }
   }, [recipe, toggleFavorite]);
 
-  // Handle adding to meal plan
-  const handleAddToMealPlanDay = useCallback((day: string, recipeId: string) => {
-    addToMealPlan(day, recipeId);
-    
-    // Add toast notification
-    toast({
-      title: "Tillagd i matsedel",
-      description: `Receptet har lagts till i matsedeln.`,
-    });
-    
-    // Manually close dropdown after action
-    setIsDropdownOpen(false);
-  }, [addToMealPlan, toast]);
-
   // Handle add to cart
   const handleAddToCart = useCallback(() => {
-    if (recipe && recipe.matchedProducts && recipe.matchedProducts.length > 0) {
-      recipe.matchedProducts.forEach((product) => {
-        handleProductQuantityChange(
-          product.id,
-          1,
-          0,
-          {
-            name: product.name,
-            details: product.details,
-            price: product.currentPrice,
-            image: product.image,
-            store: product.store,
-            recipeId: recipe.id,
-            recipeTitle: recipe.title
-          }
-        );
-      });
-      
-      // Add toast notification
-      toast({
-        title: "Tillagd i inköpslistan",
-        description: `Ingredienser från "${recipe.title}" har lagts till i inköpslistan.`,
-      });
-      
-      // Manually close dropdown after action
-      setIsDropdownOpen(false);
+    if (recipe) {
+      handleAddToCartWithToast(recipe, handleProductQuantityChange);
     }
-  }, [recipe, handleProductQuantityChange, toast]);
+  }, [recipe, handleAddToCartWithToast, handleProductQuantityChange]);
 
   // Auto scroll to top on page load
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
-  // Function to handle dropdown open state
-  const handleDropdownChange = (open: boolean) => {
-    setIsDropdownOpen(open);
-  };
 
   if (loading) {
     return (
@@ -122,7 +78,6 @@ const RecipeDetail = () => {
       <RecipeError
         message={error?.message}
         onGoBack={handleGoBack}
-        onRetry={() => {}} // Empty function since we removed the retry functionality
       />
     );
   }
@@ -131,67 +86,19 @@ const RecipeDetail = () => {
 
   return (
     <div className="min-h-screen bg-white pb-24 relative">
-      {/* Top navigation bar - always visible */}
-      <div className="fixed top-0 left-0 right-0 bg-white z-50 border-b border-gray-200 shadow-sm">
-        <div className="px-4 py-3 flex items-center justify-between">
-          <button onClick={handleGoBack} className="text-[#DB2C17]">
-            <ArrowLeft size={24} />
-          </button>
-          
-          <h1 className="text-base font-medium truncate max-w-[60%]">
-            {recipe.title}
-          </h1>
-          
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={handleFavoriteToggle}
-              className="p-2 rounded-full"
-            >
-              <Heart 
-                size={22} 
-                className={favoriteIds.includes(recipe.id) ? "text-[#DB2C17] fill-[#DB2C17]" : "text-gray-600"} 
-              />
-            </button>
-            
-            <DropdownMenu open={isDropdownOpen} onOpenChange={handleDropdownChange}>
-              <DropdownMenuTrigger asChild>
-                <button className="p-2 rounded-full">
-                  <MoreVertical size={22} className="text-gray-600" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 z-[100] bg-white">
-                <DropdownMenuItem 
-                  className="flex items-center cursor-pointer"
-                  onSelect={(e) => {
-                    e.preventDefault();
-                    // Trigger meal plan selector
-                    document.getElementById('meal-plan-trigger')?.click();
-                  }}
-                >
-                  <span>Lägg till i matsedel</span>
-                  <ChevronRight size={16} className="ml-auto" />
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onSelect={(e) => {
-                    e.preventDefault();
-                    handleAddToCart();
-                  }}
-                >
-                  Lägg till i inköpslista
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </div>
+      <TopNavigationBar
+        recipe={recipe}
+        favoriteIds={favoriteIds}
+        isDropdownOpen={isDropdownOpen}
+        onDropdownChange={handleDropdownChange}
+        onGoBack={handleGoBack}
+        onFavoriteToggle={handleFavoriteToggle}
+        onAddToCart={handleAddToCart}
+      />
 
       {/* Add top padding to prevent content from being hidden behind the fixed header */}
       <div className="pt-14">
-        <RecipeHeader 
-          recipe={recipe}
-          onBack={null} // Removing the back button from RecipeHeader
-        />
+        <RecipeHeader recipe={recipe} onBack={null} />
         
         <div className="px-4 mt-4">
           <RecipeMetrics 
@@ -205,7 +112,7 @@ const RecipeDetail = () => {
             favoriteIds={favoriteIds}
             mealPlan={mealPlan}
             onFavoriteToggle={handleFavoriteToggle}
-            onAddToMealPlan={handleAddToMealPlanDay}
+            onAddToMealPlan={(day, recipeId) => handleAddToMealPlanWithToast(day, recipeId, addToMealPlan)}
           />
         </div>
         
