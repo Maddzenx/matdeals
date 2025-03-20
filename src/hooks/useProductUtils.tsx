@@ -49,12 +49,12 @@ export const useProductUtils = (categories: CategoryData[]) => {
     
     const element = document.getElementById(categoryName);
     if (element) {
-      // Get header height (CategoryTabs + other fixed elements)
-      const headerHeight = 105 + 65; // 105px from the top sticky positioning + 65px for the fixed tabs
+      // Get header height (fixed elements)
+      const headerHeight = 140; // Increased for better visibility
       
       // Calculate the position to scroll to
       const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-      const offsetPosition = elementPosition - headerHeight - 8; // Slightly less spacing (8px) for better visual balance
+      const offsetPosition = elementPosition - headerHeight;
       
       // Scroll to the element with the offset - use smooth scrolling for better UX
       window.scrollTo({

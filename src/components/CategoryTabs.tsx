@@ -20,11 +20,13 @@ const translateCategory = (name: string): string => {
   };
   return translations[name] || name;
 };
+
 interface CategoryTabsProps {
   categories: Category[];
   activeCategory: string;
   onSelect: (id: string) => void;
 }
+
 export const CategoryTabs: React.FC<CategoryTabsProps> = ({
   categories,
   activeCategory,

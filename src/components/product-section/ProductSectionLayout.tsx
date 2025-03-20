@@ -1,4 +1,3 @@
-
 import React from "react";
 import { ProductGrid } from "@/components/ProductGrid";
 import { StoreTags } from "@/components/StoreTags";
@@ -78,14 +77,12 @@ export const ProductSectionLayout: React.FC<ProductSectionLayoutProps> = ({
       <div className="px-4 pt-2">
         <StoreTags tags={storeTags} onRemove={onRemoveTag} />
       </div>
-      <div className="sticky top-[70px] z-20 bg-white shadow-sm">
-        <CategoryTabs
-          categories={categories}
-          activeCategory={activeCategory}
-          onSelect={onCategorySelect}
-        />
-      </div>
-      <main className="p-4">
+      <CategoryTabs
+        categories={categories}
+        activeCategory={activeCategory}
+        onSelect={onCategorySelect}
+      />
+      <main className="p-4 mt-[120px]">
         {/* Display the active category name as a heading if it's not "All" */}
         {activeCategory !== "all" && activeCategoryName && (
           <h2 className="text-xl font-bold text-[#1C1C1C] mb-4">{translatedCategoryName}</h2>
