@@ -107,8 +107,6 @@ const RecipeDetail = () => {
             servings={recipe.servings}
             difficulty={recipe.difficulty}
           />
-          
-          {/* RecipeActions component has been removed */}
         </div>
         
         <div className="mt-4">
@@ -135,15 +133,39 @@ const RecipeDetail = () => {
         )}
         
         {showMealPlanSelector && (
-          <DaySelector
-            mealPlan={mealPlan}
-            recipe={recipe}
-            onSelectDay={(day, recipeId) => {
-              handleAddToMealPlanWithToast(day, recipeId, addToMealPlan);
-              setShowMealPlanSelector(false);
-            }}
-            trigger={null}
-          />
+          <div className="fixed inset-0 bg-black/50 z-[999]" onClick={() => setShowMealPlanSelector(false)}>
+            <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-xl z-[1000]" 
+                 onClick={(e) => e.stopPropagation()}>
+              <div className="p-4">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold">Välj dag för receptet</h3>
+                </div>
+                <div className="grid gap-3 py-2">
+                  {mealPlan.map((day) => (
+                    <Button
+                      key={day.day}
+                      variant={day.day === day.day ? "default" : "outline"}
+                      className="w-full justify-between"
+                      onClick={() => {
+                        handleAddToMealPlanWithToast(day.day, recipe.id, addToMealPlan);
+                        setShowMealPlanSelector(false);
+                      }}
+                    >
+                      <span>{day.day}</span>
+                      {day.recipe && (
+                        <span className="text-xs">(upptagen)</span>
+                      )}
+                    </Button>
+                  ))}
+                </div>
+                <div className="mt-6 flex justify-end gap-3">
+                  <Button variant="outline" onClick={() => setShowMealPlanSelector(false)}>
+                    Avbryt
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
         
         <BottomNav items={navItems} onSelect={handleNavSelect} />
