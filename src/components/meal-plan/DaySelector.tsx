@@ -22,7 +22,7 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
 }) => {
   const { toast } = useToast();
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
-  const [open, setOpen] = useState(false); // Changed back to false by default
+  const [open, setOpen] = useState(false);
   
   const getDayName = (day: string) => {
     switch(day.toLowerCase()) {
@@ -45,8 +45,6 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
     if (selectedDay) {
       onSelectDay(selectedDay, recipe.id);
       setOpen(false);
-      
-      // We'll let the parent component handle the toast now
     }
   };
 
@@ -58,11 +56,6 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
     }
   };
 
-  // Use CSS to ensure dialog appears above the card with a higher z-index
-  const sheetStyles = {
-    zIndex: 1000,
-  };
-
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild onClick={(e) => {
@@ -71,34 +64,37 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
       }}>
         {trigger || <Button onClick={(e) => e.stopPropagation()}>Välj dag</Button>}
       </SheetTrigger>
-      <SheetContent side="bottom" className="rounded-t-lg z-[1000]" style={sheetStyles}>
-        <SheetHeader className="mb-4">
-          <SheetTitle>Välj dag för receptet</SheetTitle>
+      <SheetContent side="bottom" className="rounded-t-lg z-[1000] p-6 bg-white">
+        <SheetHeader className="mb-6">
+          <SheetTitle className="text-left text-xl font-bold">Välj dag för receptet</SheetTitle>
         </SheetHeader>
         <div className="grid gap-3 py-2">
           {mealPlan.map((day) => (
-            <Button
+            <button
               key={day.day}
-              variant={selectedDay === day.day ? "default" : "outline"}
-              className={`w-full justify-between ${selectedDay === day.day ? "bg-[#DB2C17] hover:bg-[#c02615]" : ""}`}
               onClick={() => handleSelectDay(day.day)}
+              className={`w-full p-4 text-left rounded-md flex items-center justify-between 
+                ${selectedDay === day.day 
+                  ? "bg-[#1A1F2C] text-white" 
+                  : "bg-[#1A1F2C] text-white hover:bg-[#2c3446]"}`}
             >
-              <span>{getDayName(day.day)}</span>
+              <span className="font-medium">{getDayName(day.day)}</span>
               {day.recipe && (
-                <span className="text-xs">
+                <span className="text-sm opacity-80">
                   {selectedDay === day.day ? "(ersätter)" : "(upptagen)"}
                 </span>
               )}
               {selectedDay === day.day && <Check size={18} />}
-            </Button>
+            </button>
           ))}
         </div>
         <div className="mt-6 flex justify-end gap-3">
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button variant="outline" onClick={() => setOpen(false)}
+            className="bg-white hover:bg-gray-50 border-gray-200">
             Avbryt
           </Button>
           <Button 
-            className="bg-[#DB2C17] hover:bg-[#c02615]"
+            className="bg-[#DB2C17] hover:bg-[#c02615] text-white"
             onClick={handleConfirm}
             disabled={!selectedDay}
           >
