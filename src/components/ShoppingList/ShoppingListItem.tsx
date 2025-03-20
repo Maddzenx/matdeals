@@ -34,11 +34,17 @@ export const ShoppingListItem: React.FC<ShoppingListItemProps> = ({
   };
 
   return (
-    <div className="flex items-center py-3 border-b border-gray-200">
-      <CheckboxButton
-        checked={item.checked}
-        onCheck={() => onItemCheck(item.id)}
-      />
+    <div 
+      className="flex items-center py-3 border-b border-gray-200 cursor-pointer"
+      onClick={() => onItemCheck(item.id)}
+    >
+      {/* Use stopPropagation to prevent the checkbox click from triggering the parent div's onClick */}
+      <div onClick={(e) => e.stopPropagation()}>
+        <CheckboxButton
+          checked={item.checked}
+          onCheck={() => onItemCheck(item.id)}
+        />
+      </div>
       
       <div className="flex-grow min-w-0 mr-2">
         <ItemDetails 
@@ -49,7 +55,7 @@ export const ShoppingListItem: React.FC<ShoppingListItemProps> = ({
         />
       </div>
       
-      <div className="flex items-center gap-3 ml-auto">
+      <div className="flex items-center gap-3 ml-auto" onClick={(e) => e.stopPropagation()}>
         <TapToEditQuantity
           quantity={item.quantity}
           isChecked={item.checked}
