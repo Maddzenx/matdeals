@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Product } from "@/data/types";
 import { useProductFetching } from "@/hooks/useProductFetching";
-import { transformIcaProducts, transformWillysProducts, transformHemkopProducts } from "@/utils/productTransformers";
+import { transformIcaProducts, transformWillysProducts, transformHemkopProducts } from "@/utils/transformers";
 import { toast } from "sonner";
 
 export const useSupabaseProducts = () => {

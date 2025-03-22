@@ -1,7 +1,6 @@
-
 import { useMemo } from "react";
 import { CartItem } from "@/hooks/useCartState";
-import { determineProductCategory } from "@/utils/productTransformers";
+import { determineProductCategory } from "@/utils/transformers";
 
 interface CategoryGroups {
   [category: string]: CartItem[];

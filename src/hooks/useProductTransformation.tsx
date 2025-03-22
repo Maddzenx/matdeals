@@ -1,7 +1,7 @@
 
 import { useCallback } from "react";
 import { Product } from "@/data/types";
-import { transformIcaProducts, transformWillysProducts } from "@/utils/productTransformers";
+import { transformIcaProducts, transformWillysProducts } from "@/utils/transformers";
 
 export const useProductTransformation = () => {
   const transformProducts = useCallback((icaData: any[], willysData: any[]) => {
