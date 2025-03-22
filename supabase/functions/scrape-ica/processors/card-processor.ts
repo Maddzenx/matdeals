@@ -4,6 +4,7 @@ import { extractProductName } from "../extractors/name-extractor.ts";
 import { extractProductDescription } from "../extractors/description-extractor.ts";
 import { extractProductPrice } from "../extractors/price-extractor.ts";
 import { extractProductImageUrl } from "../extractors/image-extractor.ts";
+import { extractOfferDetails } from "../extractors/offer-details-extractor.ts";
 
 /**
  * Processes a single product card and extracts product information
