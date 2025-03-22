@@ -42,9 +42,15 @@ export const transformWillysProducts = (willysData: any[]): Product[] => {
       
       console.log(`Processing Willys item: ${item.name} (${productId}), category: ${category}, store: ${store}`);
       
+      // Check if the image URL is from ICA's domain and replace it with Willys default
+      let imageUrl = item.image_url || 'https://www.willys.se/content/dam/placeholder-200x200.png';
+      if (imageUrl.includes('icanet.se') || imageUrl.includes('assets.icanet')) {
+        imageUrl = 'https://www.willys.se/content/dam/placeholder-200x200.png';
+      }
+      
       return {
         id: productId,
-        image: item.image_url || 'https://assets.icanet.se/t_product_large_v1,f_auto/7310865085313.jpg', // Default image
+        image: imageUrl,
         name: item.name,
         details: item.description || 'Ingen beskrivning tillgänglig',
         currentPrice: formattedPrice,

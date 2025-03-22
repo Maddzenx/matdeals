@@ -1,8 +1,10 @@
 
-// Willys URLs to try for scraping
+// Willys URLs to try for scraping - prioritizing Hornsberg store
 export const WILLYS_URLS = [
+  'https://www.willys.se/butik/willys-hornsberg-stockholm',  // Specific Hornsberg store page
+  'https://www.willys.se/butiker/willys-hornsberg',          // Alternative Hornsberg URL
+  'https://www.willys.se/erbjudanden/veckans-erbjudanden/hornsberg', // Hornsberg weekly offers
   'https://www.willys.se/erbjudanden/veckans-erbjudanden',
-  'https://www.willys.se/kampanjer/veckans-erbjudanden',
   'https://www.willys.se/erbjudanden',
   'https://www.willys.se/sok?q=erbjudande',
   'https://www.willys.se'

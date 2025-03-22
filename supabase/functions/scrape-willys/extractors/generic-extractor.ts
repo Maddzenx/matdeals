@@ -31,8 +31,15 @@ export function extractGenericProducts(document: Document, baseUrl: string): Ext
           // Extract numeric price
           const price = extractPrice(priceText);
           
-          const imageElem = container.querySelector('img');
-          const imageUrl = imageElem ? (imageElem.getAttribute('src') || imageElem.getAttribute('data-src')) : null;
+          // Look for image with improved Willys-specific image finding
+          const imageElem = container.querySelector('img[src*="willys"], img.product-image, .product-image img, img.lazy-image, img');
+          let imageUrl = null;
+          
+          if (imageElem) {
+            imageUrl = imageElem.getAttribute('src') || 
+                       imageElem.getAttribute('data-src') || 
+                       imageElem.getAttribute('data-lazy-src');
+          }
           
           const finalImageUrl = normalizeImageUrl(imageUrl, baseUrl);
           
