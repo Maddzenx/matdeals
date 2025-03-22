@@ -198,6 +198,307 @@ Deno.test("extractProductPrice - should extract all price data together", () => 
   assertEquals(result.isMemberPrice, true);
 });
 
+// Edge cases for price extraction
+Deno.test("extractProductPrice - should handle empty containers", () => {
+  const html = `<div></div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, null);
+  assertEquals(result.priceStr, null);
+  assertEquals(result.originalPrice, null);
+  assertEquals(result.comparisonPrice, null);
+  assertEquals(result.offerDetails, null);
+  assertEquals(result.isMemberPrice, false);
+});
+
+Deno.test("extractProductPrice - should handle invalid price formats", () => {
+  const html = `<div>
+    <div class="price">pris</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, null);
+  assertEquals(result.priceStr, null);
+});
+
+Deno.test("extractProductPrice - should extract price with unusual decimal separators", () => {
+  const html = `<div>
+    <div class="price">25.90 kr</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+});
+
+Deno.test("extractProductPrice - should extract price when currency symbol is before the value", () => {
+  const html = `<div>
+    <div class="price">kr 25,90</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+});
+
+Deno.test("extractProductPrice - should extract price with no decimal part", () => {
+  const html = `<div>
+    <div class="price">25 kr</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25);
+});
+
+Deno.test("extractProductPrice - should extract price with unit specified", () => {
+  const html = `<div>
+    <div class="price">25,90 kr/st</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+});
+
+Deno.test("extractProductPrice - should handle whitespace in price formatting", () => {
+  const html = `<div>
+    <div class="price">    25,90    kr   </div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+});
+
+Deno.test("extractProductPrice - should extract price when embedded in text", () => {
+  const html = `<div>
+    <div class="price">Nu endast 25,90 kr!</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+});
+
+Deno.test("extractProductPrice - should extract price with alternative currency notation", () => {
+  const html = `<div>
+    <div class="price">25,90 SEK</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+});
+
+Deno.test("extractProductPrice - should prioritize first price when multiple prices exist", () => {
+  const html = `<div>
+    <div class="price-splash__text">
+      <span class="price-splash__text__firstValue">25.90</span>
+    </div>
+    <div class="price">35,90 kr</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+});
+
+// Edge cases for original price extraction
+Deno.test("extractProductPrice - should extract original price with 'Ord.pris' notation", () => {
+  const html = `<div>
+    <div class="price">25,90 kr</div>
+    <div class="some-class">Ord.pris 35,90 kr</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+  assertEquals(result.originalPrice, "Ord.pris 35,90 kr");
+});
+
+Deno.test("extractProductPrice - should extract original price with 'Ordinarie' notation", () => {
+  const html = `<div>
+    <div class="price">25,90 kr</div>
+    <div class="some-class">Ordinarie pris 35,90 kr</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+  assertEquals(result.originalPrice, "Ordinarie pris 35,90 kr");
+});
+
+Deno.test("extractProductPrice - should extract original price with strikethrough formatting", () => {
+  const html = `<div>
+    <div class="price">25,90 kr</div>
+    <del>35,90 kr</del>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+  assertEquals(result.originalPrice, "35,90 kr");
+});
+
+// Edge cases for comparison price extraction
+Deno.test("extractProductPrice - should extract comparison price with 'Jmfpris' notation", () => {
+  const html = `<div>
+    <div class="price">25,90 kr</div>
+    <div class="some-class">Jmfpris 259,00 kr/kg</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+  assertEquals(result.comparisonPrice, "Jmfpris 259,00 kr/kg");
+});
+
+Deno.test("extractProductPrice - should extract comparison price with per-unit notation", () => {
+  const html = `<div>
+    <div class="price">25,90 kr</div>
+    <div class="some-class">259,00 kr/kg</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+  assertEquals(result.comparisonPrice, "259,00 kr/kg");
+});
+
+Deno.test("extractProductPrice - should extract comparison price with per-liter notation", () => {
+  const html = `<div>
+    <div class="price">25,90 kr</div>
+    <div class="some-class">259,00 kr/liter</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+  assertEquals(result.comparisonPrice, "259,00 kr/liter");
+});
+
+// Edge cases for offer details extraction
+Deno.test("extractProductPrice - should extract offer details with numeric patterns", () => {
+  const html = `<div>
+    <div class="price">25,90 kr</div>
+    <div class="some-class">3 för 70</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+  assertEquals(result.offerDetails, "3 för 70");
+});
+
+Deno.test("extractProductPrice - should extract offer details with 'Max' limitation", () => {
+  const html = `<div>
+    <div class="price">25,90 kr</div>
+    <div class="some-class">Max 5 köp/hushåll</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+  assertEquals(result.offerDetails, "Max 5 köp/hushåll");
+});
+
+Deno.test("extractProductPrice - should extract offer details with 'Köp' patterns", () => {
+  const html = `<div>
+    <div class="price">25,90 kr</div>
+    <div class="some-class">Köp 4 betala för 3</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+  assertEquals(result.offerDetails, "Köp 4 betala för 3");
+});
+
+// Edge cases for member price detection
+Deno.test("extractProductPrice - should detect member price with 'Stammis' notation", () => {
+  const html = `<div>
+    <div class="price">25,90 kr</div>
+    <div class="some-class">Stammispris</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+  assertEquals(result.isMemberPrice, true);
+});
+
+Deno.test("extractProductPrice - should detect member price with 'Medlems' notation", () => {
+  const html = `<div>
+    <div class="price">25,90 kr</div>
+    <div class="some-class">Medlemspris</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+  assertEquals(result.isMemberPrice, true);
+});
+
+Deno.test("extractProductPrice - should detect member price with 'för medlemmar' notation", () => {
+  const html = `<div>
+    <div class="price">25,90 kr</div>
+    <div class="some-class">Endast för medlemmar</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+  assertEquals(result.isMemberPrice, true);
+});
+
+// Complex real-world cases
+Deno.test("extractProductPrice - should handle complex real-world example with multiple price elements", () => {
+  const html = `<div class="product-card">
+    <h3>Kaffe Mellanrost</h3>
+    <div class="product-price">
+      <span class="current-price">29,90 kr</span>
+      <span class="original-price">49,90 kr</span>
+    </div>
+    <div class="jmfpris">199,33 kr/kg</div>
+    <div class="campaign-text">2 för 50 kr. Max 3 köp/hushåll.</div>
+    <div class="member-badge">För dig som är medlem</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 29.90);
+  assertEquals(result.originalPrice, "49,90 kr");
+  assertEquals(result.comparisonPrice, "199,33 kr/kg");
+  assertEquals(result.offerDetails, "2 för 50 kr. Max 3 köp/hushåll.");
+  assertEquals(result.isMemberPrice, true);
+});
+
 // Tests for extractProductImageUrl
 Deno.test("extractProductImageUrl - should extract image URL with primary selectors", () => {
   const html = `<div>
