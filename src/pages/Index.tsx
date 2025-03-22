@@ -53,7 +53,7 @@ const Index = () => {
       navItems={navItems}
       storeTags={storeTagsData}
       supabaseProducts={supabaseProducts}
-      handleRefresh={() => {}} // Empty function since we don't want manual refresh anymore
+      handleRefresh={handleRefresh} // Pass the actual refresh function instead of empty function
       toggleViewMode={toggleViewMode}
       handleSearch={handleSearch}
       handleNavSelect={handleNavSelect}

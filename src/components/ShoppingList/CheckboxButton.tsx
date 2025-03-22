@@ -14,7 +14,7 @@ export const CheckboxButton: React.FC<CheckboxButtonProps> = ({
   return (
     <button
       onClick={onCheck}
-      className={`w-8 h-8 rounded-full border-2 mr-3 flex-shrink-0 transition-colors duration-200 ${
+      className={`w-9 h-9 rounded-full border-2 mr-3 flex-shrink-0 transition-colors duration-200 flex items-center justify-center ${
         checked 
           ? 'border-green-500 bg-green-500/10 active:bg-green-500/20' 
           : 'border-gray-300 active:border-gray-400'
@@ -22,9 +22,7 @@ export const CheckboxButton: React.FC<CheckboxButtonProps> = ({
       aria-label={checked ? "Mark as incomplete" : "Mark as complete"}
     >
       {checked && (
-        <span className="flex items-center justify-center w-full h-full">
-          <Check size={18} className="text-green-500" strokeWidth={2.5} />
-        </span>
+        <Check size={20} className="text-green-500" strokeWidth={2.5} />
       )}
     </button>
   );
