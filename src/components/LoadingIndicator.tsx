@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -13,6 +13,18 @@ export const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
   retry
 }) => {
   const isMobile = useIsMobile();
+  const [showRetry, setShowRetry] = useState(false);
+  
+  // If loading takes more than 5 seconds, show the retry button
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (retry) {
+        setShowRetry(true);
+      }
+    }, 5000);
+    
+    return () => clearTimeout(timer);
+  }, [retry]);
   
   return (
     <div className="p-4 flex flex-col items-center gap-4">
@@ -31,7 +43,7 @@ export const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
         </div>
       </div>
       
-      {retry && (
+      {(retry && showRetry) && (
         <button 
           onClick={retry}
           className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"

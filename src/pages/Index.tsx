@@ -23,13 +23,18 @@ const Index = () => {
   useAuthCheck();
   useInitialStoreSetup(activeStores, addStoreIfNeeded, handleStoreToggle, supabaseProducts);
 
-  // Force a refresh when the component mounts
+  // Ensure data is loaded when component mounts
   useEffect(() => {
     console.log("Index page mounted, checking if data needs refresh");
-    if (!loading && supabaseProducts.length === 0) {
-      console.log("No products found, triggering refresh");
-      handleRefresh();
-    }
+    
+    const triggerInitialLoad = async () => {
+      // Force a refresh of data when returning to the page
+      console.log("Triggering initial data refresh");
+      await handleRefresh(false);
+    };
+    
+    // Start loading immediately
+    triggerInitialLoad();
   }, []);
 
   const handleSearch = (query: string) => {

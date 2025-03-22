@@ -17,6 +17,13 @@ export const ItemDetails: React.FC<ItemDetailsProps> = ({
 }) => {
   const isMobile = useIsMobile();
   
+  // Check if image is a valid URL
+  const isValidImage = image && (
+    image.startsWith('http') || 
+    image.startsWith('/') || 
+    image.startsWith('data:')
+  );
+  
   return (
     <div className="flex-grow min-w-0">
       <p className={`font-bold text-lg leading-tight truncate ${isChecked ? 'line-through text-gray-500' : 'text-[#1C1C1C]'}`}>
@@ -25,13 +32,16 @@ export const ItemDetails: React.FC<ItemDetailsProps> = ({
       <p className={`text-sm leading-snug truncate mt-0.5 ${isChecked ? 'text-gray-400' : 'text-gray-500'}`}>
         {details}
       </p>
-      {image && (
+      {isValidImage && (
         <div className="mt-1">
           <img 
             src={image} 
             alt={name} 
             className={`${isMobile ? 'w-12 h-12' : 'w-14 h-14'} object-contain opacity-75 rounded-md`}
-            onError={(e) => (e.currentTarget.style.display = 'none')}
+            onError={(e) => {
+              console.warn(`Failed to load image for ${name}:`, image);
+              e.currentTarget.style.display = 'none';
+            }}
           />
         </div>
       )}

@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { SearchBar } from "@/components/SearchBar";
 import { BottomNav } from "@/components/BottomNav";
 import { ProductSection } from "@/components/ProductSection";
@@ -56,9 +56,39 @@ export const OffersPageContent: React.FC<OffersPageContentProps> = ({
   handleProductQuantityChange
 }) => {
   const filteredStoreTags = storeTags.filter(store => activeStores.includes(store.id));
-  const showRetryButton = !isRefreshing && loading && supabaseProducts.length === 0;
+  const showRetryButton = !isRefreshing && (loading || supabaseProducts.length === 0);
   
   console.log("OffersPageContent rendering with loading:", loading, "products:", supabaseProducts.length);
+  
+  // Log whenever the products array changes
+  useEffect(() => {
+    console.log("Loaded", supabaseProducts.length, "products from Supabase");
+    if (supabaseProducts.length > 0) {
+      const storeCount = supabaseProducts.reduce((acc: Record<string, number>, product: any) => {
+        const store = product.store?.toLowerCase() || 'unknown';
+        acc[store] = (acc[store] || 0) + 1;
+        return acc;
+      }, {});
+      console.log("Products by store:", storeCount);
+    }
+  }, [supabaseProducts]);
+
+  // If we've been in a loading state for more than 10 seconds with no products,
+  // trigger a refresh automatically
+  useEffect(() => {
+    let autoRefreshTimer: number | null = null;
+    
+    if (loading && supabaseProducts.length === 0 && !isRefreshing) {
+      autoRefreshTimer = window.setTimeout(() => {
+        console.log("Auto-triggering refresh after extended loading period");
+        handleRefresh();
+      }, 10000);
+    }
+    
+    return () => {
+      if (autoRefreshTimer) clearTimeout(autoRefreshTimer);
+    };
+  }, [loading, supabaseProducts.length, isRefreshing, handleRefresh]);
 
   return (
     <>
@@ -86,7 +116,7 @@ export const OffersPageContent: React.FC<OffersPageContentProps> = ({
           <LoadingIndicator 
             retry={showRetryButton ? handleRefresh : undefined} 
             message={showRetryButton 
-              ? "Kunde inte ladda produkter. Klicka på knappen nedan för att försöka igen." 
+              ? "Laddar produkter från Supabase... Klicka på knappen nedan om det tar för lång tid." 
               : "Laddar produkter från Supabase..."}
           />
         ) : supabaseProducts.length === 0 ? (

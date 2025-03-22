@@ -14,6 +14,7 @@ export const useSupabaseProducts = () => {
     queryKey: ["supabaseProducts"],
     queryFn: async () => {
       try {
+        console.log("Executing query function for supabaseProducts");
         const result = await refreshProducts(false);
         return result;
       } catch (error) {
@@ -21,18 +22,20 @@ export const useSupabaseProducts = () => {
         throw error;
       }
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes (reduced from 10)
-    refetchOnWindowFocus: true, // Enable refetch on window focus
-    refetchOnMount: true, // Always refetch on mount
+    staleTime: 1000 * 60 * 10, // 10 minutes
+    gcTime: 1000 * 60 * 15, // 15 minutes
+    refetchOnWindowFocus: false, // Don't refetch on window focus as it can cause confusion
+    refetchOnMount: "always", // Always refetch when the component mounts
     refetchOnReconnect: true, // Refetch on reconnect
   });
 
   useEffect(() => {
     if (data) {
       try {
-        const icaProducts = transformIcaProducts(data.icaData);
-        const willysProducts = transformWillysProducts(data.willysData);
-        const hemkopProducts = transformHemkopProducts(data.hemkopData);
+        console.log("Transforming data from query cache");
+        const icaProducts = transformIcaProducts(data.icaData || []);
+        const willysProducts = transformWillysProducts(data.willysData || []);
+        const hemkopProducts = transformHemkopProducts(data.hemkopData || []);
         
         console.log(`Transformed products: ICA (${icaProducts.length}), Willys (${willysProducts.length}), Hemköp (${hemkopProducts.length})`);
         

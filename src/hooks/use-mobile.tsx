@@ -12,6 +12,7 @@ export function useIsMobile() {
     if (typeof window === 'undefined') return
 
     const checkMobile = () => {
+      console.log("Window width:", window.innerWidth, "Mobile:", window.innerWidth < MOBILE_BREAKPOINT);
       setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
     }
 
@@ -21,8 +22,12 @@ export function useIsMobile() {
     // Set up resize listener
     window.addEventListener('resize', checkMobile)
     
+    // Add orientation change listener for mobile devices
+    window.addEventListener('orientationchange', checkMobile)
+    
     return () => {
       window.removeEventListener('resize', checkMobile)
+      window.removeEventListener('orientationchange', checkMobile)
     }
   }, [])
 
