@@ -1,9 +1,9 @@
-
 import { DOMParser } from "https://deno.land/x/deno_dom/deno-dom-wasm.ts";
 import { extractProductName } from "./extractors/name-extractor.ts";
 import { extractProductDescription } from "./extractors/description-extractor.ts";
 import { extractProductPrice } from "./extractors/price-extractor.ts";
 import { extractProductImageUrl } from "./extractors/image-extractor.ts";
+import { extractOfferDetails } from "./extractors/offer-details-extractor.ts";
 import { processProductCard } from "./processors/card-processor.ts";
 import { extractProducts } from "./products-extractor.ts";
 
@@ -69,7 +69,7 @@ Deno.test("extractProductDescription - should extract description with fallback 
   assertEquals(result, "Test Description");
 });
 
-// Tests for extractProductPrice
+// Tests for extractProductPrice and its refactored functions
 Deno.test("extractProductPrice - should extract price with primary selectors", () => {
   const html = `<div>
     <div class="price-splash__text">
@@ -82,6 +82,10 @@ Deno.test("extractProductPrice - should extract price with primary selectors", (
   
   assertEquals(result.price, 25.90);
   assert(result.priceStr !== null);
+  assertEquals(result.originalPrice, null);
+  assertEquals(result.comparisonPrice, null);
+  assertEquals(result.offerDetails, null);
+  assertEquals(result.isMemberPrice, false);
 });
 
 Deno.test("extractProductPrice - should extract price with simple formats", () => {
@@ -106,6 +110,92 @@ Deno.test("extractProductPrice - should extract price with comma format", () => 
   
   assertEquals(result.price, 25.90);
   assert(result.priceStr !== null);
+});
+
+Deno.test("extractProductPrice - should extract original price", () => {
+  const html = `<div>
+    <div class="price">25,90 kr</div>
+    <div class="original-price">35,90 kr</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+  assertEquals(result.originalPrice, "35,90 kr");
+});
+
+Deno.test("extractProductPrice - should extract comparison price", () => {
+  const html = `<div>
+    <div class="price">25,90 kr</div>
+    <div class="comparison-price">259,00 kr/kg</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+  assertEquals(result.comparisonPrice, "259,00 kr/kg");
+});
+
+Deno.test("extractProductPrice - should extract offer details", () => {
+  const html = `<div>
+    <div class="price">25,90 kr</div>
+    <div class="offer-details">2 för 45 kr</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+  assertEquals(result.offerDetails, "2 för 45 kr");
+});
+
+Deno.test("extractProductPrice - should detect member price", () => {
+  const html = `<div>
+    <div class="price">25,90 kr</div>
+    <div class="member-price">Stammispris</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+  assertEquals(result.isMemberPrice, true);
+});
+
+Deno.test("extractProductPrice - should identify complex offer patterns", () => {
+  const html = `<div>
+    <div class="price">25,90 kr</div>
+    <div class="campaign-text">Köp 3 betala för 2</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+  assertEquals(result.offerDetails, "Köp 3 betala för 2");
+});
+
+Deno.test("extractProductPrice - should extract all price data together", () => {
+  const html = `<div>
+    <div class="price-splash__text">
+      <span class="price-splash__text__firstValue">25.90</span>
+    </div>
+    <div class="original-price">35,90 kr</div>
+    <div class="comparison-price">259,00 kr/kg</div>
+    <div class="offer-details">2 för 45 kr</div>
+    <div class="member-price">Stammispris</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractProductPrice(element);
+  
+  assertEquals(result.price, 25.90);
+  assertEquals(result.originalPrice, "35,90 kr");
+  assertEquals(result.comparisonPrice, "259,00 kr/kg");
+  assertEquals(result.offerDetails, "2 för 45 kr");
+  assertEquals(result.isMemberPrice, true);
 });
 
 // Tests for extractProductImageUrl
@@ -151,6 +241,8 @@ Deno.test("processProductCard - should process a complete product card", () => {
     <p>Test Description</p>
     <div class="price">25,90 kr</div>
     <img src="test.jpg">
+    <div class="comparison-price">259,00 kr/kg</div>
+    <div class="offer-details">2 för 45 kr</div>
   </div>`;
   
   const element = createTestElement(html);
@@ -162,6 +254,42 @@ Deno.test("processProductCard - should process a complete product card", () => {
   assertEquals(result?.description, "Test Description");
   assertEquals(result?.price, 25.90);
   assertEquals(result?.image_url, "https://example.com/test.jpg");
+  assertEquals(result?.comparison_price, "259,00 kr/kg");
+  assertEquals(result?.offer_details, "2 för 45 kr");
+});
+
+// Tests for extractOfferDetails
+Deno.test("extractOfferDetails - should extract offer details with primary selectors", () => {
+  const html = `<div>
+    <div class="offer-badge">2 för 45 kr</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractOfferDetails(element);
+  
+  assertEquals(result, "2 för 45 kr");
+});
+
+Deno.test("extractOfferDetails - should extract offer details with common patterns", () => {
+  const html = `<div>
+    <div class="some-class">2 för 30 kr</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractOfferDetails(element);
+  
+  assertEquals(result, "2 för 30 kr");
+});
+
+Deno.test("extractOfferDetails - should return null when no offer details", () => {
+  const html = `<div>
+    <div class="price">25,90 kr</div>
+  </div>`;
+  
+  const element = createTestElement(html);
+  const result = extractOfferDetails(element);
+  
+  assertEquals(result, null);
 });
 
 // Import assert functions
