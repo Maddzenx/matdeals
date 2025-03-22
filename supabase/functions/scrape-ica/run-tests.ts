@@ -13,7 +13,7 @@ console.log("Running tests for scrape-ica function...");
 // Run all test files
 await runTests({
   files: [
-    "./product-extractor.test.ts",
+    "./product-extractor.test.ts", // This now imports all the individual test files
     "./dom-utils.test.ts",
     "./supabase-client.test.ts",
   ],
