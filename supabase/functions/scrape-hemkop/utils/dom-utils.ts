@@ -22,7 +22,13 @@ export async function fetchHtmlContent(
             'Accept-Language': 'sv-SE,sv;q=0.9,en-US;q=0.8,en;q=0.7',
             'Cache-Control': forceRefresh ? 'no-cache' : 'max-age=0',
             'Pragma': forceRefresh ? 'no-cache' : '',
-            'Referer': 'https://www.hemkop.se/' // Adding referer to appear more like a browser
+            'Referer': 'https://www.hemkop.se/',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'same-origin',
+            'Sec-Fetch-User': '?1'
           },
           redirect: 'follow'
         });
@@ -31,11 +37,23 @@ export async function fetchHtmlContent(
           html = await response.text();
           console.log(`Successfully fetched from ${url}, received ${html.length} characters`);
           
-          // Log the first 500 characters to see what we're getting
-          console.log(`Preview of HTML: ${html.substring(0, 500)}...`);
+          // Log a short preview to debug content structure
+          if (html.length > 100) {
+            console.log(`Preview of HTML: ${html.substring(0, 500)}...`);
+            
+            // Check for any signs this is actually the content we want
+            const hasProducts = html.includes('produkt') || html.includes('erbjudande') || 
+                               html.includes('pris') || html.includes('kampanj');
+            
+            if (hasProducts) {
+              console.log("Found product-related content in HTML");
+            } else {
+              console.log("Warning: No obvious product-related content found in HTML");
+            }
+          }
           
           // If we got a valid HTML response, parse it
-          if (html.length > 1000 && html.includes('</html>')) {
+          if (html.length > 1000) {
             // Parse the HTML
             const parser = new DOMParser();
             document = parser.parseFromString(html, "text/html");
@@ -43,28 +61,48 @@ export async function fetchHtmlContent(
             if (document) {
               console.log("Successfully parsed HTML document");
               
-              // Check if we can find any product elements to confirm this is a useful page
-              // Using a wider range of selectors to catch various product layouts
-              const productElements = document.querySelectorAll(
-                '.product, .product-card, [class*="product"], article, .offer, .campaign-item, ' +
-                '.price-card, .offer-card, .item, .goods, .product-item, .discount-item'
-              );
-              console.log(`Found ${productElements.length} potential product elements`);
+              // Try different approaches to find product containers
+              const approaches = [
+                // Approach 1: Standard product selectors
+                () => document?.querySelectorAll('.product, .product-card, [class*="product"], article, .offer, .campaign-item'),
+                // Approach 2: Price-related elements
+                () => document?.querySelectorAll('[class*="price"], [class*="Price"], [class*="kr"], [class*="erbjudande"]'),
+                // Approach 3: Generic containers with images
+                () => document?.querySelectorAll('div > img, a > img'),
+                // Approach 4: List items with price text (common pattern)
+                () => {
+                  const allListItems = document?.querySelectorAll('li');
+                  return Array.from(allListItems || []).filter(el => 
+                    el.textContent?.includes('kr') || el.textContent?.includes(':-')
+                  );
+                },
+                // Approach 5: Div containers with product-like structure
+                () => {
+                  const divs = document?.querySelectorAll('div');
+                  return Array.from(divs || []).filter(div => {
+                    const hasImg = div.querySelector('img') !== null;
+                    const hasPriceText = div.textContent?.match(/\d+[,.:]?\d*\s*kr/) !== null;
+                    return hasImg && hasPriceText;
+                  });
+                }
+              ];
               
-              if (productElements.length > 0) {
-                fetchSuccess = true;
-                break;
-              } else {
-                console.log("No product elements found on this page, trying next selector approach");
+              // Try each approach
+              for (const approachFn of approaches) {
+                const elements = approachFn();
+                console.log(`Found ${elements?.length || 0} potential product elements with approach`);
                 
-                // Try to find any elements with price-related content
-                const priceElements = document.querySelectorAll('[class*="price"], [class*="Price"], [class*="kr"], [class*="erbjudande"]');
-                console.log(`Found ${priceElements.length} potential price elements`);
-                
-                if (priceElements.length > 5) { // If we find multiple price elements, it's likely a product page
+                if (elements && elements.length > 3) {
+                  console.log("This approach found multiple elements - likely product containers");
                   fetchSuccess = true;
                   break;
                 }
+              }
+              
+              if (fetchSuccess) {
+                break;
+              } else {
+                console.log("Could not find product elements with any approach, trying next URL");
               }
             }
           } else {

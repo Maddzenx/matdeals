@@ -1,11 +1,11 @@
 
 // URLs to attempt to scrape from
 export const HEMKOP_URLS = [
-  "https://www.hemkop.se/erbjudanden",
-  "https://www.hemkop.se/erbjudanden/veckans-erbjudanden",
-  "https://www.hemkop.se/erbjudanden/veckans-erbjudanden/nordstan", // Specifically targeting Nordstan store
-  "https://www.hemkop.se/butik/nordstan", // Alternative Nordstan page
-  "https://www.hemkop.se/butiker/nordstan" // Another potential Nordstan URL
+  "https://www.hemkop.se/butiker/hemkop-nordstan",   // Primary target - Nordstan store
+  "https://www.hemkop.se/erbjudanden/veckans-erbjudanden/nordstan", // Nordstan weekly offers
+  "https://www.hemkop.se/butik/nordstan",            // Alternative Nordstan URL
+  "https://www.hemkop.se/erbjudanden/veckans-erbjudanden", // Generic weekly offers
+  "https://www.hemkop.se/erbjudanden"                // Fallback to general offers
 ];
 
 // Base URL for resolving relative URLs

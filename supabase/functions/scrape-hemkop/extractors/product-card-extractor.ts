@@ -18,16 +18,37 @@ export function extractProductCards(
   const products: ExtractorResult[] = [];
   const processedNames = new Set<string>();
   
-  for (const container of productContainers) {
+  for (let i = 0; i < productContainers.length; i++) {
+    const container = productContainers[i];
     try {
+      console.log(`\nProcessing product container ${i + 1}/${productContainers.length}`);
+      
       // Extract name using specialized extractor
       const name = extractName(container);
       
-      // Skip items with no name or duplicates
-      if (!name || name.length < 3 || processedNames.has(name.toLowerCase())) continue;
+      if (!name) {
+        console.log("Skipping item - no valid name found");
+        continue;
+      }
+      
+      // Skip items with very short names or duplicates
+      if (name.length < 3) {
+        console.log(`Skipping item with too short name: "${name}"`);
+        continue;
+      }
+      
+      if (processedNames.has(name.toLowerCase())) {
+        console.log(`Skipping duplicate product: "${name}"`);
+        continue;
+      }
       
       // Use specialized extractors to get product data
       const price = extractPrice(container);
+      if (!price) {
+        console.log(`Skipping product "${name}" - no valid price found`);
+        continue;
+      }
+      
       const imageUrl = extractImage(container, baseUrl);
       const description = extractDescription(container);
       const offerDetails = extractOfferDetails(container);
@@ -44,12 +65,13 @@ export function extractProductCards(
         offer_details: offerDetails
       });
       
-      console.log(`Extracted product: ${name}, price: ${price}, image: ${imageUrl.substring(0, 30)}...`);
+      console.log(`Successfully extracted product: ${name}, price: ${price}, description: ${description?.substring(0, 30) || 'none'}`);
       
     } catch (itemError) {
       console.error("Error extracting product data:", itemError);
     }
   }
   
+  console.log(`\nSuccessfully extracted ${products.length} products from ${productContainers.length} containers`);
   return products;
 }
