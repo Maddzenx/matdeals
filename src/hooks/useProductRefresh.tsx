@@ -4,6 +4,7 @@ import { useScrapeIca } from "@/hooks/useScrapeIca";
 import { useScrapeWillys } from "@/hooks/useScrapeWillys";
 import { useScrapeHemkop } from "@/hooks/useScrapeHemkop";
 import { useAppSession } from "@/hooks/useAppSession";
+import { toast } from "sonner";
 
 export const useProductRefresh = (refetch: () => Promise<{ success: boolean; error?: any }>) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -28,27 +29,56 @@ export const useProductRefresh = (refetch: () => Promise<{ success: boolean; err
     }
   }, [isFirstLoad]);
 
-  const handleRefresh = async () => {
+  const handleRefresh = async (showNotification = false) => {
     setIsRefreshing(true);
+    
+    if (showNotification) {
+      toast.info("Uppdaterar produkter...", {
+        duration: 2000,
+      });
+    }
     
     try {
       console.log("Starting refresh of ICA, Willys, and Hemköp data");
       
-      await Promise.all([
-        handleScrapeIca(false).catch(err => { // Always use false to disable notifications
-          console.error("Error scraping ICA:", err);
-        }),
-        handleScrapeWillys(false).catch(err => { // Always use false to disable notifications
-          console.error("Error scraping Willys:", err);
-        }),
-        handleScrapeHemkop(false).catch(err => { // Always use false to disable notifications
-          console.error("Error scraping Hemköp:", err);
-        })
-      ]);
+      // Schedule scraping operations one after another to avoid overwhelming the server
+      await handleScrapeIca(false).catch(err => {
+        console.error("Error scraping ICA:", err);
+      });
+
+      await handleScrapeWillys(false).catch(err => {
+        console.error("Error scraping Willys:", err);
+      });
+
+      await handleScrapeHemkop(false).catch(err => {
+        console.error("Error scraping Hemköp:", err);
+      });
       
-      await refetch();
+      const result = await refetch();
+      
+      if (result.success) {
+        if (showNotification) {
+          toast.success("Produkterna har uppdaterats", {
+            duration: 3000,
+          });
+        }
+      } else {
+        if (showNotification) {
+          toast.error("Kunde inte uppdatera produkter", {
+            description: "Försök igen senare",
+          });
+        }
+      }
+      
+      return result;
     } catch (error) {
       console.error("Error during refresh:", error);
+      if (showNotification) {
+        toast.error("Ett fel uppstod vid uppdatering", {
+          description: "Kontrollera din internetanslutning och försök igen",
+        });
+      }
+      return { success: false, error };
     } finally {
       setIsRefreshing(false);
     }

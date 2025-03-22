@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { useViewMode } from "@/hooks/useViewMode";
@@ -22,6 +22,15 @@ const Index = () => {
   
   useAuthCheck();
   useInitialStoreSetup(activeStores, addStoreIfNeeded, handleStoreToggle, supabaseProducts);
+
+  // Force a refresh when the component mounts
+  useEffect(() => {
+    console.log("Index page mounted, checking if data needs refresh");
+    if (!loading && supabaseProducts.length === 0) {
+      console.log("No products found, triggering refresh");
+      handleRefresh();
+    }
+  }, []);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -53,7 +62,7 @@ const Index = () => {
       navItems={navItems}
       storeTags={storeTagsData}
       supabaseProducts={supabaseProducts}
-      handleRefresh={handleRefresh} // Pass the actual refresh function instead of empty function
+      handleRefresh={handleRefresh}
       toggleViewMode={toggleViewMode}
       handleSearch={handleSearch}
       handleNavSelect={handleNavSelect}

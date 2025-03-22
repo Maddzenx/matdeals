@@ -21,8 +21,10 @@ export const useSupabaseProducts = () => {
         throw error;
       }
     },
-    staleTime: 1000 * 60 * 10, // 10 minutes
-    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5, // 5 minutes (reduced from 10)
+    refetchOnWindowFocus: true, // Enable refetch on window focus
+    refetchOnMount: true, // Always refetch on mount
+    refetchOnReconnect: true, // Refetch on reconnect
   });
 
   useEffect(() => {
@@ -52,6 +54,7 @@ export const useSupabaseProducts = () => {
     error,
     refetch: async () => {
       try {
+        console.log("Manually triggering product data refetch...");
         const result = await refetch();
         return { success: !result.error, error: result.error };
       } catch (refetchError) {
