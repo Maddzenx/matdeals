@@ -38,7 +38,11 @@ export const transformIcaProducts = (icaData: any[]): Product[] => {
       // Always set store to lowercase for consistency
       const store = 'ica';
       
-      console.log(`Processing ICA item: ${item.name} (${productId}), category: ${category}`);
+      // Determine if it's a member price and create appropriate badge text
+      const isMemberPrice = item.is_member_price === true;
+      const offerBadge = isMemberPrice ? 'Stämmispris' : 'Erbjudande';
+      
+      console.log(`Processing ICA item: ${item.name} (${productId}), category: ${category}, member price: ${isMemberPrice}`);
       
       return {
         id: productId,
@@ -49,7 +53,7 @@ export const transformIcaProducts = (icaData: any[]): Product[] => {
         originalPrice: '',
         store: store,  // Lowercase to match store filter
         category: category,
-        offerBadge: 'Erbjudande' // Swedish offer badge
+        offerBadge: offerBadge // Swedish offer badge with member price distinction
       };
     }).filter(Boolean) as Product[];
     

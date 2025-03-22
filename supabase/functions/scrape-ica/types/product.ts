@@ -11,4 +11,5 @@ export interface Product {
   comparison_price: string | null;
   offer_details: string | null;
   quantity_info: string | null;
+  is_member_price?: boolean;
 }

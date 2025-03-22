@@ -72,6 +72,11 @@ export async function storeProducts(products: Product[]) {
         descriptionParts.push(product.original_price);
       }
       
+      // Add member price info if it's a member-only price
+      if (product.is_member_price) {
+        descriptionParts.push("Stämmispris");
+      }
+      
       // Join all parts with a separator
       const fullDescription = descriptionParts.filter(Boolean).join(' | ');
       
@@ -84,7 +89,8 @@ export async function storeProducts(products: Product[]) {
         name: product.name,
         description: fullDescription || null,
         price: product.price,
-        image_url: product.image_url
+        image_url: product.image_url,
+        is_member_price: product.is_member_price || false
       };
     }).filter(Boolean); // Remove null items
 

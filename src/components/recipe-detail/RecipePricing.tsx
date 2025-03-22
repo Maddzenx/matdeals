@@ -1,8 +1,9 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, User } from "lucide-react";
 import { Product } from "@/data/types";
+import { Badge } from "@/components/ui/badge";
 
 interface RecipePricingProps {
   price: number | null;
@@ -30,6 +31,9 @@ export const RecipePricing: React.FC<RecipePricingProps> = ({
   }
 
   const hasDiscountedIngredients = matchedProducts && matchedProducts.length > 0;
+  
+  // Check if there are any member prices
+  const hasMemberPrices = matchedProducts?.some(p => p.offerBadge === "Stämmispris") || false;
 
   return (
     <div className="bg-gray-50 p-5 rounded-lg mt-6 mb-4">
@@ -56,6 +60,15 @@ export const RecipePricing: React.FC<RecipePricingProps> = ({
             <div className="mt-1 flex items-center text-sm text-green-600">
               <ShoppingBag size={14} className="mr-1" />
               <span>{matchedProducts.length} ingredienser på rea!</span>
+              
+              {hasMemberPrices && (
+                <div className="flex items-center ml-2">
+                  <User size={12} className="mr-1 text-blue-600" />
+                  <Badge variant="outline" className="text-[0.6rem] py-0 px-1 h-4 bg-blue-50 text-blue-600 border-blue-200">
+                    Inkl. medlemspriser
+                  </Badge>
+                </div>
+              )}
             </div>
           )}
         </div>

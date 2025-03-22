@@ -56,7 +56,7 @@ export function processProductCard(
     
     // Extract other product details
     const { description, quantityInfo } = extractProductDescription(card, name);
-    const { price, priceStr, originalPrice, comparisonPrice, offerDetails } = extractProductPrice(card);
+    const { price, priceStr, originalPrice, comparisonPrice, offerDetails, isMemberPrice } = extractProductPrice(card);
     const imageUrl = extractProductImageUrl(card, baseUrl);
     
     // Only add to processed names if we got a valid price
@@ -70,6 +70,7 @@ export function processProductCard(
     if (comparisonPrice) console.log(`  Comparison price: ${comparisonPrice}`);
     if (offerDetails) console.log(`  Offer details: ${offerDetails}`);
     if (quantityInfo) console.log(`  Quantity info: ${quantityInfo}`);
+    if (isMemberPrice) console.log(`  Member price: Yes`);
     
     return {
       name,
@@ -79,7 +80,8 @@ export function processProductCard(
       original_price: originalPrice,
       comparison_price: comparisonPrice,
       offer_details: offerDetails,
-      quantity_info: quantityInfo
+      quantity_info: quantityInfo,
+      is_member_price: isMemberPrice
     };
   } catch (cardError) {
     console.error("Error processing a card:", cardError);

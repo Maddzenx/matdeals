@@ -2,6 +2,7 @@
 import React from "react";
 import { ShoppingBag } from "lucide-react";
 import { Product } from "@/data/types";
+import { Badge } from "@/components/ui/badge";
 
 interface RecipeDiscountedProductsProps {
   products: Product[];
@@ -25,12 +26,21 @@ export const RecipeDiscountedProducts: React.FC<RecipeDiscountedProductsProps> =
       <ul className="text-xs space-y-1">
         {products.map((product, idx) => (
           <li key={idx} className="flex justify-between">
-            <div className="flex-grow">{product.name}</div>
+            <div className="flex-grow flex items-center">
+              {product.name}
+              {product.offerBadge === "Stämmispris" && (
+                <Badge variant="outline" className="ml-1 text-[0.6rem] py-0 px-1 h-4 bg-blue-50 text-blue-600 border-blue-200">
+                  Medlem
+                </Badge>
+              )}
+            </div>
             <div className="flex items-center">
               {product.originalPrice && (
                 <span className="line-through mr-1 text-gray-500">{product.originalPrice}</span>
               )}
-              <span className="font-semibold text-[#DB2C17]">{product.currentPrice}</span>
+              <span className={`font-semibold ${product.offerBadge === "Stämmispris" ? "text-blue-600" : "text-[#DB2C17]"}`}>
+                {product.currentPrice}
+              </span>
             </div>
           </li>
         ))}

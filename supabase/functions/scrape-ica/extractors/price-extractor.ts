@@ -8,6 +8,7 @@ export function extractProductPrice(card: Element): {
   originalPrice: string | null;
   comparisonPrice: string | null;
   offerDetails: string | null;
+  isMemberPrice: boolean;
 } {
   // Try multiple price element selectors
   const priceSelectors = [
@@ -23,6 +24,7 @@ export function extractProductPrice(card: Element): {
   let originalPrice: string | null = null;
   let comparisonPrice: string | null = null;
   let offerDetails: string | null = null;
+  let isMemberPrice = false;
   
   // Find main price
   for (const selector of priceSelectors) {
@@ -127,6 +129,36 @@ export function extractProductPrice(card: Element): {
     }
   }
   
+  // Check for "Stämmispris" or member-only indicators
+  const memberPriceIndicators = [
+    '.member-price', '.stammis-price', '.loyalty-price', '[class*="member"]', 
+    '[class*="stammis"]', '[class*="loyalty"]', '.member-offer', '.stammis-offer'
+  ];
+  
+  for (const selector of memberPriceIndicators) {
+    if (card.querySelector(selector)) {
+      isMemberPrice = true;
+      break;
+    }
+  }
+  
+  // If not found by selector, check any text mentioning "Stammis" or members
+  if (!isMemberPrice) {
+    const allText = Array.from(card.querySelectorAll('*'))
+      .map(el => el.textContent?.trim())
+      .filter(Boolean);
+    
+    for (const text of allText) {
+      if (text.toLowerCase().includes('stammis') || 
+          text.toLowerCase().includes('medlems') ||
+          text.toLowerCase().includes('för medlemmar') ||
+          text.toLowerCase().includes('för dig som är medlem')) {
+        isMemberPrice = true;
+        break;
+      }
+    }
+  }
+  
   // If not found yet, look for specific patterns in the text
   if (!offerDetails) {
     const offerPatterns = [
@@ -180,5 +212,5 @@ export function extractProductPrice(card: Element): {
     }
   }
   
-  return { price, priceStr, originalPrice, comparisonPrice, offerDetails };
+  return { price, priceStr, originalPrice, comparisonPrice, offerDetails, isMemberPrice };
 }
