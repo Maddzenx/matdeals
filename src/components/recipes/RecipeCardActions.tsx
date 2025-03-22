@@ -50,21 +50,21 @@ export const RecipeCardActions: React.FC<RecipeCardActionsProps> = ({
       <Button
         variant="ghost"
         size="icon"
-        className="w-10 h-10 rounded-full"
+        className="w-11 h-11 rounded-full"
         onClick={handleFavoriteToggle}
         aria-label={isFavorite ? "Ta bort från favoriter" : "Lägg till i favoriter"}
       >
-        <Heart size={20} className={isFavorite ? "text-[#DB2C17] fill-[#DB2C17]" : ""} />
+        <Heart size={22} className={isFavorite ? "text-[#DB2C17] fill-[#DB2C17]" : ""} />
       </Button>
       
       <Button 
         variant="ghost"
         size="icon"
-        className="w-10 h-10 rounded-full"
+        className="w-11 h-11 rounded-full"
         aria-label="Lägg till i matsedel"
         onClick={handleMealPlanClick}
       >
-        <CalendarPlus size={20} />
+        <CalendarPlus size={22} />
       </Button>
       
       <DaySelector
@@ -81,12 +81,12 @@ export const RecipeCardActions: React.FC<RecipeCardActionsProps> = ({
       />
       
       <Button 
-        className="bg-[#DB2C17] hover:bg-[#c02615] w-10 h-10 rounded-full"
+        className="bg-[#DB2C17] hover:bg-[#c02615] w-11 h-11 rounded-full"
         onClick={handleAddToCart}
         size="icon"
         aria-label="Lägg till varor i inköpslistan"
       >
-        <ShoppingCart size={20} />
+        <ShoppingCart size={22} />
       </Button>
     </div>
   );

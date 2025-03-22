@@ -23,21 +23,21 @@ export const RecipeMetadata: React.FC<RecipeMetadataProps> = ({ recipe }) => {
   const difficultyProps = getDifficultyProps(recipe.difficulty);
 
   return (
-    <div className="flex justify-between mb-4 text-xs text-gray-500">
+    <div className="flex justify-between mb-4 text-sm text-gray-500">
       <div className="flex items-center">
-        <Clock size={14} className="mr-1" /> 
+        <Clock size={16} className="mr-1.5" /> 
         {recipe.time_minutes} min
       </div>
       
       {recipe.servings && (
         <div className="flex items-center">
-          <Users size={14} className="mr-1" /> 
+          <Users size={16} className="mr-1.5" /> 
           {recipe.servings} pers
         </div>
       )}
       
       <div className={`flex items-center ${difficultyProps.color}`}>
-        <ChefHat size={14} className="mr-1" /> 
+        <ChefHat size={16} className="mr-1.5" /> 
         {difficultyProps.level}
       </div>
     </div>

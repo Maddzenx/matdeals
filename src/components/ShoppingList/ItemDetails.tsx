@@ -15,7 +15,7 @@ export const ItemDetails: React.FC<ItemDetailsProps> = ({
 }) => {
   return (
     <div className="flex-grow min-w-0">
-      <p className={`font-bold text-base truncate ${isChecked ? 'line-through text-gray-500' : 'text-[#1C1C1C]'}`}>
+      <p className={`font-bold text-lg truncate ${isChecked ? 'line-through text-gray-500' : 'text-[#1C1C1C]'}`}>
         {name}
       </p>
       <p className={`text-sm truncate ${isChecked ? 'text-gray-400' : 'text-gray-500'}`}>

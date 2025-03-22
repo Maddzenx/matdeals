@@ -92,7 +92,7 @@ export const TapToEditQuantity: React.FC<TapToEditQuantityProps> = ({
 
   return (
     <>
-      <div className="min-w-[45px] text-center">
+      <div className="min-w-[48px] text-center">
         {isEditing ? (
           <Input
             ref={inputRef}
@@ -100,7 +100,7 @@ export const TapToEditQuantity: React.FC<TapToEditQuantityProps> = ({
             onChange={(e) => setInputValue(e.target.value)}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
-            className={`w-16 h-10 p-1 text-center text-base transition-all ${isChecked ? 'text-gray-400' : ''}`}
+            className={`w-16 h-11 p-1 text-center text-lg transition-all ${isChecked ? 'text-gray-400' : ''}`}
             type="number"
             min="0"
             inputMode="numeric"
@@ -109,14 +109,14 @@ export const TapToEditQuantity: React.FC<TapToEditQuantityProps> = ({
         ) : (
           <div
             onClick={handleStartEditing}
-            className={`flex items-center justify-center py-2 px-3 rounded-md transition-colors cursor-pointer ${
+            className={`flex items-center justify-center py-2.5 px-3.5 rounded-md transition-colors cursor-pointer ${
               isChecked ? 'text-gray-500' : 'hover:bg-gray-100'
             }`}
             role="button"
             tabIndex={0}
             aria-label="Redigera antal"
           >
-            <span className={`font-medium text-base ${isChecked ? 'text-gray-500' : ''}`}>
+            <span className={`font-medium text-lg ${isChecked ? 'text-gray-500' : ''}`}>
               {quantity}
             </span>
           </div>
@@ -126,14 +126,14 @@ export const TapToEditQuantity: React.FC<TapToEditQuantityProps> = ({
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Ta bort vara</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-xl">Ta bort vara</AlertDialogTitle>
+            <AlertDialogDescription className="text-base">
               Om du sätter antalet till 0 kommer varan att tas bort från din inköpslista. Är du säker?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={cancelRemoval} className="text-base">Avbryt</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmRemoval} className="text-base">Ta bort</AlertDialogAction>
+            <AlertDialogCancel onClick={cancelRemoval} className="text-base h-12">Avbryt</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRemoval} className="text-base h-12">Ta bort</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

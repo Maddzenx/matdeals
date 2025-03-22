@@ -21,7 +21,7 @@ export const QuantityControls: React.FC<QuantityControlsProps> = ({
     return (
       <button
         onClick={onAdd}
-        className="text-white text-center text-sm font-bold bg-[#DB2C17] mt-1 px-4 py-2 rounded-[100px] w-full transition-colors active:bg-[#c12715] touch-manipulation"
+        className="text-white text-center text-base font-bold bg-[#DB2C17] mt-1 px-4 py-2.5 rounded-[100px] w-full transition-colors active:bg-[#c12715] touch-manipulation"
       >
         Add to list
       </button>
@@ -29,19 +29,19 @@ export const QuantityControls: React.FC<QuantityControlsProps> = ({
   }
 
   return (
-    <div className="flex items-center h-10 flex-1 text-center text-sm font-bold bg-neutral-100 mt-1 px-1.5 py-0 rounded-[100px]">
+    <div className="flex items-center h-11 flex-1 text-center text-base font-bold bg-neutral-100 mt-1 px-1.5 py-0 rounded-[100px]">
       <button
         onClick={onDecrement}
-        className="flex-1 flex justify-center items-center text-center text-sm font-bold bg-white px-1.5 py-1.5 rounded-[100px] active:bg-neutral-200 transition-colors touch-manipulation"
+        className="flex-1 flex justify-center items-center text-center text-base font-bold bg-white px-1.5 py-1.5 rounded-[100px] active:bg-neutral-200 transition-colors touch-manipulation"
       >
-        <Minus size={18} />
+        <Minus size={20} />
       </button>
-      <span className="flex-1 text-center text-sm font-bold">{quantity}</span>
+      <span className="flex-1 text-center text-base font-bold">{quantity}</span>
       <button
         onClick={onIncrement}
-        className="flex-1 flex justify-center items-center text-center text-sm font-bold text-white bg-[#DB2C17] px-1.5 py-1.5 rounded-[100px] active:bg-[#c12715] transition-colors touch-manipulation"
+        className="flex-1 flex justify-center items-center text-center text-base font-bold text-white bg-[#DB2C17] px-1.5 py-1.5 rounded-[100px] active:bg-[#c12715] transition-colors touch-manipulation"
       >
-        <Plus size={18} />
+        <Plus size={20} />
       </button>
     </div>
   );

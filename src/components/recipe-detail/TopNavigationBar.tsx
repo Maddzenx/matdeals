@@ -34,51 +34,51 @@ export const TopNavigationBar: React.FC<TopNavigationBarProps> = ({
   return (
     <div className="fixed top-0 left-0 right-0 bg-white z-50 border-b border-gray-200 shadow-sm">
       <div className="px-4 py-4 flex items-center justify-between">
-        <button onClick={onGoBack} className="text-[#DB2C17] p-2">
-          <ArrowLeft size={26} />
+        <button onClick={onGoBack} className="text-[#DB2C17] p-2.5">
+          <ArrowLeft size={28} />
         </button>
         
-        <h1 className="text-lg font-medium truncate max-w-[60%]">
+        <h1 className="text-xl font-medium truncate max-w-[60%]">
           {recipe.title}
         </h1>
         
         <div className="flex items-center gap-2">
           <button 
             onClick={onFavoriteToggle}
-            className="p-2.5 rounded-full"
+            className="p-3 rounded-full"
           >
             <Heart 
-              size={24} 
+              size={26} 
               className={favoriteIds.includes(recipe.id) ? "text-[#DB2C17] fill-[#DB2C17]" : "text-gray-600"} 
             />
           </button>
           
           <DropdownMenu open={isDropdownOpen} onOpenChange={onDropdownChange}>
             <DropdownMenuTrigger asChild>
-              <button className="p-2.5 rounded-full">
-                <MoreVertical size={24} className="text-gray-600" />
+              <button className="p-3 rounded-full">
+                <MoreVertical size={26} className="text-gray-600" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 z-[60] bg-white">
               <DropdownMenuItem 
-                className="flex items-center cursor-pointer py-3 text-base"
+                className="flex items-center cursor-pointer py-3.5 text-lg"
                 onClick={(e) => {
                   e.stopPropagation();
                   onAddToMealPlanClick();
                 }}
               >
-                <CalendarDays size={18} className="mr-2" />
+                <CalendarDays size={20} className="mr-2" />
                 <span>Lägg till i matsedel</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                className="flex items-center cursor-pointer py-3 text-base"
+                className="flex items-center cursor-pointer py-3.5 text-lg"
                 onClick={(e) => {
                   e.stopPropagation();
                   onAddToCart();
                 }}
               >
-                <ShoppingCart size={18} className="mr-2" />
+                <ShoppingCart size={20} className="mr-2" />
                 <span>Lägg till i inköpslista</span>
               </DropdownMenuItem>
             </DropdownMenuContent>

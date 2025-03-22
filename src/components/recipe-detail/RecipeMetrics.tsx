@@ -30,21 +30,21 @@ export const RecipeMetrics: React.FC<RecipeMetricsProps> = ({
   const difficultyProps = getDifficultyProps(difficulty);
 
   return (
-    <div className="flex justify-between mb-4 text-sm bg-gray-50 p-3 rounded-lg shadow-sm">
+    <div className="flex justify-between mb-4 text-base bg-gray-50 p-3.5 rounded-lg shadow-sm">
       <div className="flex items-center">
-        <Clock size={16} className="mr-1.5 text-gray-600" /> 
+        <Clock size={18} className="mr-2 text-gray-600" /> 
         <span>{time_minutes} min</span>
       </div>
       
       {servings && (
         <div className="flex items-center">
-          <Users size={16} className="mr-1.5 text-gray-600" /> 
+          <Users size={18} className="mr-2 text-gray-600" /> 
           <span>{servings} pers</span>
         </div>
       )}
       
       <div className={`flex items-center ${difficultyProps.color}`}>
-        <ChefHat size={16} className="mr-1.5" /> 
+        <ChefHat size={18} className="mr-2" /> 
         <span>{difficultyProps.level}</span>
       </div>
     </div>
