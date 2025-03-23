@@ -49,6 +49,11 @@ serve(async (req) => {
     
     console.log(`Extracted ${products.length} products from Johanneberg store page`);
     
+    // Explicitly set the store name for all products
+    products.forEach(product => {
+      product.store = STORE_NAME;
+    });
+    
     // If no products were found, use sample products
     if (!products || products.length === 0) {
       console.log("No products found for Johanneberg store. Using sample products...");

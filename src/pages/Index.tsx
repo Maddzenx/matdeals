@@ -23,14 +23,13 @@ const Index = () => {
   useAuthCheck();
   useInitialStoreSetup(activeStores, addStoreIfNeeded, handleStoreToggle, supabaseProducts);
 
-  // Ensure data is loaded when component mounts
+  // Force a refresh when the page loads
   useEffect(() => {
-    console.log("Index page mounted, checking if data needs refresh");
+    console.log("Index page mounted, forcing immediate data refresh");
     
     const triggerInitialLoad = async () => {
-      // Force a refresh of data when returning to the page
       console.log("Triggering initial data refresh");
-      await handleRefresh(false);
+      await handleRefresh(true); // Set to true to show notifications
     };
     
     // Start loading immediately

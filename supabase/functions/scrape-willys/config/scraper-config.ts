@@ -1,22 +1,19 @@
 
-// Willys URLs to try for scraping - prioritizing Johanneberg store
+// URLs to scrape from Willys website
 export const WILLYS_URLS = [
-  'https://www.willys.se/erbjudanden/butik/willys-johanneberg',  // Primary target: Johanneberg store offers page
-  'https://www.willys.se/butik/willys-johanneberg-goteborg',     // Specific Johanneberg store page
-  'https://www.willys.se/erbjudanden/butik',                     // Fallback to general store offers
-  'https://www.willys.se/erbjudanden/veckans-erbjudanden',
-  'https://www.willys.se/erbjudanden',
-  'https://www.willys.se/sok?q=erbjudande',
-  'https://www.willys.se'
+  'https://www.willys.se/erbjudanden/butik/johanneberg',   // Specific Johanneberg store
+  'https://www.willys.se/erbjudanden/butik',               // Fallback to general offers
 ];
 
-// User agent strings to try
+// User agents to rotate for avoiding bot detection
 export const USER_AGENTS = [
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
-  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/118.0.5993.69 Mobile/15E148 Safari/604.1'
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Safari/605.1.15',
+  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36'
 ];
 
-export const BASE_URL = "https://www.willys.se";
-export const STORE_NAME = "Willys Johanneberg"; // Add store name for labeling products
+// Base URL for resolving relative URLs
+export const BASE_URL = 'https://www.willys.se';
+
+// Store name to use for all products
+export const STORE_NAME = 'willys johanneberg';

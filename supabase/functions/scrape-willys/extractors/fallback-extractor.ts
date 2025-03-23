@@ -1,70 +1,126 @@
 
-// Fallback extractor for handling cases where specific extractors fail
 import { ExtractorResult } from "./base-extractor.ts";
 
-export function extractFallbackProducts(document: Document, storeName?: string): ExtractorResult[] {
-  // Implement generic fallback extraction logic here if needed
-  console.log("Using fallback product extractor since specific extractors failed");
+/**
+ * Creates sample products when no products can be extracted from the page
+ */
+export function createSampleProducts(storeName: string = "willys johanneberg"): ExtractorResult[] {
+  console.log(`Creating sample products for ${storeName}`);
   
-  // Return empty array to let the caller handle the fallback
-  return [];
-}
-
-// Create sample products when no products can be extracted
-export function createSampleProducts(storeName?: string): ExtractorResult[] {
-  const storeNameFormatted = storeName?.toLowerCase() || 'willys';
-  const storePrefix = storeName ? `${storeName} ` : 'Willys ';
-  
-  console.log(`Creating sample products for ${storeName || 'Willys'}`);
-  
+  // Sample products with Willys-style formatting
   return [
     {
+      name: "Äpple Royal Gala",
+      description: "Willys, Italien, Klass 1",
+      price: 24.90,
+      image_url: "https://assets.icanet.se/e_sharpen:100,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_226367/cf_259/morotter_i_knippe.jpg",
+      original_price: "29.90",
+      offer_details: "Johanneberg erbjudande",
+      store: storeName
+    },
+    {
       name: "Färsk Kycklingfilé",
-      description: "Kronfågel. 900-1000 g. Jämförpris 79:90/kg",
-      price: 79,
-      image_url: "https://assets.icanet.se/t_product_large_v1,f_auto/7300156501245.jpg",
-      offer_details: `${storePrefix}Veckans erbjudande`,
-      store_name: storeNameFormatted
+      description: "Kronfågel, Sverige, 700-925g",
+      price: 89.90,
+      image_url: "https://assets.icanet.se/e_sharpen:100,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_226367/cf_259/morotter_i_knippe.jpg",
+      original_price: "109.90",
+      offer_details: "Johanneberg erbjudande",
+      store: storeName
     },
     {
-      name: "Färsk Laxfilé",
-      description: "Fiskeriet. 400 g. Jämförpris 149:75/kg",
-      price: 59,
-      image_url: "https://assets.icanet.se/t_product_large_v1,f_auto/7313630100015.jpg",
-      offer_details: `${storePrefix}Veckans erbjudande`,
-      store_name: storeNameFormatted
+      name: "Kavli Mjukost",
+      description: "Willys, Flera smaker, 275g",
+      price: 29.90,
+      image_url: "https://assets.icanet.se/e_sharpen:100,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_226367/cf_259/morotter_i_knippe.jpg",
+      original_price: "34.90",
+      offer_details: "Johanneberg erbjudande",
+      store: storeName
     },
     {
-      name: "Äpplen Royal Gala",
-      description: "Italien. Klass 1. Jämförpris 24:95/kg",
-      price: 24,
-      image_url: "https://assets.icanet.se/t_product_large_v1,f_auto/4038838117829.jpg",
-      offer_details: `${storePrefix}Veckans erbjudande`,
-      store_name: storeNameFormatted
+      name: "Nötfärs 12%",
+      description: "Svenskt Butikskött, 800g",
+      price: 69.90,
+      image_url: "https://assets.icanet.se/e_sharpen:100,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_226367/cf_259/morotter_i_knippe.jpg",
+      original_price: "89.90",
+      offer_details: "Johanneberg erbjudande",
+      store: storeName
     },
     {
-      name: "Färsk pasta",
-      description: "Findus. 400 g. Jämförpris 62:38/kg",
-      price: 25,
-      image_url: "https://assets.icanet.se/t_product_large_v1,f_auto/7310500144511.jpg",
-      offer_details: `${storePrefix}Veckans erbjudande`,
-      store_name: storeNameFormatted
+      name: "Karré Skivad",
+      description: "Scan, 300g",
+      price: 29.90,
+      image_url: "https://assets.icanet.se/e_sharpen:100,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_226367/cf_259/morotter_i_knippe.jpg",
+      original_price: "39.90",
+      offer_details: "Johanneberg erbjudande",
+      store: storeName
     },
     {
-      name: "Bryggkaffe Mellanrost",
-      description: "Gevalia. 450 g. Jämförpris 119:89/kg",
-      price: 49,
-      image_url: "https://assets.icanet.se/t_product_large_v1,f_auto/8711000530092.jpg",
-      offer_details: `${storePrefix}Veckans erbjudande`,
-      store_name: storeNameFormatted
-    },
-    {
-      name: "Marabou Mjölkchoklad",
-      description: "Marabou. 200 g. Jämförpris 99:75/kg",
-      price: 19,
-      image_url: "https://assets.icanet.se/t_product_large_v1,f_auto/7310511210502.jpg",
-      offer_details: `${storePrefix}Veckans erbjudande`,
-      store_name: storeNameFormatted
+      name: "Smörgåsgurka",
+      description: "Felix, 375g",
+      price: 19.90,
+      image_url: "https://assets.icanet.se/e_sharpen:100,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_226367/cf_259/morotter_i_knippe.jpg",
+      original_price: "24.90",
+      offer_details: "Johanneberg erbjudande",
+      store: storeName
     }
   ];
+}
+
+/**
+ * Extracts products using a fallback method when primary methods fail
+ */
+export function extractFallbackProducts(document: Document, storeName: string = "willys johanneberg"): ExtractorResult[] {
+  console.log("Attempting fallback extraction for Willys products");
+  
+  // Try to extract any product-like elements on the page
+  const containers = document.querySelectorAll(".w-product, .product, .offer-card, [data-testid^='product']");
+  console.log(`Found ${containers.length} potential product containers via fallback selectors`);
+  
+  if (containers.length === 0) {
+    return [];
+  }
+  
+  const products: ExtractorResult[] = [];
+  
+  for (const container of containers) {
+    try {
+      // Attempt to extract basic info
+      const nameEl = container.querySelector("h2, h3, .product-name, .title");
+      if (!nameEl) continue;
+      
+      const name = nameEl.textContent?.trim();
+      if (!name) continue;
+      
+      // Extract price from any element that might contain it
+      const priceEl = container.querySelector(".price, .current-price, [data-testid='price']");
+      let price = null;
+      if (priceEl) {
+        const priceText = priceEl.textContent?.trim()
+          .replace("kr", "")
+          .replace(",-", "")
+          .replace(",", ".")
+          .trim();
+        price = parseFloat(priceText || "0") || null;
+      }
+      
+      // Extract image
+      const imgEl = container.querySelector("img");
+      const image_url = imgEl ? imgEl.getAttribute("src") : null;
+      
+      products.push({
+        name,
+        price,
+        image_url,
+        description: null,
+        original_price: null,
+        offer_details: "Johanneberg erbjudande",
+        store: storeName
+      });
+    } catch (e) {
+      console.error("Error extracting fallback product:", e);
+    }
+  }
+  
+  console.log(`Extracted ${products.length} products with fallback method`);
+  return products;
 }

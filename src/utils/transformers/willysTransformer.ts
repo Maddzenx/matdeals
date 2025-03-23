@@ -47,10 +47,10 @@ export const transformWillysProducts = (willysData: any[]): Product[] => {
       
       console.log(`Processing Willys item: ${item.name} (${productId}), category: ${category}, store: ${store}`);
       
-      // Check if the image URL is from ICA's domain and replace it with Willys default
-      let imageUrl = item.image_url || 'https://www.willys.se/content/dam/placeholder-200x200.png';
+      // Check if the image URL is valid
+      let imageUrl = item.image_url || 'https://assets.icanet.se/e_sharpen:100,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_226367/cf_259/morotter_i_knippe.jpg';
       if (imageUrl.includes('icanet.se') || imageUrl.includes('assets.icanet')) {
-        imageUrl = 'https://www.willys.se/content/dam/placeholder-200x200.png';
+        imageUrl = 'https://assets.icanet.se/e_sharpen:100,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_226367/cf_259/morotter_i_knippe.jpg';
       }
       
       return {
