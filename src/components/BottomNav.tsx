@@ -23,17 +23,17 @@ export const BottomNav: React.FC<BottomNavProps> = ({ items, onSelect }) => {
   const getIcon = (iconName: string) => {
     switch (iconName) {
       case "shopping-cart":
-        return <ShoppingCart size={22} />; // Increased from 18
+        return <ShoppingCart size={22} />; 
       case "search":
-        return <Search size={22} />; // Increased from 18
+        return <Search size={22} />; 
       case "book":
-        return <BookOpen size={22} />; // Increased from 18
+        return <BookOpen size={22} />; 
       case "discount":
-        return <Percent size={22} />; // Increased from 18
+        return <Percent size={22} />; 
       case "user":
-        return <User size={22} />; // Increased from 18
+        return <User size={22} />; 
       case "calendar":
-        return <Calendar size={22} />; // Increased from 18
+        return <Calendar size={22} />; 
       default:
         return <div className="w-5.5 h-5.5" />;
     }
@@ -75,7 +75,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({ items, onSelect }) => {
           aria-label={item.label}
         >
           {item.badge !== undefined && (
-            <div className="absolute flex items-center justify-center text-white w-5 h-5 text-[9px] font-bold bg-[#DB2C17] rounded-full -right-0.5 top-0">
+            <div className={`absolute flex items-center justify-center text-white 
+              ${item.badge > 9 ? 'min-w-7 h-7 text-xs px-1' : 'w-6 h-6 text-xs'} 
+              font-bold bg-[#DB2C17] rounded-full -right-1 -top-1 
+              shadow-sm transition-all duration-300 animate-scale-in`}>
               {item.badge}
             </div>
           )}
