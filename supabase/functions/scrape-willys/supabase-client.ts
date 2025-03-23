@@ -40,7 +40,7 @@ export async function storeProducts(products: any[]): Promise<number> {
     // Validate and prepare products for storage
     const validProducts = products.map(product => {
       // Get the store name from the product or use the default
-      const storeName = product.store_name || 'willys';
+      const storeName = product.store_name || 'willys johanneberg';
       
       // Create a new product object with only the fields needed for the table
       return {
