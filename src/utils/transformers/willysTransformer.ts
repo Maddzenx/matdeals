@@ -38,17 +38,11 @@ export const transformWillysProducts = (willysData: any[]): Product[] => {
       const productId = `willys-${item.name.replace(/\s+/g, '-').toLowerCase()}-${Math.random().toString(36).substring(2, 9)}`;
       
       // Make sure we use the store field from the database if available
-      let store = 'willys';
+      let store = 'willys johanneberg'; // Default to willys johanneberg
       
       // Check if we have a store specific name
       if (item.store && typeof item.store === 'string') {
-        const storeLower = item.store.toLowerCase();
-        // Format the store name nicely
-        if (storeLower.includes('johanneberg')) {
-          store = 'willys johanneberg';
-        } else {
-          store = storeLower;
-        }
+        store = item.store.toLowerCase();
       }
       
       console.log(`Processing Willys item: ${item.name} (${productId}), category: ${category}, store: ${store}`);

@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolean; error?: any }>) => {
   const [scraping, setScraping] = useState(false);
@@ -9,7 +10,13 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
     try {
       setScraping(true);
       
-      console.log("Starting Willys scraping process");
+      if (showNotification) {
+        toast.info("Startar datainsamling från Willys Johanneberg...", {
+          description: "Detta kan ta upp till 2 minuter"
+        });
+      }
+      
+      console.log("Starting Willys Johanneberg scraping process");
       
       // Set up a timeout for the request (120 seconds to allow more time)
       const timeoutPromise = new Promise((_, reject) => {
@@ -34,7 +41,7 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
         throw error;
       }
       
-      console.log("Scraping results from Willys:", data);
+      console.log("Scraping results from Willys Johanneberg:", data);
       
       if (!data.success) {
         throw new Error(data.error || "Unknown error in scraping function");
@@ -50,11 +57,23 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
       }
       
       const productsCount = data.products?.length || 0;
-      console.log(`Updated ${productsCount} products from Willys`);
+      console.log(`Updated ${productsCount} products from Willys Johanneberg`);
+      
+      if (showNotification) {
+        toast.success("Datainsamling från Willys Johanneberg klar", {
+          description: `Uppdaterade ${productsCount} produkter.`
+        });
+      }
       
       return data;
     } catch (err: any) {
-      console.error("Error scraping Willys:", err);
+      console.error("Error scraping Willys Johanneberg:", err);
+      
+      if (showNotification) {
+        toast.error("Kunde inte hämta data från Willys Johanneberg", {
+          description: err.message || "Okänt fel"
+        });
+      }
       
       // Check if we need to refresh products even after error
       // (in cases where the edge function returned fallback products)

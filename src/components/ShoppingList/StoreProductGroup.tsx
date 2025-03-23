@@ -22,14 +22,17 @@ export const StoreProductGroup: React.FC<StoreProductGroupProps> = ({
 }) => {
   // Format store names consistently
   const formatStoreName = (name: string) => {
-    switch (name.toLowerCase()) {
-      case "ica":
-        return "ICA";
-      case "willys":
-        return "Willys";
-      default:
-        return name.charAt(0).toUpperCase() + name.slice(1);
-    }
+    const lowerName = name.toLowerCase();
+    
+    if (lowerName === "ica") return "ICA";
+    if (lowerName === "willys") return "Willys";
+    if (lowerName === "willys johanneberg") return "Willys Johanneberg";
+    if (lowerName === "hemkop") return "Hemköp";
+    
+    // Default formatting
+    return name.split(' ').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
   };
 
   return (

@@ -44,11 +44,19 @@ export const ListProductCard: React.FC<ListProductCardProps> = ({
     onClick();
   };
 
-  // Function to properly capitalize store names
+  // Function to properly format store names
   const formatStoreName = (storeName: string): string => {
-    if (storeName.toLowerCase() === "ica") return "ICA";
-    if (storeName.toLowerCase() === "willys") return "Willys";
-    return storeName.charAt(0).toUpperCase() + storeName.slice(1).toLowerCase();
+    const lowerName = storeName.toLowerCase();
+    
+    if (lowerName === "ica") return "ICA";
+    if (lowerName === "willys") return "Willys";
+    if (lowerName === "willys johanneberg") return "Willys Johanneberg";
+    if (lowerName === "hemkop") return "Hemköp";
+    
+    // Default formatting for other store names
+    return storeName.split(' ').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
   };
 
   return (
