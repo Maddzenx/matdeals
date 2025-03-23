@@ -1,9 +1,9 @@
 
-// Willys URLs to try for scraping - prioritizing Hornsberg store
+// Willys URLs to try for scraping - prioritizing Johanneberg store
 export const WILLYS_URLS = [
-  'https://www.willys.se/butik/willys-hornsberg-stockholm',  // Specific Hornsberg store page
-  'https://www.willys.se/butiker/willys-hornsberg',          // Alternative Hornsberg URL
-  'https://www.willys.se/erbjudanden/veckans-erbjudanden/hornsberg', // Hornsberg weekly offers
+  'https://www.willys.se/erbjudanden/butik/willys-johanneberg',  // Primary target: Johanneberg store offers page
+  'https://www.willys.se/butik/willys-johanneberg-goteborg',     // Specific Johanneberg store page
+  'https://www.willys.se/erbjudanden/butik',                     // Fallback to general store offers
   'https://www.willys.se/erbjudanden/veckans-erbjudanden',
   'https://www.willys.se/erbjudanden',
   'https://www.willys.se/sok?q=erbjudande',
@@ -19,3 +19,4 @@ export const USER_AGENTS = [
 ];
 
 export const BASE_URL = "https://www.willys.se";
+export const STORE_NAME = "Willys Johanneberg"; // Add store name for labeling products

@@ -6,10 +6,10 @@ export interface ExtractorResult {
   description: string | null;
   image_url: string;
   offer_details: string;
+  store_name?: string;
 }
 
-// Updated to use Willys domain for default image
-export const DEFAULT_IMAGE_URL = 'https://www.willys.se/content/dam/placeholder-200x200.png';
+export const DEFAULT_IMAGE_URL = 'https://assets.icanet.se/t_product_large_v1,f_auto/7300156501245.jpg';
 
 export function normalizeImageUrl(imageUrl: string | null, baseUrl: string): string {
   if (!imageUrl) {
@@ -17,10 +17,6 @@ export function normalizeImageUrl(imageUrl: string | null, baseUrl: string): str
   }
   
   if (imageUrl.startsWith('http')) {
-    // If it's already a full URL but contains ICA domain, replace with default Willys image
-    if (imageUrl.includes('icanet.se') || imageUrl.includes('assets.icanet')) {
-      return DEFAULT_IMAGE_URL;
-    }
     return imageUrl;
   } else if (imageUrl.startsWith('//')) {
     return 'https:' + imageUrl;
