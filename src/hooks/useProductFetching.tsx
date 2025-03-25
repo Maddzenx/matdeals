@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/data/types";
@@ -133,6 +134,7 @@ export const useProductFetching = () => {
       
       console.log("Starting refreshProducts function...");
       
+      // Execute all fetch operations in parallel for better performance
       const [icaData, willysData, hemkopData, willysJohannebergData] = await Promise.all([
         fetchIcaProducts(showNotifications).catch(err => {
           console.error("Error fetching ICA products during refresh:", err);
@@ -176,4 +178,3 @@ export const useProductFetching = () => {
     setError
   };
 };
-

@@ -46,26 +46,29 @@ export const useProductRefresh = (refetch: () => Promise<{ success: boolean; err
       // First, try to just fetch the data from Supabase without scraping
       console.log("Attempting to fetch existing data from Supabase");
       const result = await refetch();
+      console.log("Fetch result:", result);
       
       // Only scrape if explicitly requested or if there's no data
-      if (showNotification || !result.success) {
+      if (showNotification) {
         console.log("Scraping new data from store websites");
         
-        // Prioritize Willys scraping since that's where the issue is
-        await handleScrapeWillys(false).catch(err => {
+        // Prioritize Willys scraping 
+        await handleScrapeWillys(true).catch(err => {
           console.error("Error scraping Willys:", err);
         });
         
-        await handleScrapeIca(false).catch(err => {
+        await handleScrapeIca(true).catch(err => {
           console.error("Error scraping ICA:", err);
         });
   
-        await handleScrapeHemkop(false).catch(err => {
+        await handleScrapeHemkop(true).catch(err => {
           console.error("Error scraping Hemköp:", err);
         });
         
-        // Refetch after scraping
+        // Refetch after scraping to get the latest data
+        console.log("Refetching after scraping to get the latest data");
         const refreshResult = await refetch();
+        console.log("Refetch after scraping result:", refreshResult);
         
         if (refreshResult.success) {
           if (showNotification) {

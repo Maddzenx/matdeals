@@ -25,13 +25,37 @@ export const transformWillysJohannebergProducts = (willysJohannebergData: any[])
       if (typeof item.Price === 'number') {
         price = item.Price;
       } else if (typeof item.Price === 'string') {
-        price = parseInt(item.Price, 10);
+        // Try to parse as integer first
+        let parsedPrice = parseInt(item.Price, 10);
+        if (isNaN(parsedPrice)) {
+          // If failed, try to extract number from string (e.g., "29:90 kr/st")
+          const match = item.Price.match(/(\d+)[,.:]?(\d+)?/);
+          if (match) {
+            if (match[2]) {
+              // If we have decimals like "29:90", convert to "29.90" and parse
+              parsedPrice = parseFloat(`${match[1]}.${match[2]}`);
+            } else {
+              // Just the integer part
+              parsedPrice = parseInt(match[1], 10);
+            }
+          }
+        }
+        price = parsedPrice;
       }
       
       // Format the price string for display
       let formattedPrice = 'N/A';
       if (price !== null && !isNaN(price)) {
-        formattedPrice = `${price}:- kr`;
+        // Format as "XX:YY kr", Swedish format
+        if (Number.isInteger(price)) {
+          formattedPrice = `${price}:- kr`;
+        } else {
+          const [whole, decimal] = price.toFixed(2).split('.');
+          formattedPrice = `${whole}:${decimal} kr`;
+        }
+      } else if (item.Price && typeof item.Price === 'string') {
+        // If we couldn't parse it, use the original string if available
+        formattedPrice = item.Price;
       }
       
       // Original price is not available in this dataset, use unit price if available
@@ -43,14 +67,14 @@ export const transformWillysJohannebergProducts = (willysJohannebergData: any[])
       // Determine product category based on name
       const category = determineProductCategory(item["Product Name"], item["Brand and Weight"] || '');
       
-      // Create a stable ID based on name but with a random suffix to avoid collisions
-      const randomSuffix = Math.random().toString(36).substring(2, 9);
-      const productId = `willys-johanneberg-${item["Product Name"].replace(/\s+/g, '-').toLowerCase()}-${randomSuffix}`;
+      // Create a stable ID based on name and a unique identifier
+      const sanitizedName = item["Product Name"].replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+      const productId = `willys-johanneberg-${sanitizedName}-${Date.now().toString(36)}`;
       
       // Always standardize store name to lowercase 'willys' for filtering consistency
       const store = 'willys';
       
-      console.log(`Processing Willys Johanneberg item: ${item["Product Name"]} (${productId}), category: ${category}, store: ${store}, price: ${price}`);
+      console.log(`Processing Willys Johanneberg item: ${item["Product Name"]} (${productId}), category: ${category}, store: ${store}, price: ${formattedPrice}`);
       
       // Check if the image URL is valid and use a fallback image
       let imageUrl = item["Product Image"] || 'https://cdn.pixabay.com/photo/2020/10/05/19/55/grocery-5630804_1280.jpg';
