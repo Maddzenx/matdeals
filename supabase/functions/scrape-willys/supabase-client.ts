@@ -1,4 +1,3 @@
-
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.7";
 import { ExtractorResult } from "./extractors/base-extractor.ts";
 
@@ -22,27 +21,52 @@ export async function storeProducts(products: ExtractorResult[]): Promise<number
     return 0;
   }
   
-  console.log(`Preparing to store ${products.length} products in Supabase`);
+  console.log(`Preparing to store ${products.length} products in Supabase (Willys Johanneberg table)`);
   
   try {
-    // Validate products before inserting
+    // First, clear existing products to avoid duplication
+    console.log("Clearing existing products from Willys Johanneberg table");
+    
+    // Clear existing products but keep system rows if any
+    const { error: deleteError } = await supabase
+      .from('Willys Johanneberg')
+      .delete()
+      .gt('Position', 0); // Assuming Position > 0 for all regular products
+    
+    if (deleteError) {
+      console.error("Error clearing existing products:", deleteError);
+      console.error("Error details:", JSON.stringify(deleteError));
+      // Continue anyway to insert new products
+    } else {
+      console.log("Successfully cleared existing products");
+    }
+    
+    // Prepare the data for Willys Johanneberg table format
     const validProducts = products.filter(product => {
-      if (!product.name) {
+      // Basic validation
+      if (!product["Product Name"] && !product.name) {
         console.warn("Product missing name:", product);
         return false;
       }
       
       return true;
-    }).map(product => {
-      // Ensure all required fields are present and properly formatted
+    }).map((product, index) => {
+      // Map to Willys Johanneberg table schema
       return {
-        name: product.name,
-        price: typeof product.price === 'number' ? product.price : parseInt(String(product.price)) || 0,
-        description: product.description || null,
-        image_url: product.image_url || null,
-        offer_details: product.offer_details || null,
-        store: (product.store || 'willys').toLowerCase(),
-        // Add any additional fields your database expects
+        "Product Name": product["Product Name"] || product.name,
+        "Brand and Weight": product["Brand and Weight"] || product.description || null,
+        "Price": typeof product.price === 'number' ? product.price : 
+                (typeof product.Price === 'number' ? product.Price : 
+                (parseInt(String(product.price || product.Price)) || 0)),
+        "Product Image": product["Product Image"] || product.image_url || null,
+        "Product Link": product["Product Link"] || null,
+        "Label 1": product["Label 1"] || "Veckans erbjudande",
+        "Label 2": product["Label 2"] || null,
+        "Label 3": product["Label 3"] || null,
+        "Savings": product["Savings"] || null,
+        "Unit Price": product["Unit Price"] || null,
+        "Purchase Limit": product["Purchase Limit"] || null,
+        "Position": product["Position"] || (index + 1)
       };
     });
     
@@ -50,24 +74,11 @@ export async function storeProducts(products: ExtractorResult[]): Promise<number
       console.log(`Filtered out ${products.length - validProducts.length} invalid products`);
     }
     
-    console.log(`Storing ${validProducts.length} valid products in Supabase`);
-    
-    // First, clear existing products to avoid duplication
-    // This edge function will be called periodically to refresh the data
-    const { error: deleteError } = await supabase
-      .from('Willys')
-      .delete()
-      .neq('name', 'DO_NOT_DELETE_THIS_ROW');
-    
-    if (deleteError) {
-      console.error("Error clearing existing products:", deleteError);
-      // Continue anyway to insert new products
-    } else {
-      console.log("Successfully cleared existing products");
-    }
+    console.log(`Storing ${validProducts.length} valid products in Supabase Willys Johanneberg table`);
+    console.log("First product example:", JSON.stringify(validProducts[0]));
     
     // Insert in batches to avoid exceeding request sizes
-    const batchSize = 50;
+    const batchSize = 20;
     let insertedCount = 0;
     
     for (let i = 0; i < validProducts.length; i += batchSize) {
@@ -75,23 +86,24 @@ export async function storeProducts(products: ExtractorResult[]): Promise<number
       console.log(`Inserting batch ${Math.floor(i / batchSize) + 1} with ${batch.length} products`);
       
       const { data, error } = await supabase
-        .from('Willys')
+        .from('Willys Johanneberg')
         .insert(batch)
-        .select('id');
+        .select('Position');
       
       if (error) {
         console.error(`Error inserting batch ${Math.floor(i / batchSize) + 1}:`, error);
+        console.error("Error details:", JSON.stringify(error));
         
         // Try inserting one by one to identify problematic records
         for (const product of batch) {
           const { error: singleError } = await supabase
-            .from('Willys')
+            .from('Willys Johanneberg')
             .insert(product);
           
           if (!singleError) {
             insertedCount++;
           } else {
-            console.error(`Error inserting product '${product.name}':`, singleError);
+            console.error(`Error inserting product '${product["Product Name"]}':`, singleError);
             console.error("Problematic product:", product);
           }
         }
@@ -105,6 +117,7 @@ export async function storeProducts(products: ExtractorResult[]): Promise<number
     return insertedCount;
   } catch (error) {
     console.error("Error storing products:", error);
+    console.error("Error details:", JSON.stringify(error));
     return 0;
   }
 }

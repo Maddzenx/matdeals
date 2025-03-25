@@ -28,7 +28,7 @@ export const transformWillysJohannebergProducts = (willysJohannebergData: any[])
       if (typeof item.Price === 'number') {
         price = item.Price;
       } else if (typeof item.Price === 'string') {
-        // Try to parse as integer first
+        // Try to parse as float
         const priceStr = String(item.Price).replace(/[^\d,.]/g, '').replace(',', '.');
         price = parseFloat(priceStr);
       }

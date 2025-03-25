@@ -9,72 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      hemkop: {
-        Row: {
-          comparison_price: string | null
-          created_at: string
-          description: string | null
-          id: number
-          image_url: string | null
-          name: string
-          offer_details: string | null
-          original_price: number | null
-          price: number | null
-          quantity_info: string | null
-          store: string | null
-        }
-        Insert: {
-          comparison_price?: string | null
-          created_at?: string
-          description?: string | null
-          id?: number
-          image_url?: string | null
-          name: string
-          offer_details?: string | null
-          original_price?: number | null
-          price?: number | null
-          quantity_info?: string | null
-          store?: string | null
-        }
-        Update: {
-          comparison_price?: string | null
-          created_at?: string
-          description?: string | null
-          id?: number
-          image_url?: string | null
-          name?: string
-          offer_details?: string | null
-          original_price?: number | null
-          price?: number | null
-          quantity_info?: string | null
-          store?: string | null
-        }
-        Relationships: []
-      }
-      ICA: {
-        Row: {
-          created_at: string
-          description: string | null
-          image_url: string | null
-          name: string
-          price: number | null
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          image_url?: string | null
-          name: string
-          price?: number | null
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          image_url?: string | null
-          name?: string
-          price?: number | null
-        }
-        Relationships: []
-      }
       recipes: {
         Row: {
           category: string | null
@@ -126,48 +60,6 @@ export type Database = {
           tags?: string[] | null
           time_minutes?: number | null
           title?: string
-        }
-        Relationships: []
-      }
-      Willys: {
-        Row: {
-          comparison_price: string | null
-          created_at: string
-          description: string | null
-          id: number
-          image_url: string | null
-          name: string
-          offer_details: string | null
-          original_price: number | null
-          price: number | null
-          quantity_info: string | null
-          store: string | null
-        }
-        Insert: {
-          comparison_price?: string | null
-          created_at?: string
-          description?: string | null
-          id?: number
-          image_url?: string | null
-          name: string
-          offer_details?: string | null
-          original_price?: number | null
-          price?: number | null
-          quantity_info?: string | null
-          store?: string | null
-        }
-        Update: {
-          comparison_price?: string | null
-          created_at?: string
-          description?: string | null
-          id?: number
-          image_url?: string | null
-          name?: string
-          offer_details?: string | null
-          original_price?: number | null
-          price?: number | null
-          quantity_info?: string | null
-          store?: string | null
         }
         Relationships: []
       }

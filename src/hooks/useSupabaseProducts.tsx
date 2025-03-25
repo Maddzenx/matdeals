@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Product } from "@/data/types";
 import { useProductFetching } from "@/hooks/useProductFetching";
-import { transformIcaProducts, transformWillysProducts, transformHemkopProducts, transformWillysJohannebergProducts } from "@/utils/transformers";
+import { transformWillysJohannebergProducts } from "@/utils/transformers";
 import { toast } from "sonner";
 
 export const useSupabaseProducts = () => {
@@ -18,15 +18,11 @@ export const useSupabaseProducts = () => {
         const result = await refreshProducts(false);
         console.log("Product refresh result:", result);
         
-        // Log the raw data for debugging
-        console.log("Raw ICA data:", result.icaData?.length || 0, "items");
-        console.log("Raw Willys data:", result.willysData?.length || 0, "items");
-        console.log("Raw Hemköp data:", result.hemkopData?.length || 0, "items");
+        // Log the raw data for debugging, focusing on Willys Johanneberg
         console.log("Raw Willys Johanneberg data:", result.willysJohannebergData?.length || 0, "items");
         
-        if (!result.icaData?.length && !result.willysData?.length && 
-            !result.hemkopData?.length && !result.willysJohannebergData?.length) {
-          console.warn("No product data found in any table");
+        if (!result.willysJohannebergData?.length) {
+          console.warn("No Willys Johanneberg data found in database");
         }
         
         return result;
@@ -47,35 +43,19 @@ export const useSupabaseProducts = () => {
       try {
         console.log("Transforming data from query cache");
         
-        // Transform ICA products
-        const icaProducts = transformIcaProducts(data.icaData || []);
-        console.log(`Transformed ICA products: ${icaProducts.length}`);
-        
-        // Transform Willys products
-        const willysProducts = transformWillysProducts(data.willysData || []);
-        console.log(`Transformed Willys products: ${willysProducts.length}`);
-        
-        // Transform Hemköp products
-        const hemkopProducts = transformHemkopProducts(data.hemkopData || []);
-        console.log(`Transformed Hemköp products: ${hemkopProducts.length}`);
-        
-        // Transform Willys Johanneberg products
+        // Focus only on transforming Willys Johanneberg products
         const willysJohannebergProducts = transformWillysJohannebergProducts(data.willysJohannebergData || []);
         console.log(`Transformed Willys Johanneberg products: ${willysJohannebergProducts.length}`);
         
-        // Combine all products
-        const allProducts = [...icaProducts, ...willysProducts, ...hemkopProducts, ...willysJohannebergProducts];
-        console.log(`Total products after combining: ${allProducts.length}`);
-        
-        // Validate products for debugging
-        if (allProducts.length === 0) {
+        // Log sample products for debugging
+        if (willysJohannebergProducts.length === 0) {
           console.warn("No products after transformation");
         } else {
           // Log sample products for debugging
-          console.log("Sample transformed products:", allProducts.slice(0, 3));
+          console.log("Sample transformed products:", willysJohannebergProducts.slice(0, 3));
         }
         
-        setProducts(allProducts);
+        setProducts(willysJohannebergProducts);
       } catch (transformError) {
         console.error("Error transforming products:", transformError);
         toast.error("Kunde inte transformera produktdata", {
@@ -113,11 +93,7 @@ export const useSupabaseProducts = () => {
         
         // Additional check to see if we got any products
         if (result.data) {
-          const totalRawProducts = 
-            (result.data.icaData?.length || 0) + 
-            (result.data.willysData?.length || 0) + 
-            (result.data.hemkopData?.length || 0) + 
-            (result.data.willysJohannebergData?.length || 0);
+          const totalRawProducts = result.data.willysJohannebergData?.length || 0;
             
           console.log(`Total raw products after refetch: ${totalRawProducts}`);
           

@@ -19,6 +19,17 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
       
       console.log("Starting Willys scraping process");
       
+      // Check if we have any data in the Willys Johanneberg table first
+      const { data: existingData, error: checkError } = await supabase
+        .from('Willys Johanneberg')
+        .select('count(*)');
+        
+      if (checkError) {
+        console.error("Error checking existing Willys Johanneberg data:", checkError);
+      } else {
+        console.log("Current Willys Johanneberg data count:", existingData);
+      }
+      
       // Set up a timeout for the request (120 seconds to allow more time)
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('Request took too long (120 seconds)')), 120000);
@@ -26,7 +37,11 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
       
       // Create the invocation promise with forceRefresh flag
       const invocationPromise = supabase.functions.invoke('scrape-willys', {
-        body: { forceRefresh: true, source: "manual-refresh" }
+        body: { 
+          forceRefresh: true, 
+          source: "manual-refresh",
+          target: "willys-johanneberg" // Explicitly target Willys Johanneberg
+        }
       });
       
       // Race between timeout and invocation
@@ -69,6 +84,17 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
       if (!refreshResult.success) {
         console.error("Refresh error:", refreshResult.error);
         throw new Error("Could not update products after scraping");
+      }
+      
+      // After refreshing, check if we got data
+      const { data: afterData, error: afterError } = await supabase
+        .from('Willys Johanneberg')
+        .select('count(*)');
+        
+      if (afterError) {
+        console.error("Error checking after-refresh data:", afterError);
+      } else {
+        console.log("After refresh Willys Johanneberg data count:", afterData);
       }
       
       if (showNotification && productsCount > 0) {
