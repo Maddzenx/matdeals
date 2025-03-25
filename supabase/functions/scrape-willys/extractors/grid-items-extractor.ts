@@ -1,6 +1,7 @@
 
 // Extractor for product grid items
 import { ExtractorResult, normalizeImageUrl, extractPrice } from "./base-extractor.ts";
+import { extractName } from "./name-extractor.ts";
 
 export function extractGridItems(document: Document, baseUrl: string, storeName?: string): ExtractorResult[] {
   console.log("Looking for product grid items in the HTML");
@@ -60,27 +61,29 @@ export function extractGridItems(document: Document, baseUrl: string, storeName?
       // Process each grid item
       for (const item of gridItems) {
         try {
-          // Extract product details (similar logic to weekly offers)
+          // Try to extract name using our name extractor first
+          let name = extractName(item);
           
-          // 1. Name
-          let name = '';
-          const nameElements = item.querySelectorAll('h1, h2, h3, h4, h5, [class*="title"], [class*="name"], b, strong');
-          
-          for (const el of nameElements) {
-            const text = el.textContent?.trim();
-            if (text && text.length > 2 && text.length < 100) {
-              name = text;
-              break;
-            }
-          }
-          
+          // If name extractor failed, try alternative methods
           if (!name) {
-            const textElements = item.querySelectorAll('p, div, span');
-            for (const el of textElements) {
+            const nameElements = item.querySelectorAll('h1, h2, h3, h4, h5, [class*="title"], [class*="name"], b, strong');
+            
+            for (const el of nameElements) {
               const text = el.textContent?.trim();
-              if (text && text.length > 2 && text.length < 50 && !text.includes('kr/') && !text.match(/^\d+[\s:,.]?\d*(\s*kr)?$/)) {
+              if (text && text.length > 2 && text.length < 100) {
                 name = text;
                 break;
+              }
+            }
+            
+            if (!name) {
+              const textElements = item.querySelectorAll('p, div, span');
+              for (const el of textElements) {
+                const text = el.textContent?.trim();
+                if (text && text.length > 2 && text.length < 50 && !text.includes('kr/') && !text.match(/^\d+[\s:,.]?\d*(\s*kr)?$/)) {
+                  name = text;
+                  break;
+                }
               }
             }
           }
@@ -160,7 +163,7 @@ export function extractGridItems(document: Document, baseUrl: string, storeName?
           }
           
           if (!offerDetails) {
-            offerDetails = storeName ? `${storeName} erbjudande` : 'Veckans erbjudande';
+            offerDetails = 'Veckans erbjudande';
           }
           
           // Add product to list
@@ -171,7 +174,7 @@ export function extractGridItems(document: Document, baseUrl: string, storeName?
               description: description || null,
               image_url: imageUrl || 'https://assets.icanet.se/t_product_large_v1,f_auto/7300156501245.jpg',
               offer_details: offerDetails,
-              store_name: storeNameFormatted
+              store: storeNameFormatted
             });
             
             console.log(`Added grid item: ${name}, price: ${price}`);
