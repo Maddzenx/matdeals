@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Product } from "@/data/types";
 import { useProductFetching } from "@/hooks/useProductFetching";
-import { transformIcaProducts, transformWillysProducts, transformHemkopProducts } from "@/utils/transformers";
+import { transformIcaProducts, transformWillysProducts, transformHemkopProducts, transformWillysJohannebergProducts } from "@/utils/transformers";
 import { toast } from "sonner";
 
 export const useSupabaseProducts = () => {
@@ -36,11 +36,12 @@ export const useSupabaseProducts = () => {
         const icaProducts = transformIcaProducts(data.icaData || []);
         const willysProducts = transformWillysProducts(data.willysData || []);
         const hemkopProducts = transformHemkopProducts(data.hemkopData || []);
+        const willysJohannebergProducts = transformWillysJohannebergProducts(data.willysJohannebergData || []);
         
-        console.log(`Transformed products: ICA (${icaProducts.length}), Willys (${willysProducts.length}), Hemköp (${hemkopProducts.length})`);
+        console.log(`Transformed products: ICA (${icaProducts.length}), Willys (${willysProducts.length}), Hemköp (${hemkopProducts.length}), Willys Johanneberg (${willysJohannebergProducts.length})`);
         
         // Combine all products
-        const allProducts = [...icaProducts, ...willysProducts, ...hemkopProducts];
+        const allProducts = [...icaProducts, ...willysProducts, ...hemkopProducts, ...willysJohannebergProducts];
         setProducts(allProducts);
       } catch (transformError) {
         console.error("Error transforming products:", transformError);

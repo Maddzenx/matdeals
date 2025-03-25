@@ -171,6 +171,51 @@ export type Database = {
         }
         Relationships: []
       }
+      "Willys Johanneberg": {
+        Row: {
+          "Brand and Weight": string | null
+          "Label 1": string | null
+          "Label 2": string | null
+          "Label 3": string | null
+          Position: number
+          Price: number | null
+          "Product Image": string | null
+          "Product Link": string | null
+          "Product Name": string
+          "Purchase Limit": string | null
+          Savings: string | null
+          "Unit Price": string | null
+        }
+        Insert: {
+          "Brand and Weight"?: string | null
+          "Label 1"?: string | null
+          "Label 2"?: string | null
+          "Label 3"?: string | null
+          Position: number
+          Price?: number | null
+          "Product Image"?: string | null
+          "Product Link"?: string | null
+          "Product Name": string
+          "Purchase Limit"?: string | null
+          Savings?: string | null
+          "Unit Price"?: string | null
+        }
+        Update: {
+          "Brand and Weight"?: string | null
+          "Label 1"?: string | null
+          "Label 2"?: string | null
+          "Label 3"?: string | null
+          Position?: number
+          Price?: number | null
+          "Product Image"?: string | null
+          "Product Link"?: string | null
+          "Product Name"?: string
+          "Purchase Limit"?: string | null
+          Savings?: string | null
+          "Unit Price"?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
