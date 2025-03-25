@@ -23,7 +23,7 @@ export async function storeProducts(products: any[]): Promise<number> {
   try {
     console.log(`Preparing to store ${products.length} products in Willys table`);
     
-    // First, clear existing records
+    // First, clear existing records - this is important to avoid duplicates
     console.log("Clearing existing Willys products");
     const { error: deleteError } = await supabase
       .from('Willys')
@@ -32,10 +32,14 @@ export async function storeProducts(products: any[]): Promise<number> {
       
     if (deleteError) {
       console.error("Error clearing existing Willys products:", deleteError);
+      console.error("Error details:", JSON.stringify(deleteError));
       // Continue anyway to try inserting new products
     } else {
       console.log("Successfully cleared existing Willys products");
     }
+    
+    // Log the products we're about to insert
+    console.log("First product to insert:", JSON.stringify(products[0], null, 2));
     
     // Validate and prepare products for storage - STANDARDIZE store name to 'willys'
     const validProducts = products.map(product => {
@@ -45,7 +49,9 @@ export async function storeProducts(products: any[]): Promise<number> {
         name: product.name || 'Unnamed Product',
         description: product.description || '',
         price: typeof product.price === 'number' ? product.price : 
-               typeof product.price === 'string' ? parseInt(product.price) || 0 : 0,
+               typeof product.price === 'string' ? parseFloat(product.price) || 0 : 0,
+        original_price: typeof product.original_price === 'number' ? product.original_price : 
+                         typeof product.original_price === 'string' ? parseFloat(product.original_price) || null : null,
         image_url: product.image_url || 'https://assets.icanet.se/t_product_large_v1,f_auto/7300156501245.jpg',
         offer_details: product.offer_details || 'Veckans erbjudande',
         store: 'willys' // ALWAYS lowercase 'willys' for consistency
@@ -54,16 +60,16 @@ export async function storeProducts(products: any[]): Promise<number> {
     
     console.log(`Prepared ${validProducts.length} valid products to store`);
     if (validProducts.length > 0) {
-      console.log("First valid product:", JSON.stringify(validProducts[0], null, 2));
+      console.log("Sample valid product:", JSON.stringify(validProducts[0], null, 2));
     }
     
     // Insert products in smaller batches to avoid hitting statement size limits
-    const batchSize = 10; // Using a smaller batch size to avoid potential issues
+    const batchSize = 5; // Using a smaller batch size to avoid potential issues
     let insertedCount = 0;
     
     for (let i = 0; i < validProducts.length; i += batchSize) {
       const batch = validProducts.slice(i, Math.min(i + batchSize, validProducts.length));
-      console.log(`Inserting batch ${i/batchSize + 1} of ${Math.ceil(validProducts.length/batchSize)}`);
+      console.log(`Inserting batch ${i/batchSize + 1} of ${Math.ceil(validProducts.length/batchSize)} with ${batch.length} products`);
       
       const { data, error } = await supabase
         .from('Willys')
@@ -86,6 +92,7 @@ export async function storeProducts(products: any[]): Promise<number> {
     return insertedCount;
   } catch (error) {
     console.error("Error in storeProducts:", error);
+    console.error("Error details:", JSON.stringify(error));
     
     // As a last resort, try to insert some sample products
     try {
@@ -112,6 +119,7 @@ export async function storeProducts(products: any[]): Promise<number> {
         }
       }
       
+      console.log(`Inserted ${insertedCount} fallback products after error`);
       return insertedCount;
     } catch (fallbackError) {
       console.error("Even fallback product insertion failed:", fallbackError);

@@ -2,7 +2,7 @@
 /**
  * Extracts product price from a card element
  */
-export function extractProductPrice(card: Element): { price: number | null; originalPrice: number | null } {
+export function extractPrice(card: Element): number | null {
   // Try various selectors for prices
   const priceSelectors = [
     '.price', 
@@ -33,6 +33,13 @@ export function extractProductPrice(card: Element): { price: number | null; orig
     }
   }
   
+  return price;
+}
+
+/**
+ * Extracts original price from a card element
+ */
+export function extractOriginalPrice(card: Element): number | null {
   // Look for original price
   const originalPriceSelectors = [
     '.original-price',
@@ -62,5 +69,5 @@ export function extractProductPrice(card: Element): { price: number | null; orig
     }
   }
   
-  return { price, originalPrice };
+  return originalPrice;
 }

@@ -1,46 +1,52 @@
 
-// Base extractor with common utilities and shared functionality
+// Base types and utilities for extractors
+
 export interface ExtractorResult {
   name: string;
   price: number | null;
   description: string | null;
   image_url: string;
   offer_details: string;
+  original_price?: number | null;
   store_name?: string;
 }
 
-export const DEFAULT_IMAGE_URL = 'https://assets.icanet.se/t_product_large_v1,f_auto/7300156501245.jpg';
-
-export function normalizeImageUrl(imageUrl: string | null, baseUrl: string): string {
-  if (!imageUrl) {
-    return DEFAULT_IMAGE_URL;
+/**
+ * Normalizes an image URL by handling relative paths
+ */
+export function normalizeImageUrl(url: string, baseUrl: string): string {
+  if (!url) {
+    return 'https://assets.icanet.se/t_product_large_v1,f_auto/7300156501245.jpg';
   }
   
-  if (imageUrl.startsWith('http')) {
-    return imageUrl;
-  } else if (imageUrl.startsWith('//')) {
-    return 'https:' + imageUrl;
+  if (url.startsWith('http')) {
+    return url;
   } else {
-    return `${baseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+    return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
   }
 }
 
-export function extractPrice(priceText: string | null): number | null {
-  if (!priceText) return null;
+/**
+ * Extracts a price from a string
+ */
+export function extractPrice(priceText: string): number | null {
+  if (!priceText) {
+    return null;
+  }
   
-  const priceMatch = priceText.match(/(\d+)[,.:]?(\d*)/);
-  if (!priceMatch) return null;
+  // Handle different price formats (29:90 kr, 29,90 kr, 29.90 kr, 29:-)
+  const priceMatch = priceText.match(/(\d+)[,\.:]*(\d*)/);
   
-  let price = parseInt(priceMatch[1]);
-  
-  // Handle decimal parts if present and convert to öre
-  if (priceMatch[2] && priceMatch[2].length > 0) {
-    const decimal = parseInt(priceMatch[2]);
+  if (priceMatch) {
+    const whole = parseInt(priceMatch[1]);
+    const decimal = priceMatch[2] ? parseInt(priceMatch[2]) : 0;
+    
     if (decimal > 0) {
-      price = price * 100 + decimal;
-      price = price / 100;
+      return parseFloat(`${whole}.${decimal}`);
+    } else {
+      return whole;
     }
   }
   
-  return price;
+  return null;
 }

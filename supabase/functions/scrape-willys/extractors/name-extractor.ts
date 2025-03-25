@@ -2,7 +2,7 @@
 /**
  * Extracts product name from a card element
  */
-export function extractProductName(card: Element): string | null {
+export function extractName(card: Element): string | null {
   // Try various selectors for product name
   const nameSelectors = [
     '.product-name', 
