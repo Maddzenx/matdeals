@@ -1,7 +1,7 @@
 
 import { extractName } from "./name-extractor.ts";
 import { extractProductDescription } from "./description-extractor.ts";
-import { extractImage } from "./image-extractor.ts";
+import { extractProductImageUrl } from "./image-extractor.ts";
 import { extractPrice, extractOriginalPrice } from "./price-extractor.ts";
 import { extractOfferDetails } from "./offer-details-extractor.ts";
 
@@ -44,7 +44,7 @@ export function extractFromWeeklyOffers(document: Document, baseUrl: string): an
         }
         
         const description = extractProductDescription(card);
-        const imageUrl = extractImage(card, baseUrl);
+        const imageUrl = extractProductImageUrl(card, baseUrl);
         const price = extractPrice(card);
         const originalPrice = extractOriginalPrice(card);
         const offerDetails = extractOfferDetails(card);
