@@ -53,7 +53,7 @@ const Index = () => {
         const store = product.store?.toLowerCase() || 'unknown';
         acc[store] = (acc[store] || 0) + 1;
         return acc;
-      }, {});
+      }, {} as Record<string, number>);
       console.log("Products by store:", storeCount);
     }
   }, [activeStores, supabaseProducts]);

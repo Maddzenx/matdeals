@@ -11,12 +11,12 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
       setScraping(true);
       
       if (showNotification) {
-        toast.info("Startar datainsamling från Willys Johanneberg...", {
+        toast.info("Startar datainsamling från Willys...", {
           description: "Detta kan ta upp till 2 minuter"
         });
       }
       
-      console.log("Starting Willys Johanneberg scraping process");
+      console.log("Starting Willys scraping process");
       
       // Set up a timeout for the request (120 seconds to allow more time)
       const timeoutPromise = new Promise((_, reject) => {
@@ -25,7 +25,7 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
       
       // Create the invocation promise with forceRefresh flag
       const invocationPromise = supabase.functions.invoke('scrape-willys', {
-        body: { forceRefresh: true }
+        body: { forceRefresh: true, source: "manual" }
       });
       
       // Race between timeout and invocation
@@ -41,7 +41,7 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
         throw error;
       }
       
-      console.log("Scraping results from Willys Johanneberg:", data);
+      console.log("Scraping results from Willys:", data);
       
       if (!data.success) {
         throw new Error(data.error || "Unknown error in scraping function");
@@ -57,20 +57,20 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
       }
       
       const productsCount = data.products?.length || 0;
-      console.log(`Updated ${productsCount} products from Willys Johanneberg`);
+      console.log(`Updated ${productsCount} products from Willys`);
       
       if (showNotification) {
-        toast.success("Datainsamling från Willys Johanneberg klar", {
+        toast.success("Datainsamling från Willys klar", {
           description: `Uppdaterade ${productsCount} produkter.`
         });
       }
       
       return data;
     } catch (err: any) {
-      console.error("Error scraping Willys Johanneberg:", err);
+      console.error("Error scraping Willys:", err);
       
       if (showNotification) {
-        toast.error("Kunde inte hämta data från Willys Johanneberg", {
+        toast.error("Kunde inte hämta data från Willys", {
           description: err.message || "Okänt fel"
         });
       }

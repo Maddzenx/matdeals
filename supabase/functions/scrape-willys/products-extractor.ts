@@ -1,56 +1,53 @@
 
-// Main product extractor that orchestrates the extraction process
-import { extractWeeklyOffers } from "./extractors/weekly-offers-extractor.ts";
-import { extractGridItems } from "./extractors/grid-items-extractor.ts";
-import { extractGenericProducts } from "./extractors/generic-extractor.ts";
-import { extractFallbackProducts, createSampleProducts } from "./extractors/fallback-extractor.ts";
-import { ExtractorResult } from "./extractors/base-extractor.ts";
+import { STORE_NAME, BASE_URL } from "./config/scraper-config.ts";
+import { extractFromWeeklyOffers } from "./extractors/weekly-offers-extractor.ts";
+import { extractFromGridItems } from "./extractors/grid-items-extractor.ts";
 
-// Function to extract products from the Willys webpage
-export function extractProducts(document: Document, baseUrl: string, storeName?: string): ExtractorResult[] {
-  console.log(`Starting product extraction from Willys webpage${storeName ? ` for ${storeName}` : ''}`);
+/**
+ * Extract products from the Willys web page
+ * This function combines multiple extraction strategies to get the most product data
+ */
+export function extractProducts(document: Document, baseUrl: string, storeName: string): any[] {
+  console.log("Extracting products from Willys webpage");
   
   try {
-    // Try multiple extraction strategies in sequence
-    let products: ExtractorResult[] = [];
+    // Try multiple extraction methods and combine results
+    const products: any[] = [];
     
-    // Strategy 1: Look for offer cards in the weekly offers section
-    products = extractWeeklyOffers(document, baseUrl, storeName);
-    
-    // Strategy 2: Look for product grid items if first strategy yielded no results
-    if (products.length === 0) {
-      products = extractGridItems(document, baseUrl, storeName);
+    // Method 1: Extract from weekly offers section
+    const weeklyOffers = extractFromWeeklyOffers(document, baseUrl);
+    if (weeklyOffers.length > 0) {
+      console.log(`Extracted ${weeklyOffers.length} products from weekly offers section`);
+      products.push(...weeklyOffers);
+    } else {
+      console.log("No products found in weekly offers section");
     }
     
-    // Strategy 3: Generic search for products if previous strategies failed
-    if (products.length === 0) {
-      products = extractGenericProducts(document, baseUrl, storeName);
+    // Method 2: Extract from grid items
+    const gridItems = extractFromGridItems(document, baseUrl);
+    if (gridItems.length > 0) {
+      console.log(`Extracted ${gridItems.length} products from grid items`);
+      products.push(...gridItems);
+    } else {
+      console.log("No products found in grid items");
     }
     
-    // Strategy 4: Use generic selectors as a last resort
-    if (products.length === 0) {
-      products = extractFallbackProducts(document, storeName);
-      
-      // If still no products, add some fallback products
-      if (products.length === 0) {
-        products = createSampleProducts(storeName);
-        console.log(`Added fallback products for ${storeName || 'Willys'} as no products were found in the HTML`);
-      }
-    }
+    // Ensure each product has the store property set
+    products.forEach(product => {
+      product.store = storeName.toLowerCase();
+    });
     
-    // Log the results
-    console.log(`Total products extracted for ${storeName || 'Willys'}: ${products.length}`);
-    if (products.length > 0) {
-      console.log("First product:", JSON.stringify(products[0], null, 2));
-    }
+    // De-duplicate products by name
+    const uniqueProducts = Array.from(
+      new Map(products.map(item => [item.name, item])).values()
+    );
     
-    return products;
+    console.log(`Total products extracted: ${products.length}`);
+    console.log(`After de-duplication: ${uniqueProducts.length} unique products`);
+    
+    return uniqueProducts;
   } catch (error) {
-    console.error("Error during product extraction:", error);
-    
-    // Return fallback products
-    const fallbackProducts = createSampleProducts(storeName);
-    console.log(`Using fallback products for ${storeName || 'Willys'} due to extraction error`);
-    return fallbackProducts.slice(0, 2); // Just return first two fallback products
+    console.error("Error in extractProducts:", error);
+    return [];
   }
 }

@@ -35,17 +35,18 @@ export const transformWillysProducts = (willysData: any[]): Product[] => {
       // Determine product category based on keywords
       const category = determineProductCategory(item.name, item.description || '');
       
+      // Create a stable ID based on name but with a random suffix to avoid collisions
       const productId = `willys-${item.name.replace(/\s+/g, '-').toLowerCase()}-${Math.random().toString(36).substring(2, 9)}`;
       
-      // Always standardize store name to 'willys' for filtering consistency
+      // Always standardize store name to lowercase 'willys' for filtering consistency
       const store = 'willys';
       
       console.log(`Processing Willys item: ${item.name} (${productId}), category: ${category}, store: ${store}`);
       
-      // Check if the image URL is valid
-      let imageUrl = item.image_url || 'https://assets.icanet.se/e_sharpen:100,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_226367/cf_259/morotter_i_knippe.jpg';
-      if (imageUrl.includes('icanet.se') || imageUrl.includes('assets.icanet')) {
-        imageUrl = 'https://assets.icanet.se/e_sharpen:100,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_226367/cf_259/morotter_i_knippe.jpg';
+      // Check if the image URL is valid and use a better fallback image
+      let imageUrl = item.image_url || 'https://cdn.pixabay.com/photo/2020/10/05/19/55/grocery-5630804_1280.jpg';
+      if (!imageUrl.startsWith('http')) {
+        imageUrl = 'https://cdn.pixabay.com/photo/2020/10/05/19/55/grocery-5630804_1280.jpg';
       }
       
       return {

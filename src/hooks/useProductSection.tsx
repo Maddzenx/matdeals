@@ -16,24 +16,19 @@ export const useProductSection = (
     console.log("Filtering products:", products.length);
     console.log("Active store IDs:", activeStoreIds);
     
-    // Filter by active stores - make this case insensitive
+    // Convert active store IDs to lowercase for case-insensitive comparison
+    const lowerCaseActiveStores = activeStoreIds.map(store => store.toLowerCase());
+    
+    // Filter by active stores - case insensitive
     let filtered = products.filter(product => {
-      // Ensure the product has a store property and it's in the active stores list (case insensitive)
-      const productStore = product.store?.toLowerCase();
+      // Ensure the product has a store property and convert to lowercase
+      const productStore = (product.store || '').toLowerCase();
       
-      // Debug store information
-      if (!productStore) {
-        console.log("Product without store property:", product.name);
-        return false;
-      }
-      
-      // Check if any activeStoreId matches the product store (case insensitive)
-      const isIncluded = activeStoreIds.some(storeId => 
-        productStore === storeId.toLowerCase()
-      );
+      // Check if this store is in our active stores list
+      const isIncluded = lowerCaseActiveStores.includes(productStore);
       
       if (!isIncluded) {
-        console.log(`Product with store "${productStore}" filtered out because it's not in active stores:`, activeStoreIds);
+        console.log(`Product with store "${productStore}" filtered out because it's not in active stores:`, lowerCaseActiveStores);
       }
       
       return isIncluded;
@@ -54,10 +49,10 @@ export const useProductSection = (
     
     // Create a breakdown of the filtered products by store
     const storeCount = filtered.reduce((acc, product) => {
-      const store = product.store?.toLowerCase() || 'unknown';
+      const store = (product.store || '').toLowerCase() || 'unknown';
       acc[store] = (acc[store] || 0) + 1;
       return acc;
-    }, {});
+    }, {} as Record<string, number>);
     
     console.log("Filtered products by store:", storeCount);
     
