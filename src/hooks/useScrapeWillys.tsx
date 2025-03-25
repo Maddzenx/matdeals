@@ -12,7 +12,8 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
       
       if (showNotification) {
         toast.info("Startar datainsamling från Willys...", {
-          description: "Detta kan ta upp till 2 minuter"
+          description: "Detta kan ta upp till 2 minuter",
+          duration: 10000
         });
       }
       
@@ -25,7 +26,7 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
       
       // Create the invocation promise with forceRefresh flag
       const invocationPromise = supabase.functions.invoke('scrape-willys', {
-        body: { forceRefresh: true, source: "manual" }
+        body: { forceRefresh: true, source: "manual-refresh" }
       });
       
       // Race between timeout and invocation
@@ -43,8 +44,22 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
       
       console.log("Scraping results from Willys:", data);
       
-      if (!data.success) {
-        throw new Error(data.error || "Unknown error in scraping function");
+      if (!data || !data.success) {
+        console.error("Willys scraping failed:", data?.error || "No data returned");
+        throw new Error(data?.error || "Unknown error in scraping function");
+      }
+      
+      // Check if we got any actual products
+      const productsCount = data.products?.length || 0;
+      console.log(`Received ${productsCount} products from Willys scraper`);
+      
+      if (productsCount === 0) {
+        console.warn("Willys scraper returned zero products");
+        if (showNotification) {
+          toast.warning("Inga erbjudanden hittades på Willys", {
+            description: "Detta kan bero på att deras webbplats har ändrats"
+          });
+        }
       }
       
       // Refresh the products after scraping - whether successful or fallback
@@ -56,16 +71,13 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
         throw new Error("Could not update products after scraping");
       }
       
-      const productsCount = data.products?.length || 0;
-      console.log(`Updated ${productsCount} products from Willys`);
-      
-      if (showNotification) {
+      if (showNotification && productsCount > 0) {
         toast.success("Datainsamling från Willys klar", {
           description: `Uppdaterade ${productsCount} produkter.`
         });
       }
       
-      return data;
+      return { success: true, productsCount };
     } catch (err: any) {
       console.error("Error scraping Willys:", err);
       
@@ -85,7 +97,7 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
       }
       
       // Re-throw for handling in the caller
-      throw err;
+      return { success: false, error: err };
     } finally {
       setScraping(false);
     }

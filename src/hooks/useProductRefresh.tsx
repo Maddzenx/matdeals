@@ -48,77 +48,75 @@ export const useProductRefresh = (refetch: () => Promise<{ success: boolean; err
     
     if (showNotification) {
       toast.info("Uppdaterar produkter...", {
-        duration: 4000,
+        description: "Hämtar erbjudanden från butiker, detta kan ta några minuter",
+        duration: 10000,
       });
     }
     
     try {
-      console.log("Starting refresh of product data");
+      console.log("Starting refresh of product data from scrapers...");
       
       // First, try to just fetch the data from Supabase without scraping
       console.log("Attempting to fetch existing data from Supabase");
-      const result = await refetch();
-      console.log("Fetch result:", result);
       
-      // Check if we got any data
-      const hasNoData = !result.success || result.error;
+      // Always scrape data from all stores to make sure we have fresh data
+      console.log("Scraping new data from all store websites");
       
-      // Always scrape if explicitly requested (showNotification = true)
-      // or if there's no data
-      if (showNotification || hasNoData) {
-        console.log("Scraping new data from store websites", hasNoData ? "(no data was found in database)" : "(user requested refresh)");
+      // Run all scraping requests in parallel with proper error handling
+      const scrapePromises = [
+        handleScrapeWillys(showNotification).catch(err => {
+          console.error("Error scraping Willys:", err);
+          return { success: false, error: err };
+        }),
         
-        // Run all scraping requests in parallel with proper error handling
-        const scrapePromises = [
-          handleScrapeWillys(showNotification).catch(err => {
-            console.error("Error scraping Willys:", err);
-            return { success: false, error: err };
-          }),
-          
-          handleScrapeIca(showNotification).catch(err => {
-            console.error("Error scraping ICA:", err);
-            return { success: false, error: err };
-          }),
-          
-          handleScrapeHemkop(showNotification).catch(err => {
-            console.error("Error scraping Hemköp:", err);
-            return { success: false, error: err };
-          })
-        ];
+        handleScrapeIca(showNotification).catch(err => {
+          console.error("Error scraping ICA:", err);
+          return { success: false, error: err };
+        }),
         
-        // Wait for all scraping operations to complete
-        const scrapeResults = await Promise.all(scrapePromises);
-        
-        // Log scrape results for debugging
-        console.log("Scrape results:", scrapeResults);
-        
-        // Check if any of the scraping operations were successful
-        const anyScrapeSuccessful = scrapeResults.some(r => r && r.success);
-        
-        // Refetch after scraping to get the latest data
-        console.log("Refetching after scraping to get the latest data");
-        const refreshResult = await refetch();
-        console.log("Refetch after scraping result:", refreshResult);
-        
-        if (refreshResult.success) {
-          if (showNotification) {
-            toast.success("Produkterna har uppdaterats", {
-              duration: 3000,
-            });
-          }
-        } else {
-          if (showNotification) {
-            toast.error("Kunde inte uppdatera produkter", {
-              description: "Försök igen senare eller kontrollera nätverksanslutningen",
-            });
-          }
-          console.error("Failed to refresh products:", refreshResult.error);
-        }
-        
-        return refreshResult;
+        handleScrapeHemkop(showNotification).catch(err => {
+          console.error("Error scraping Hemköp:", err);
+          return { success: false, error: err };
+        })
+      ];
+      
+      // Wait for all scraping operations to complete
+      const scrapeResults = await Promise.all(scrapePromises);
+      
+      // Log results for debugging
+      console.log("Scrape results:", scrapeResults);
+      
+      // Check if any of the scraping operations were successful
+      const anyScrapeSuccessful = scrapeResults.some(r => r && r.success);
+      
+      if (anyScrapeSuccessful) {
+        console.log("At least one scraper was successful, refetching data");
+      } else {
+        console.warn("No scrapers were successful, but continuing with refetch anyway");
       }
       
-      return result;
+      // Refetch after scraping to get the latest data
+      console.log("Refetching after scraping to get the latest data");
+      const refreshResult = await refetch();
+      console.log("Refetch after scraping result:", refreshResult);
+      
+      if (refreshResult.success) {
+        if (showNotification) {
+          toast.success("Produkterna har uppdaterats", {
+            description: "Erbjudanden har hämtats från alla butiker",
+            duration: 5000,
+          });
+        }
+      } else {
+        if (showNotification) {
+          toast.error("Kunde inte uppdatera alla produkter", {
+            description: "Vissa butiker kunde inte nås. Försök igen om en stund.",
+          });
+        }
+        console.error("Failed to refresh products:", refreshResult.error);
+      }
+      
+      return refreshResult;
     } catch (error) {
       console.error("Error during refresh:", error);
       if (showNotification) {

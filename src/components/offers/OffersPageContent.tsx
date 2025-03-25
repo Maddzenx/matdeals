@@ -57,9 +57,9 @@ export const OffersPageContent: React.FC<OffersPageContentProps> = ({
   handleProductQuantityChange
 }) => {
   const filteredStoreTags = storeTags.filter(store => activeStores.includes(store.id));
-  const showRetryButton = !isRefreshing && (loading || supabaseProducts.length === 0);
+  const showRetryButton = !isRefreshing; // Always show the retry button
   
-  console.log("OffersPageContent rendering with loading:", loading, "products:", supabaseProducts.length);
+  console.log("OffersPageContent rendering with loading:", loading, "isRefreshing:", isRefreshing, "products:", supabaseProducts.length);
   console.log("Active stores:", activeStores);
   console.log("Filtered store tags:", filteredStoreTags);
   
@@ -73,6 +73,11 @@ export const OffersPageContent: React.FC<OffersPageContentProps> = ({
         return acc;
       }, {});
       console.log("Products by store:", storeCount);
+      
+      // Log a few sample products for debugging
+      console.log("Sample products:", supabaseProducts.slice(0, 3));
+    } else {
+      console.warn("No products available to display");
     }
   }, [supabaseProducts]);
 
@@ -118,13 +123,13 @@ export const OffersPageContent: React.FC<OffersPageContentProps> = ({
         {loading ? (
           <LoadingIndicator 
             retry={showRetryButton ? handleRefresh : undefined} 
-            message={showRetryButton 
-              ? "Laddar produkter från Supabase... Klicka på knappen nedan om det tar för lång tid." 
+            message={isRefreshing 
+              ? "Hämtar produkter från butikerna... Detta kan ta några minuter." 
               : "Laddar produkter från Supabase..."}
           />
         ) : supabaseProducts.length === 0 ? (
           <div className="p-8 text-center flex flex-col items-center">
-            <p className="text-gray-500 mb-4">Inga produkter hittades i databasen</p>
+            <p className="text-gray-500 mb-4">Inga produkter hittades</p>
             <Button 
               onClick={handleRefresh}
               className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
@@ -134,6 +139,9 @@ export const OffersPageContent: React.FC<OffersPageContentProps> = ({
             </Button>
             <p className="text-sm text-gray-400 mt-4">
               Det kan ta upp till 5 minuter att hämta erbjudanden från butikerna
+            </p>
+            <p className="text-sm text-gray-400 mt-2">
+              Om inga produkter visas efter flera försök, kontakta supportteamet
             </p>
           </div>
         ) : (

@@ -32,13 +32,18 @@ export async function storeProducts(products: ExtractorResult[]): Promise<number
         return false;
       }
       
-      // Ensure price is an integer and not null
-      if (product.price === null || typeof product.price !== 'number') {
-        console.warn(`Product '${product.name}' has invalid price:`, product.price);
-        return false;
-      }
-      
       return true;
+    }).map(product => {
+      // Ensure all required fields are present and properly formatted
+      return {
+        name: product.name,
+        price: typeof product.price === 'number' ? product.price : parseInt(String(product.price)) || 0,
+        description: product.description || null,
+        image_url: product.image_url || null,
+        offer_details: product.offer_details || null,
+        store: (product.store || 'willys').toLowerCase(),
+        // Add any additional fields your database expects
+      };
     });
     
     if (validProducts.length !== products.length) {
@@ -52,8 +57,7 @@ export async function storeProducts(products: ExtractorResult[]): Promise<number
     const { error: deleteError } = await supabase
       .from('Willys')
       .delete()
-      .is('name', null) // Dummy condition to satisfy the RLS policy - effectively deletes all
-      .not('name', null); // Use this approach since we want to delete all rows
+      .neq('name', 'DO_NOT_DELETE_THIS_ROW');
     
     if (deleteError) {
       console.error("Error clearing existing products:", deleteError);

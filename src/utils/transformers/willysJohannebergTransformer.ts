@@ -60,7 +60,7 @@ export const transformWillysJohannebergProducts = (willysJohannebergData: any[])
       // Determine product category based on name and brand
       const category = determineProductCategory(productName, brandAndWeight);
       
-      // Create a stable ID
+      // Create a stable ID that varies for each execution so we always get new products
       const timestamp = Date.now();
       const randomStr = Math.random().toString(36).substring(2, 8);
       const productId = `willys-jberg-${timestamp}-${randomStr}`;

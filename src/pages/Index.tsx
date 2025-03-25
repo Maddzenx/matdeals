@@ -31,7 +31,8 @@ const Index = () => {
     const triggerInitialLoad = async () => {
       console.log("Triggering initial data refresh");
       toast.info("Uppdaterar butikserbjudanden...", {
-        description: "Hämtar erbjudanden från butiker, detta kan ta några minuter"
+        description: "Hämtar erbjudanden från butiker, detta kan ta några minuter",
+        duration: 10000
       });
       
       try {
@@ -40,8 +41,16 @@ const Index = () => {
         
         if (result && result.success) {
           toast.success("Uppdatering färdig!", {
-            description: "Butikserbjudanden har uppdaterats"
+            description: `Butikserbjudanden har uppdaterats. ${supabaseProducts.length} produkter hittades.`
           });
+          
+          if (supabaseProducts.length === 0) {
+            console.log("No products found after refresh, retrying scrape...");
+            // If no products are found, try scraping again after a short delay
+            setTimeout(async () => {
+              await handleRefresh(true);
+            }, 5000);
+          }
         } else {
           console.error("Initial refresh failed:", result?.error);
           toast.error("Kunde inte hämta erbjudanden", {
@@ -90,6 +99,34 @@ const Index = () => {
     }
   };
 
+  // Enhanced refresh handler that ensures data is scraped
+  const handleForceRefresh = async () => {
+    console.log("User clicked refresh button, forcing scrape from all sources");
+    toast.info("Uppdaterar butikserbjudanden...", {
+      description: "Hämtar färska erbjudanden från alla butiker",
+      duration: 10000
+    });
+    
+    try {
+      const result = await handleRefresh(true);
+      
+      if (result && result.success) {
+        console.log("Refresh successful");
+        
+        // If we still have no products, show a more detailed message
+        if (supabaseProducts.length === 0) {
+          toast.info("Inga erbjudanden hittades", {
+            description: "Det kan bero på att butikernas webbsidor har ändrats. Vi arbetar på en lösning."
+          });
+        }
+      } else {
+        console.error("Force refresh failed:", result?.error);
+      }
+    } catch (error) {
+      console.error("Error during force refresh:", error);
+    }
+  };
+
   // Get navigation items from navigation state
   const { navItems } = useNavigationState();
 
@@ -104,7 +141,7 @@ const Index = () => {
       navItems={navItems}
       storeTags={storeTagsData}
       supabaseProducts={supabaseProducts}
-      handleRefresh={handleRefresh}
+      handleRefresh={handleForceRefresh}
       toggleViewMode={toggleViewMode}
       handleSearch={handleSearch}
       handleNavSelect={handleNavSelect}

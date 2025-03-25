@@ -43,6 +43,7 @@ serve(async (req) => {
       const sampleProducts = createSampleProducts(STORE_NAME);
       console.log(`Created ${sampleProducts.length} sample products as fallback`);
       
+      // Store the fallback products in the database
       const insertedCount = await storeProducts(sampleProducts);
       console.log(`Stored ${insertedCount} sample products in the database`);
       
