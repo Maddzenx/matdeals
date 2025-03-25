@@ -1,173 +1,115 @@
 
-import { useState, useEffect, useRef } from "react";
-import { CategoryData, Product } from "@/data/types";
-import { useProductUtils } from "@/hooks/useProductUtils";
+import { useState, useEffect, useMemo } from "react";
+import { Product, CategoryData } from "@/data/types";
 
 export const useProductSection = (
   categories: CategoryData[],
-  allProducts: Product[],
+  products: Product[],
   activeStoreIds: string[],
   storeTags: { id: string; name: string }[],
-  searchQuery: string
+  searchQuery: string = ""
 ) => {
-  const { 
-    getProductsWithCategories, 
-    scrollToCategory, 
-    getAllCategoryNames,
-    getNonEmptyCategories
-  } = useProductUtils(categories);
-  
-  // Add category for "all"
-  const allCategory = { id: "all", name: "All" };
-  
-  // Get non-empty categories and ensure they're not empty
-  let nonEmptyCategories = getNonEmptyCategories();
-  
-  // If no products are in the local data, use supabase product categories
-  if (nonEmptyCategories.length === 0 && allProducts.length > 0) {
-    // Extract categories from products
-    const uniqueCategories = [...new Set(allProducts.map(p => p.category))].filter(Boolean);
-    
-    // Map to proper CategoryData format
-    nonEmptyCategories = uniqueCategories.map(catName => {
-      // Find existing category or create new one
-      const existingCat = categories.find(c => c.id === catName || c.name === catName);
-      if (existingCat) return existingCat;
-      
-      // Create new category
-      return {
-        id: catName || 'other',
-        name: catName || 'Other'
-      };
-    });
-    
-    console.log("Created categories from products:", nonEmptyCategories);
-  }
-  
-  // Ensure "all" category is first
-  nonEmptyCategories = [allCategory, ...nonEmptyCategories.filter(c => c.id !== 'all')];
-  
-  const [activeCategory, setActiveCategory] = useState('all'); // Start with 'all' as default
-  const scrolledToCategoryRef = useRef(false);
-  const initialScrollRef = useRef(false);
-  
-  const allCategoryNames = getAllCategoryNames();
+  const [activeCategory, setActiveCategory] = useState("all");
 
-  useEffect(() => {
-    if (nonEmptyCategories.length > 0 && !nonEmptyCategories.some(c => c.id === activeCategory)) {
-      setActiveCategory('all');
-    }
-  }, [nonEmptyCategories, activeCategory]);
-
-  useEffect(() => {
-    if (!initialScrollRef.current && activeCategory && nonEmptyCategories.length > 0) {
-      const timer = setTimeout(() => {
-        scrollToCategory(activeCategory);
-        initialScrollRef.current = true;
-      }, 300);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [activeCategory, nonEmptyCategories, scrollToCategory]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (scrolledToCategoryRef.current) {
-        scrolledToCategoryRef.current = false;
-        return;
-      }
-
-      const categoryElements = allCategoryNames.map(name => document.getElementById(name));
-      
-      const validElements = categoryElements
-        .filter(el => el !== null)
-        .map(el => ({
-          id: nonEmptyCategories.find(c => c.name === el?.id)?.id || "",
-          position: el!.getBoundingClientRect().top
-        }));
-
-      const headerHeight = 120;
-
-      const closestElement = validElements
-        .filter(el => el.position <= headerHeight + 100)
-        .sort((a, b) => b.position - a.position)[0];
-
-      if (closestElement && closestElement.id !== activeCategory) {
-        setActiveCategory(closestElement.id);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [allCategoryNames, nonEmptyCategories, activeCategory]);
-
-  // Log activeStoreIds and storeTags for debugging
-  useEffect(() => {
+  // Filter products by active stores and search query
+  const filteredProducts = useMemo(() => {
+    console.log("Filtering products:", products.length);
     console.log("Active store IDs:", activeStoreIds);
-    console.log("Store tags:", storeTags);
-  }, [activeStoreIds, storeTags]);
-
-  const filteredProducts = allProducts.filter(product => {
-    // Match based on store ID
-    const storeMatch = activeStoreIds.length === 0 || activeStoreIds.some(storeId => {
-      // Check for lowercase store values for ICA and Willys
-      const productStore = product.store?.toLowerCase() || '';
+    
+    // Filter by active stores - make this case insensitive
+    let filtered = products.filter(product => {
+      // Ensure the product has a store property and it's in the active stores list
+      const productStore = product.store?.toLowerCase();
+      const isIncluded = productStore && activeStoreIds.includes(productStore);
       
-      if (productStore === 'ica' && storeId === 'ica') return true;
-      if (productStore === 'willys' && storeId === 'willys') return true;
+      if (!isIncluded && productStore) {
+        console.log(`Product with store "${productStore}" filtered out because it's not in active stores:`, activeStoreIds);
+      }
       
-      // For other stores, match based on the tag name/id
-      const storeTag = storeTags.find(tag => tag.name.toLowerCase() === productStore);
-      return storeTag && storeId === storeTag.id;
+      return isIncluded;
     });
     
-    if (!storeMatch) {
-      return false;
-    }
+    console.log("After store filtering:", filtered.length, "products remaining");
     
-    // If we have a search query, filter by it
-    if (searchQuery) {
+    // Filter by search query if provided
+    if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      const matchesSearch = 
-        product.name.toLowerCase().includes(query) || 
-        product.details.toLowerCase().includes(query) ||
-        (product.category && product.category.toLowerCase().includes(query));
-      
-      return matchesSearch;
+      filtered = filtered.filter(
+        product => 
+          product.name.toLowerCase().includes(query) ||
+          (product.details && product.details.toLowerCase().includes(query))
+      );
+      console.log("After search filtering:", filtered.length, "products remaining");
     }
     
-    // If no search query and store matches, include product
-    return true;
-  });
+    // Create a breakdown of the filtered products by store
+    const storeCount = filtered.reduce((acc, product) => {
+      const store = product.store?.toLowerCase() || 'unknown';
+      acc[store] = (acc[store] || 0) + 1;
+      return acc;
+    }, {});
+    
+    console.log("Filtered products by store:", storeCount);
+    
+    return filtered;
+  }, [products, activeStoreIds, searchQuery]);
 
-  console.log(`Found ${filteredProducts.length} products after filtering from ${allProducts.length} total products`);
-  
-  // Log filtered products by store for debugging
-  const storeCount = filteredProducts.reduce((acc, product) => {
-    const store = product.store?.toLowerCase() || 'unknown';
-    acc[store] = (acc[store] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-  
-  console.log("Filtered products by store:", storeCount);
+  // Get all unique category names from products
+  const allCategoryNames = useMemo(() => {
+    const uniqueCategories = new Set<string>();
+    filteredProducts.forEach(product => {
+      if (product.category) {
+        uniqueCategories.add(product.category);
+      }
+    });
+    return Array.from(uniqueCategories);
+  }, [filteredProducts]);
 
-  // Log first few filtered products for debugging
-  if (filteredProducts.length > 0) {
-    console.log("First few filtered products:", filteredProducts.slice(0, 3).map(p => ({
-      id: p.id,
-      name: p.name,
-      store: p.store,
-      category: p.category
-    })));
-  } else {
-    console.warn("No products found after filtering!");
-  }
+  // Create categories that actually have products
+  const nonEmptyCategories = useMemo(() => {
+    // Start with the "All" category
+    const allCategory = categories.find(c => c.id === "all") || { id: "all", name: "All" };
+    
+    // Filter other categories to only include those with products
+    const categoriesWithProducts = categories
+      .filter(category => 
+        category.id === "all" || 
+        allCategoryNames.includes(category.id) ||
+        filteredProducts.some(product => product.category === category.id)
+      );
+    
+    // If "All" isn't already in the list, add it at the beginning
+    if (!categoriesWithProducts.some(c => c.id === "all")) {
+      return [allCategory, ...categoriesWithProducts];
+    }
+    
+    console.log("Categories with products:", categoriesWithProducts.map(c => c.name));
+    
+    return categoriesWithProducts;
+  }, [categories, filteredProducts, allCategoryNames]);
 
+  // Handle category selection
   const handleCategorySelect = (categoryId: string) => {
+    console.log(`Category changed to: ${categoryId}`);
     setActiveCategory(categoryId);
-    scrolledToCategoryRef.current = true;
-    scrollToCategory(categoryId);
   };
+
+  // If the active category has no products, switch to "all"
+  useEffect(() => {
+    if (activeCategory !== "all" && 
+        !allCategoryNames.includes(activeCategory) && 
+        !filteredProducts.some(p => p.category === activeCategory)) {
+      console.log(`Active category ${activeCategory} has no products, switching to 'all'`);
+      setActiveCategory("all");
+    }
+  }, [activeCategory, filteredProducts, allCategoryNames]);
+
+  // Create categories from products if there are products without known categories
+  useEffect(() => {
+    if (allCategoryNames.length > 0) {
+      console.log("Created categories from products:", allCategoryNames);
+    }
+  }, [allCategoryNames]);
 
   return {
     filteredProducts,

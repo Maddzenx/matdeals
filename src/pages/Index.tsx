@@ -15,7 +15,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { handleProductQuantityChange } = useNavigationState();
   const { viewMode, toggleViewMode } = useViewMode("grid");
-  const { activeStores, handleRemoveTag, handleStoreToggle, addStoreIfNeeded } = useStoreFilters(['ica', 'willys']);
+  const { activeStores, handleRemoveTag, handleStoreToggle, addStoreIfNeeded } = useStoreFilters(['ica', 'willys', 'hemkop']);
   const [searchQuery, setSearchQuery] = useState("");
   const { products: supabaseProducts, loading, error, refetch } = useSupabaseProducts();
   const { isRefreshing, handleRefresh } = useProductRefresh(refetch);
@@ -35,6 +35,18 @@ const Index = () => {
     // Start loading immediately
     triggerInitialLoad();
   }, []);
+
+  useEffect(() => {
+    console.log("Active stores:", activeStores);
+    if (supabaseProducts.length > 0) {
+      const storeCount = supabaseProducts.reduce((acc, product) => {
+        const store = product.store?.toLowerCase() || 'unknown';
+        acc[store] = (acc[store] || 0) + 1;
+        return acc;
+      }, {});
+      console.log("Products by store:", storeCount);
+    }
+  }, [activeStores, supabaseProducts]);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);

@@ -44,21 +44,24 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
     console.log("ProductSection rendered with supabaseProducts:", supabaseProducts.length);
     if (supabaseProducts.length > 0) {
       console.log("Supabase products first few:", supabaseProducts.slice(0, 3));
+      
+      // Log store information for debugging
+      const storeDistribution = supabaseProducts.reduce((acc, p) => {
+        const store = p.store?.toLowerCase() || 'unknown';
+        acc[store] = (acc[store] || 0) + 1;
+        return acc;
+      }, {});
+      console.log("Store distribution in supabase products:", storeDistribution);
+      console.log("Active store IDs for filtering:", activeStoreIds);
     }
-  }, [supabaseProducts]);
+  }, [supabaseProducts, activeStoreIds]);
   
   const allProducts = React.useMemo(() => {
     console.log("Combining products - local:", allLocalProducts.length, "supabase:", supabaseProducts.length);
-    
-    if (supabaseProducts.length > 0) {
-      const categories = supabaseProducts.map(p => p.category).filter(Boolean);
-      const uniqueCategories = [...new Set(categories)];
-      console.log("Categories in Supabase products:", uniqueCategories);
-    }
-    
     return [...allLocalProducts, ...supabaseProducts];
   }, [allLocalProducts, supabaseProducts]);
   
+  // Modified useProductSection hook usage
   const { 
     filteredProducts,
     activeCategory,
@@ -75,29 +78,31 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
 
   useEffect(() => {
     console.log("After filtering - products to display:", filteredProducts.length);
-    console.log("Active stores:", activeStoreIds);
-    if (filteredProducts.length === 0) {
-      console.warn("No products after filtering. Check activeStoreIds:", activeStoreIds);
-      console.warn("Store tags:", storeTags);
+    
+    if (filteredProducts.length === 0 && allProducts.length > 0) {
+      console.warn("No products after filtering. Check filtering logic:");
+      console.warn("Active store IDs:", activeStoreIds);
+      console.warn("Search query:", searchQuery);
+      console.warn("Active category:", activeCategory);
       
-      if (allProducts.length > 0) {
-        console.warn("Sample products before filtering:", 
-          allProducts.slice(0, 3).map(p => ({
-            id: p.id, 
-            name: p.name, 
-            store: p.store,
-            category: p.category
-          }))
-        );
+      // Debug the filtering logic
+      const productsAfterStoreFilter = allProducts.filter(product => {
+        const productStore = product.store?.toLowerCase();
+        return productStore && activeStoreIds.includes(productStore);
+      });
+      
+      console.log("Products after store filter only:", productsAfterStoreFilter.length);
+      
+      if (productsAfterStoreFilter.length === 0 && allProducts.length > 0) {
+        console.log("Store filtering is eliminating all products. Sample products stores:");
+        allProducts.slice(0, 5).forEach(p => console.log("Product store:", p.store));
       }
     }
-  }, [filteredProducts, activeStoreIds, storeTags, allProducts]);
+  }, [filteredProducts, activeStoreIds, searchQuery, activeCategory, allProducts]);
 
   const handleQuantityChange = (productId: string, newQuantity: number, previousQuantity: number) => {
     const product = allProducts.find(p => p.id === productId);
     if (product) {
-      console.log("Product store info:", product.store);
-      
       onProductQuantityChange(
         productId, 
         newQuantity, 
@@ -114,8 +119,6 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
       onProductQuantityChange(productId, newQuantity, previousQuantity);
     }
   };
-
-  console.log("ProductSection rendering with categories:", nonEmptyCategories.length);
   
   return (
     <ProductSectionLayout

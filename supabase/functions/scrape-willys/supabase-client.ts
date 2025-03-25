@@ -39,8 +39,8 @@ export async function storeProducts(products: any[]): Promise<number> {
     
     // Validate and prepare products for storage
     const validProducts = products.map(product => {
-      // Get the store name from the product or use the default
-      const storeName = product.store_name || 'willys johanneberg';
+      // Ensure store is consistent with the filters in the UI - simplified to just 'willys'
+      const storeName = 'willys';
       
       // Create a new product object with only the fields needed for the table
       return {
@@ -50,7 +50,7 @@ export async function storeProducts(products: any[]): Promise<number> {
                typeof product.price === 'string' ? parseInt(product.price) || 0 : 0,
         image_url: product.image_url || 'https://assets.icanet.se/t_product_large_v1,f_auto/7300156501245.jpg',
         offer_details: product.offer_details || 'Veckans erbjudande',
-        store: storeName.toLowerCase() // Explicitly set the store field
+        store: storeName // Explicitly set the store field to match UI filters
       };
     });
     
@@ -98,7 +98,7 @@ export async function storeProducts(products: any[]): Promise<number> {
         price: p.price,
         image_url: p.image_url,
         offer_details: p.offer_details,
-        store: 'willys johanneberg' // Make sure fallback products also have the store field
+        store: 'willys' // Make sure fallback products also have the correct store field
       }));
       
       // Try inserting fallbacks one by one to have better chances of success
@@ -130,56 +130,56 @@ function createFallbackProducts() {
       description: "Kronfågel. 900-1000 g. Jämförpris 79:90/kg",
       price: 79,
       image_url: "https://assets.icanet.se/t_product_large_v1,f_auto/7300156501245.jpg",
-      offer_details: "Willys Johanneberg erbjudande"
+      offer_details: "Willys erbjudande"
     },
     {
       name: "Laxfilé",
       description: "Fiskeriet. 400 g. Jämförpris 149:75/kg",
       price: 59,
       image_url: "https://assets.icanet.se/t_product_large_v1,f_auto/7313630100015.jpg",
-      offer_details: "Willys Johanneberg erbjudande"
+      offer_details: "Willys erbjudande"
     },
     {
       name: "Äpplen Royal Gala",
       description: "Italien. Klass 1. Jämförpris 24:95/kg",
       price: 24,
       image_url: "https://assets.icanet.se/t_product_large_v1,f_auto/4038838117829.jpg",
-      offer_details: "Willys Johanneberg erbjudande"
+      offer_details: "Willys erbjudande"
     },
     {
       name: "Färsk pasta",
       description: "Findus. 400 g. Jämförpris 62:38/kg",
       price: 25,
       image_url: "https://assets.icanet.se/t_product_large_v1,f_auto/7310500144511.jpg",
-      offer_details: "Willys Johanneberg erbjudande"
+      offer_details: "Willys erbjudande"
     },
     {
       name: "Kaffe",
       description: "Gevalia. 450 g. Jämförpris 119:89/kg",
       price: 49,
       image_url: "https://assets.icanet.se/t_product_large_v1,f_auto/8711000530092.jpg",
-      offer_details: "Willys Johanneberg erbjudande"
+      offer_details: "Willys erbjudande"
     },
     {
       name: "Choklad",
       description: "Marabou. 200 g. Jämförpris 99:75/kg",
       price: 19,
       image_url: "https://assets.icanet.se/t_product_large_v1,f_auto/7310511210502.jpg",
-      offer_details: "Willys Johanneberg erbjudande"
+      offer_details: "Willys erbjudande"
     },
     {
       name: "Ost Präst",
       description: "Arla. 700 g. Jämförpris 99:90/kg",
       price: 69,
       image_url: "https://assets.icanet.se/t_product_large_v1,f_auto/7310865004725.jpg",
-      offer_details: "Willys Johanneberg erbjudande"
+      offer_details: "Willys erbjudande"
     },
     {
       name: "Bröd",
       description: "Pågen. 500 g. Jämförpris 39:80/kg",
       price: 19,
       image_url: "https://assets.icanet.se/t_product_large_v1,f_auto/7311070362291.jpg",
-      offer_details: "Willys Johanneberg erbjudande"
+      offer_details: "Willys erbjudande"
     }
   ];
 }

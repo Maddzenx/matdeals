@@ -15,5 +15,5 @@ export const USER_AGENTS = [
 // Base URL for resolving relative URLs
 export const BASE_URL = 'https://www.willys.se';
 
-// Store name to use for all products
-export const STORE_NAME = 'willys johanneberg';
+// Store name to use for all products - simplified to match filter in UI
+export const STORE_NAME = 'willys';

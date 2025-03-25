@@ -59,6 +59,8 @@ export const OffersPageContent: React.FC<OffersPageContentProps> = ({
   const showRetryButton = !isRefreshing && (loading || supabaseProducts.length === 0);
   
   console.log("OffersPageContent rendering with loading:", loading, "products:", supabaseProducts.length);
+  console.log("Active stores:", activeStores);
+  console.log("Filtered store tags:", filteredStoreTags);
   
   // Log whenever the products array changes
   useEffect(() => {
