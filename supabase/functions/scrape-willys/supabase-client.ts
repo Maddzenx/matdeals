@@ -38,20 +38,29 @@ export async function storeProducts(products: any[]): Promise<number> {
       console.log("Successfully cleared existing Willys products");
     }
     
-    // Log the products we're about to insert
-    console.log("First product to insert:", JSON.stringify(products[0], null, 2));
-    
-    // Validate and prepare products for storage - STANDARDIZE store name to 'willys'
+    // Validate and prepare products for storage
     const validProducts = products.map(product => {
+      // Ensure price is a number (smallint) and handle decimal values properly
+      let price = null;
+      if (product.price !== null && product.price !== undefined) {
+        if (typeof product.price === 'number') {
+          // If it's already a number, use Math.round to get an integer
+          price = Math.round(product.price);
+        } else if (typeof product.price === 'string') {
+          // Try to parse the string as a number
+          const parsedPrice = parseFloat(product.price);
+          if (!isNaN(parsedPrice)) {
+            price = Math.round(parsedPrice);
+          }
+        }
+      }
+      
       // Create a new product object with only the fields needed for the table
-      // Always set store to lowercase 'willys' for consistency
       return {
         name: product.name || 'Unnamed Product',
         description: product.description || '',
-        price: typeof product.price === 'number' ? product.price : 
-               typeof product.price === 'string' ? parseFloat(product.price) || 0 : 0,
-        original_price: typeof product.original_price === 'number' ? product.original_price : 
-                         typeof product.original_price === 'string' ? parseFloat(product.original_price) || null : null,
+        price: price, // Now properly handled as integer
+        original_price: null, // We'll leave this null as it needs to be an integer
         image_url: product.image_url || 'https://assets.icanet.se/t_product_large_v1,f_auto/7300156501245.jpg',
         offer_details: product.offer_details || 'Veckans erbjudande',
         store: 'willys' // ALWAYS lowercase 'willys' for consistency
@@ -100,7 +109,7 @@ export async function storeProducts(products: any[]): Promise<number> {
       const fallbackProducts = createFallbackProducts().map(p => ({
         name: p.name,
         description: p.description,
-        price: p.price,
+        price: typeof p.price === 'number' ? Math.round(p.price) : null,
         image_url: p.image_url,
         offer_details: p.offer_details,
         store: 'willys' // Make sure fallback products also have the correct store field

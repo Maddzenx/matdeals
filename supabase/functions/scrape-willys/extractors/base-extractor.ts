@@ -1,52 +1,56 @@
-
-// Base types and utilities for extractors
-
+// Base extractor with common utilities and shared functionality
 export interface ExtractorResult {
   name: string;
   price: number | null;
   description: string | null;
   image_url: string;
   offer_details: string;
-  original_price?: number | null;
-  store_name?: string;
+  store?: string;
 }
+
+export const DEFAULT_IMAGE_URL = 'https://assets.icanet.se/t_product_large_v1,f_auto/7300156501245.jpg';
 
 /**
  * Normalizes an image URL by handling relative paths
  */
-export function normalizeImageUrl(url: string, baseUrl: string): string {
-  if (!url) {
-    return 'https://assets.icanet.se/t_product_large_v1,f_auto/7300156501245.jpg';
+export function normalizeImageUrl(imageUrl: string | null, baseUrl: string): string {
+  if (!imageUrl) {
+    return DEFAULT_IMAGE_URL;
   }
   
-  if (url.startsWith('http')) {
-    return url;
+  if (imageUrl.startsWith('http')) {
+    return imageUrl;
+  } else if (imageUrl.startsWith('//')) {
+    return 'https:' + imageUrl;
   } else {
-    return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+    return `${baseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
   }
 }
 
 /**
  * Extracts a price from a string
  */
-export function extractPrice(priceText: string): number | null {
-  if (!priceText) {
-    return null;
-  }
+export function extractPrice(priceText: string | null): number | null {
+  if (!priceText) return null;
   
-  // Handle different price formats (29:90 kr, 29,90 kr, 29.90 kr, 29:-)
-  const priceMatch = priceText.match(/(\d+)[,\.:]*(\d*)/);
+  // Remove any non-price characters, keeping only numbers, decimals, and decimal separators
+  const cleanedText = priceText.replace(/[^\d.,]/g, '');
   
-  if (priceMatch) {
-    const whole = parseInt(priceMatch[1]);
-    const decimal = priceMatch[2] ? parseInt(priceMatch[2]) : 0;
-    
+  // Handle various price formats
+  const priceMatch = cleanedText.match(/(\d+)[,.:]?(\d*)/);
+  if (!priceMatch) return null;
+  
+  let price = parseInt(priceMatch[1]);
+  
+  // Handle decimal parts if present
+  if (priceMatch[2] && priceMatch[2].length > 0) {
+    const decimal = parseInt(priceMatch[2]);
     if (decimal > 0) {
-      return parseFloat(`${whole}.${decimal}`);
-    } else {
-      return whole;
+      // Convert to decimal value (e.g. 19,90 => 19.9)
+      const combinedPrice = parseFloat(`${price}.${decimal}`);
+      return combinedPrice;
     }
   }
   
-  return null;
+  return price;
 }

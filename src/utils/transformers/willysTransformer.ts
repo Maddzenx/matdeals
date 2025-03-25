@@ -23,6 +23,7 @@ export const transformWillysProducts = (willysData: any[]): Product[] => {
       // Parse the price string to get the numeric value
       let formattedPrice = 'N/A';
       if (item.price !== null && item.price !== undefined) {
+        // Make sure price is formatted with :- kr
         formattedPrice = `${item.price}:- kr`;
       }
       
@@ -36,7 +37,8 @@ export const transformWillysProducts = (willysData: any[]): Product[] => {
       const category = determineProductCategory(item.name, item.description || '');
       
       // Create a stable ID based on name but with a random suffix to avoid collisions
-      const productId = `willys-${item.name.replace(/\s+/g, '-').toLowerCase()}-${Math.random().toString(36).substring(2, 9)}`;
+      const randomSuffix = Math.random().toString(36).substring(2, 9);
+      const productId = `willys-${item.name.replace(/\s+/g, '-').toLowerCase()}-${randomSuffix}`;
       
       // Always standardize store name to lowercase 'willys' for filtering consistency
       const store = 'willys';

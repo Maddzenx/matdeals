@@ -95,7 +95,7 @@ export function extractGridItems(document: Document, baseUrl: string, storeName?
           
           console.log(`Processing grid item: ${name}`);
           
-          // 2. Price
+          // 2. Price - updated to ensure integer values
           let price = null;
           const priceElements = item.querySelectorAll('[class*="price"], [class*="Price"], .pris, .discount');
           
@@ -104,7 +104,8 @@ export function extractGridItems(document: Document, baseUrl: string, storeName?
             if (priceText && priceText.match(/\d+/)) {
               const extractedPrice = extractPrice(priceText);
               if (extractedPrice !== null) {
-                price = extractedPrice;
+                // Convert to integer to match database type
+                price = Math.round(extractedPrice);
                 break;
               }
             }
@@ -118,8 +119,10 @@ export function extractGridItems(document: Document, baseUrl: string, storeName?
               const mainNumber = parseInt(priceMatches[1]);
               const decimal = priceMatches[2] ? parseInt(priceMatches[2]) : 0;
               
+              // Ensure price is an integer
               if (decimal > 0) {
-                price = parseFloat(`${mainNumber}.${decimal}`);
+                const combinedPrice = parseFloat(`${mainNumber}.${decimal}`);
+                price = Math.round(combinedPrice);
               } else {
                 price = mainNumber;
               }

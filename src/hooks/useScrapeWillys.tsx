@@ -75,7 +75,7 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
         });
       }
       
-      // Check if we need to refresh products even after error
+      // Always try to refresh products even after error
       // (in cases where the edge function returned fallback products)
       try {
         console.log("Attempting to refresh products despite error");

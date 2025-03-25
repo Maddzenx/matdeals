@@ -19,11 +19,13 @@ serve(async (req) => {
     
     // Parse request body to check for forceRefresh flag
     let forceRefresh = false;
+    let source = "unknown";
     
     try {
       const body = await req.json();
       forceRefresh = body?.forceRefresh || false;
-      console.log(`ForceRefresh flag: ${forceRefresh}`);
+      source = body?.source || "unknown";
+      console.log(`ForceRefresh flag: ${forceRefresh}, Source: ${source}`);
     } catch (e) {
       console.log("No valid JSON body or forceRefresh flag");
     }
@@ -79,6 +81,7 @@ serve(async (req) => {
     }
     
     console.log("About to store products in database");
+    console.log("First product example:", JSON.stringify(products[0]));
     
     // Store products in Supabase
     const insertedCount = await storeProducts(products);
