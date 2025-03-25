@@ -1,7 +1,7 @@
 
 import { STORE_NAME, BASE_URL } from "./config/scraper-config.ts";
 import { extractFromWeeklyOffers } from "./extractors/weekly-offers-extractor.ts";
-import { extractFromGridItems } from "./extractors/grid-items-extractor.ts";
+import { extractGridItems } from "./extractors/grid-items-extractor.ts";
 
 /**
  * Extract products from the Willys web page
@@ -24,7 +24,7 @@ export function extractProducts(document: Document, baseUrl: string, storeName: 
     }
     
     // Method 2: Extract from grid items
-    const gridItems = extractFromGridItems(document, baseUrl);
+    const gridItems = extractGridItems(document, baseUrl);
     if (gridItems.length > 0) {
       console.log(`Extracted ${gridItems.length} products from grid items`);
       products.push(...gridItems);
