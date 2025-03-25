@@ -51,13 +51,13 @@ export const useProductRefresh = (refetch: () => Promise<{ success: boolean; err
       if (showNotification || !result.success) {
         console.log("Scraping new data from store websites");
         
-        // Schedule scraping operations one after another to avoid overwhelming the server
-        await handleScrapeIca(false).catch(err => {
-          console.error("Error scraping ICA:", err);
-        });
-  
+        // Prioritize Willys scraping since that's where the issue is
         await handleScrapeWillys(false).catch(err => {
           console.error("Error scraping Willys:", err);
+        });
+        
+        await handleScrapeIca(false).catch(err => {
+          console.error("Error scraping ICA:", err);
         });
   
         await handleScrapeHemkop(false).catch(err => {

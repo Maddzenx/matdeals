@@ -20,17 +20,30 @@ export const transformWillysProducts = (willysData: any[]): Product[] => {
         return null;
       }
       
-      // Parse the price string to get the numeric value
+      // Parse the price to ensure it's a number
+      let price = null;
+      if (typeof item.price === 'number') {
+        price = item.price;
+      } else if (typeof item.price === 'string') {
+        price = parseInt(item.price, 10);
+      }
+      
+      // Format the price string for display
       let formattedPrice = 'N/A';
-      if (item.price !== null && item.price !== undefined) {
-        // Make sure price is formatted with :- kr
-        formattedPrice = `${item.price}:- kr`;
+      if (price !== null && !isNaN(price)) {
+        formattedPrice = `${price}:- kr`;
       }
       
       // Original price formatting
       let originalPriceFormatted = '';
       if (item.original_price !== null && item.original_price !== undefined) {
-        originalPriceFormatted = `${item.original_price}:- kr`;
+        const originalPrice = typeof item.original_price === 'number' 
+          ? item.original_price 
+          : parseInt(item.original_price, 10);
+        
+        if (!isNaN(originalPrice)) {
+          originalPriceFormatted = `${originalPrice}:- kr`;
+        }
       }
       
       // Determine product category based on keywords
@@ -43,7 +56,7 @@ export const transformWillysProducts = (willysData: any[]): Product[] => {
       // Always standardize store name to lowercase 'willys' for filtering consistency
       const store = 'willys';
       
-      console.log(`Processing Willys item: ${item.name} (${productId}), category: ${category}, store: ${store}`);
+      console.log(`Processing Willys item: ${item.name} (${productId}), category: ${category}, store: ${store}, price: ${price}`);
       
       // Check if the image URL is valid and use a better fallback image
       let imageUrl = item.image_url || 'https://cdn.pixabay.com/photo/2020/10/05/19/55/grocery-5630804_1280.jpg';

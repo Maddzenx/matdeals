@@ -97,7 +97,7 @@ export function extractFromWeeklyOffers(document: Document, baseUrl: string): Ex
         
         console.log(`Processing product card: ${name}`);
         
-        // 2. Price - modified to ensure we get integer values
+        // 2. Price - ensure we get an integer value
         let price = null;
         const priceElements = card.querySelectorAll('[class*="price"], [class*="Price"], .pris, .discount');
         
@@ -129,6 +129,11 @@ export function extractFromWeeklyOffers(document: Document, baseUrl: string): Ex
               price = mainNumber;
             }
           }
+        }
+        
+        if (price === null) {
+          console.log(`Skipping product ${name} - no valid price found`);
+          continue;
         }
         
         // 3. Image

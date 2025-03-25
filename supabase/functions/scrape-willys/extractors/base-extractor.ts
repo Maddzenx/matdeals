@@ -1,3 +1,4 @@
+
 // Base extractor with common utilities and shared functionality
 export interface ExtractorResult {
   name: string;
@@ -28,7 +29,8 @@ export function normalizeImageUrl(imageUrl: string | null, baseUrl: string): str
 }
 
 /**
- * Extracts a price from a string
+ * Extracts a price from a string and returns it as a number
+ * The returned value MUST be an integer for PostgreSQL compatibility
  */
 export function extractPrice(priceText: string | null): number | null {
   if (!priceText) return null;
@@ -48,7 +50,8 @@ export function extractPrice(priceText: string | null): number | null {
     if (decimal > 0) {
       // Convert to decimal value (e.g. 19,90 => 19.9)
       const combinedPrice = parseFloat(`${price}.${decimal}`);
-      return combinedPrice;
+      // Round to integer for database compatibility
+      return Math.round(combinedPrice);
     }
   }
   

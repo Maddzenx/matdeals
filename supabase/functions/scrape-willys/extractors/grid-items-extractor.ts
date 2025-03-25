@@ -1,197 +1,222 @@
 
-// Extractor for product grid items
 import { ExtractorResult, normalizeImageUrl, extractPrice } from "./base-extractor.ts";
 import { extractName } from "./name-extractor.ts";
+import { extractOfferDetails } from "./offer-details-extractor.ts";
 
-export function extractGridItems(document: Document, baseUrl: string, storeName?: string): ExtractorResult[] {
+/**
+ * Extract products from the grid items on the page
+ */
+export function extractGridItems(document: Document, baseUrl: string): ExtractorResult[] {
   console.log("Looking for product grid items in the HTML");
   
-  const products: ExtractorResult[] = [];
-  const storeNameFormatted = storeName?.toLowerCase() || 'willys';
-  
   try {
-    // Select grid item containers
+    // Find grid containers for products
     const gridSelectors = [
-      '.product-grid', '.products-grid', '.items-grid', '.grid-container',
-      '[class*="grid"]', '.product-container', '.product-listing',
-      '[data-testid="products-grid"]', '[data-testid="product-listing"]',
-      '.products', '.items', '.listing'
+      '.product-grid', '.grid', '.products-grid',
+      '[class*="productGrid"]', '[class*="productList"]',
+      'section div[class*="grid"]'
     ];
     
-    // Find grid container
+    // Find all potential grid containers
     let gridContainer: Element | null = null;
     
     for (const selector of gridSelectors) {
-      const grid = document.querySelector(selector);
-      if (grid) {
+      const container = document.querySelector(selector);
+      if (container) {
         console.log(`Found grid container with selector: ${selector}`);
-        gridContainer = grid;
+        gridContainer = container;
         break;
       }
     }
     
-    // If no grid container found, try to find individual grid items directly
     if (!gridContainer) {
-      console.log("No grid container found, trying to find grid items directly");
+      console.log("No grid container found, trying to find individual product items directly");
       
-      const productItemSelectors = [
-        '.product-item', '.grid-item', '.product-card', '.item-card',
-        '[class*="product-item"]', '[class*="grid-item"]', '[class*="productItem"]',
-        '[data-testid*="product"]', 'li[class*="product"]'
-      ];
+      // Try to find product items directly
+      const products: ExtractorResult[] = [];
+      const allProductItems = document.querySelectorAll('[class*="product"], article, .card, .item, li');
       
-      let gridItems: NodeListOf<Element> | null = null;
+      console.log(`Found ${allProductItems.length} potential product items`);
       
-      for (const selector of productItemSelectors) {
-        const items = document.querySelectorAll(selector);
-        if (items && items.length > 0) {
-          console.log(`Found ${items.length} grid items with selector: ${selector}`);
-          gridItems = items;
-          break;
-        }
-      }
-      
-      if (!gridItems || gridItems.length === 0) {
-        console.log("No grid items found");
-        return [];
-      }
-      
-      console.log(`Processing ${gridItems.length} grid items`);
-      
-      // Process each grid item
-      for (const item of gridItems) {
-        try {
-          // Try to extract name using our name extractor first
-          let name = extractName(item);
-          
-          // If name extractor failed, try alternative methods
-          if (!name) {
-            const nameElements = item.querySelectorAll('h1, h2, h3, h4, h5, [class*="title"], [class*="name"], b, strong');
+      for (const item of allProductItems) {
+        // Check if this element contains product information
+        if (isProductElement(item)) {
+          try {
+            const name = extractName(item);
+            if (!name) continue;
             
-            for (const el of nameElements) {
-              const text = el.textContent?.trim();
-              if (text && text.length > 2 && text.length < 100) {
-                name = text;
-                break;
-              }
-            }
+            // Extract price from text - ensure it's an integer
+            let price: number | null = null;
+            const priceText = item.textContent || '';
+            const priceMatch = priceText.match(/(\d+)[,.:]*(\d*)\s*kr/);
             
-            if (!name) {
-              const textElements = item.querySelectorAll('p, div, span');
-              for (const el of textElements) {
-                const text = el.textContent?.trim();
-                if (text && text.length > 2 && text.length < 50 && !text.includes('kr/') && !text.match(/^\d+[\s:,.]?\d*(\s*kr)?$/)) {
-                  name = text;
-                  break;
-                }
-              }
-            }
-          }
-          
-          if (!name) {
-            console.log("Skipping item - could not find product name");
-            continue;
-          }
-          
-          console.log(`Processing grid item: ${name}`);
-          
-          // 2. Price - updated to ensure integer values
-          let price = null;
-          const priceElements = item.querySelectorAll('[class*="price"], [class*="Price"], .pris, .discount');
-          
-          for (const el of priceElements) {
-            const priceText = el.textContent?.trim();
-            if (priceText && priceText.match(/\d+/)) {
-              const extractedPrice = extractPrice(priceText);
-              if (extractedPrice !== null) {
-                // Convert to integer to match database type
-                price = Math.round(extractedPrice);
-                break;
-              }
-            }
-          }
-          
-          if (price === null) {
-            const allText = item.textContent || '';
-            const priceMatches = allText.match(/(\d+)[\s:,.]?(\d*)\s*kr/);
-            
-            if (priceMatches) {
-              const mainNumber = parseInt(priceMatches[1]);
-              const decimal = priceMatches[2] ? parseInt(priceMatches[2]) : 0;
+            if (priceMatch) {
+              const mainDigits = parseInt(priceMatch[1]);
+              const decimalPart = priceMatch[2] ? parseInt(priceMatch[2]) : 0;
               
-              // Ensure price is an integer
-              if (decimal > 0) {
-                const combinedPrice = parseFloat(`${mainNumber}.${decimal}`);
-                price = Math.round(combinedPrice);
+              // Convert to appropriate format (integer)
+              if (decimalPart > 0) {
+                // Round to nearest integer if there's a decimal part
+                price = Math.round(parseFloat(`${mainDigits}.${decimalPart}`));
               } else {
-                price = mainNumber;
+                price = mainDigits;
               }
             }
-          }
-          
-          // 3. Image
-          let imageUrl = '';
-          const images = item.querySelectorAll('img');
-          
-          for (const img of images) {
-            const src = img.getAttribute('src') || img.getAttribute('data-src');
-            if (src && !src.includes('logo') && !src.includes('icon')) {
-              imageUrl = normalizeImageUrl(src, baseUrl);
-              break;
+            
+            if (!price) continue;
+            
+            // Get image
+            let imageUrl = '';
+            const image = item.querySelector('img');
+            if (image) {
+              const src = image.getAttribute('src') || image.getAttribute('data-src');
+              if (src) {
+                imageUrl = normalizeImageUrl(src, baseUrl);
+              }
             }
-          }
-          
-          // 4. Description
-          let description = '';
-          const descElements = item.querySelectorAll('[class*="desc"], [class*="info"], [class*="details"], p');
-          
-          for (const el of descElements) {
-            const text = el.textContent?.trim();
-            if (text && text !== name && text.length > 5 && !text.match(/\d+[\s:,.]?\d*\s*kr/) && !el.querySelector('img')) {
-              description = text;
-              break;
-            }
-          }
-          
-          // 5. Offer details
-          let offerDetails = '';
-          const offerElements = item.querySelectorAll('[class*="campaign"], [class*="offer"], [class*="saving"], [class*="discount"]');
-          
-          for (const el of offerElements) {
-            const text = el.textContent?.trim();
-            if (text && text.length > 2 && text !== name && text !== description) {
-              offerDetails = text;
-              break;
-            }
-          }
-          
-          if (!offerDetails) {
-            offerDetails = 'Veckans erbjudande';
-          }
-          
-          // Add product to list
-          if (name && price !== null) {
+            
+            const description = item.querySelector('p, [class*="desc"]')?.textContent?.trim() || null;
+            const offerDetails = extractOfferDetails(item);
+            
             products.push({
               name,
               price,
-              description: description || null,
-              image_url: imageUrl || 'https://assets.icanet.se/t_product_large_v1,f_auto/7300156501245.jpg',
+              description,
+              image_url: imageUrl,
               offer_details: offerDetails,
-              store: storeNameFormatted
+              store: 'willys'
             });
             
-            console.log(`Added grid item: ${name}, price: ${price}`);
+            console.log(`Added grid product: ${name}, price: ${price}`);
+          } catch (itemError) {
+            console.error("Error processing a potential product item:", itemError);
           }
-        } catch (itemError) {
-          console.error("Error processing grid item:", itemError);
         }
+      }
+      
+      console.log(`Extracted ${products.length} products from direct product items`);
+      return products;
+    }
+    
+    // Find all product items within the grid
+    const productItemSelectors = [
+      '.product-item', '.product', '.offer-item', 'article', 
+      '[class*="productCard"]', '[class*="card"]', 'li', '.item'
+    ];
+    
+    let productItems: NodeListOf<Element> | null = null;
+    
+    for (const selector of productItemSelectors) {
+      const items = gridContainer.querySelectorAll(selector);
+      if (items && items.length > 0) {
+        console.log(`Found ${items.length} product items with selector: ${selector}`);
+        productItems = items;
+        break;
       }
     }
     
-    console.log(`Successfully extracted ${products.length} grid items`);
+    if (!productItems || productItems.length === 0) {
+      console.log("No product items found in grid container");
+      return [];
+    }
+    
+    // Process each product item
+    const products: ExtractorResult[] = [];
+    
+    for (const item of productItems) {
+      try {
+        const name = extractName(item);
+        if (!name) continue;
+        
+        // Extract price making sure it's an integer
+        let price: number | null = null;
+        const priceElements = item.querySelectorAll('[class*="price"], .pris, .amount');
+        
+        for (const el of priceElements) {
+          const priceText = el.textContent?.trim();
+          if (priceText && priceText.match(/\d+/)) {
+            const extractedPrice = extractPrice(priceText);
+            if (extractedPrice !== null) {
+              // Ensure it's an integer
+              price = Math.round(extractedPrice);
+              break;
+            }
+          }
+        }
+        
+        // If no price found in dedicated elements, try to find it in the general text
+        if (price === null) {
+          const allText = item.textContent || '';
+          const priceMatch = allText.match(/(\d+)[,.:]*(\d*)\s*kr/);
+          
+          if (priceMatch) {
+            const mainDigits = parseInt(priceMatch[1]);
+            const decimalPart = priceMatch[2] ? parseInt(priceMatch[2]) : 0;
+            
+            // Convert to appropriate format (integer)
+            if (decimalPart > 0) {
+              // Round to nearest integer if there's a decimal part
+              price = Math.round(parseFloat(`${mainDigits}.${decimalPart}`));
+            } else {
+              price = mainDigits;
+            }
+          }
+        }
+        
+        if (!price) continue;
+        
+        // Find image
+        let imageUrl = '';
+        const image = item.querySelector('img');
+        if (image) {
+          const src = image.getAttribute('src') || image.getAttribute('data-src');
+          if (src) {
+            imageUrl = normalizeImageUrl(src, baseUrl);
+          }
+        }
+        
+        // Description
+        const description = item.querySelector('p, [class*="desc"]')?.textContent?.trim() || null;
+        const offerDetails = extractOfferDetails(item);
+        
+        products.push({
+          name,
+          price,
+          description,
+          image_url: imageUrl,
+          offer_details: offerDetails,
+          store: 'willys'
+        });
+        
+        console.log(`Added grid product: ${name}, price: ${price}`);
+      } catch (itemError) {
+        console.error("Error processing a product item:", itemError);
+      }
+    }
+    
+    console.log(`Extracted ${products.length} products from grid items`);
     return products;
   } catch (error) {
-    console.error("Error extracting grid items:", error);
+    console.error("Error extracting grid products:", error);
     return [];
   }
+}
+
+/**
+ * Determine if an element is likely a product card
+ */
+function isProductElement(element: Element): boolean {
+  // Check if the element contains product indicators
+  const text = element.textContent?.toLowerCase() || '';
+  const hasPrice = text.includes('kr') || text.includes(':-)') || text.includes('pris');
+  const hasProductName = element.querySelector('h2, h3, h4, h5, .title, [class*="name"]');
+  const hasImage = element.querySelector('img');
+  
+  // Score based on product indicators
+  let score = 0;
+  if (hasPrice) score += 2;
+  if (hasProductName) score += 2;
+  if (hasImage) score += 1;
+  
+  return score >= 3;
 }
