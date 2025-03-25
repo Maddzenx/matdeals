@@ -10,6 +10,7 @@ import { useInitialStoreSetup } from "@/hooks/useInitialStoreSetup";
 import { useAuthCheck } from "@/hooks/useAuthCheck";
 import { OffersPageContent } from "@/components/offers/OffersPageContent";
 import { storeTagsData } from "@/data/productData";
+import { toast } from "sonner";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -29,7 +30,16 @@ const Index = () => {
     
     const triggerInitialLoad = async () => {
       console.log("Triggering initial data refresh");
+      toast.info("Uppdaterar butikserbjudanden...", {
+        description: "Detta kan ta upp till 2 minuter"
+      });
+      
+      // Force a full refresh from all store sources
       await handleRefresh(true); // Set to true to show notifications
+      
+      toast.success("Uppdatering färdig!", {
+        description: "Butikserbjudanden har uppdaterats"
+      });
     };
     
     // Start loading immediately

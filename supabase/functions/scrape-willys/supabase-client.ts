@@ -37,12 +37,10 @@ export async function storeProducts(products: any[]): Promise<number> {
       console.log("Successfully cleared existing Willys products");
     }
     
-    // Validate and prepare products for storage
+    // Validate and prepare products for storage - STANDARDIZE store name to 'willys'
     const validProducts = products.map(product => {
-      // Ensure store is consistent with the filters in the UI - simplified to just 'willys'
-      const storeName = 'willys';
-      
       // Create a new product object with only the fields needed for the table
+      // Always set store to lowercase 'willys' for consistency
       return {
         name: product.name || 'Unnamed Product',
         description: product.description || '',
@@ -50,7 +48,7 @@ export async function storeProducts(products: any[]): Promise<number> {
                typeof product.price === 'string' ? parseInt(product.price) || 0 : 0,
         image_url: product.image_url || 'https://assets.icanet.se/t_product_large_v1,f_auto/7300156501245.jpg',
         offer_details: product.offer_details || 'Veckans erbjudande',
-        store: storeName // Explicitly set the store field to match UI filters
+        store: 'willys' // ALWAYS lowercase 'willys' for consistency
       };
     });
     

@@ -18,11 +18,21 @@ export const useProductSection = (
     
     // Filter by active stores - make this case insensitive
     let filtered = products.filter(product => {
-      // Ensure the product has a store property and it's in the active stores list
+      // Ensure the product has a store property and it's in the active stores list (case insensitive)
       const productStore = product.store?.toLowerCase();
-      const isIncluded = productStore && activeStoreIds.includes(productStore);
       
-      if (!isIncluded && productStore) {
+      // Debug store information
+      if (!productStore) {
+        console.log("Product without store property:", product.name);
+        return false;
+      }
+      
+      // Check if any activeStoreId matches the product store (case insensitive)
+      const isIncluded = activeStoreIds.some(storeId => 
+        productStore === storeId.toLowerCase()
+      );
+      
+      if (!isIncluded) {
         console.log(`Product with store "${productStore}" filtered out because it's not in active stores:`, activeStoreIds);
       }
       

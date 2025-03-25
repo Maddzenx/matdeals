@@ -37,7 +37,7 @@ export async function storeProducts(products: any[]): Promise<number> {
       console.log("Successfully cleared existing hemkop products");
     }
     
-    // Validate and prepare products for storage
+    // Validate and prepare products for storage - ALWAYS use 'hemkop' for consistency
     const validProducts = products.map(product => {
       // Create a new product object with only the fields needed for the table
       return {
@@ -47,7 +47,7 @@ export async function storeProducts(products: any[]): Promise<number> {
                typeof product.price === 'string' ? parseInt(product.price) || 0 : 0,
         image_url: product.image_url || 'https://assets.icanet.se/t_product_large_v1,f_auto/7300156501245.jpg',
         offer_details: product.offer_details || 'Veckans erbjudande',
-        store: 'hemkop' // Make sure store is set to 'hemkop'
+        store: 'hemkop' // ALWAYS lowercase 'hemkop' for consistency
       };
     });
     
