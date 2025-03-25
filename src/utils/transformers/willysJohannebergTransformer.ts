@@ -14,11 +14,14 @@ export const transformWillysJohannebergProducts = (willysJohannebergData: any[])
   }
   
   try {
-    const transformedProducts = (willysJohannebergData || []).map((item) => {
+    const transformedProducts = (willysJohannebergData || []).filter(Boolean).map((item) => {
       if (!item || !item["Product Name"]) {
         console.warn("Skipping Willys Johanneberg item without name:", item);
         return null;
       }
+      
+      // Sanitize product name to ensure it's a string
+      const productName = String(item["Product Name"]).trim();
       
       // Parse the price to ensure it's a number
       let price = null;
@@ -26,21 +29,8 @@ export const transformWillysJohannebergProducts = (willysJohannebergData: any[])
         price = item.Price;
       } else if (typeof item.Price === 'string') {
         // Try to parse as integer first
-        let parsedPrice = parseInt(item.Price, 10);
-        if (isNaN(parsedPrice)) {
-          // If failed, try to extract number from string (e.g., "29:90 kr/st")
-          const match = item.Price.match(/(\d+)[,.:]?(\d+)?/);
-          if (match) {
-            if (match[2]) {
-              // If we have decimals like "29:90", convert to "29.90" and parse
-              parsedPrice = parseFloat(`${match[1]}.${match[2]}`);
-            } else {
-              // Just the integer part
-              parsedPrice = parseInt(match[1], 10);
-            }
-          }
-        }
-        price = parsedPrice;
+        const priceStr = String(item.Price).replace(/[^\d,.]/g, '').replace(',', '.');
+        price = parseFloat(priceStr);
       }
       
       // Format the price string for display
@@ -64,17 +54,19 @@ export const transformWillysJohannebergProducts = (willysJohannebergData: any[])
         originalPriceFormatted = item["Unit Price"];
       }
       
-      // Determine product category based on name
-      const category = determineProductCategory(item["Product Name"], item["Brand and Weight"] || '');
+      // Get any brand and weight information
+      const brandAndWeight = item["Brand and Weight"] ? String(item["Brand and Weight"]).trim() : '';
       
-      // Create a stable ID based on name and a unique identifier
-      const sanitizedName = item["Product Name"].replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-      const productId = `willys-johanneberg-${sanitizedName}-${Date.now().toString(36)}`;
+      // Determine product category based on name and brand
+      const category = determineProductCategory(productName, brandAndWeight);
+      
+      // Create a stable ID
+      const timestamp = Date.now();
+      const randomStr = Math.random().toString(36).substring(2, 8);
+      const productId = `willys-jberg-${timestamp}-${randomStr}`;
       
       // Always standardize store name to lowercase 'willys' for filtering consistency
       const store = 'willys';
-      
-      console.log(`Processing Willys Johanneberg item: ${item["Product Name"]} (${productId}), category: ${category}, store: ${store}, price: ${formattedPrice}`);
       
       // Check if the image URL is valid and use a fallback image
       let imageUrl = item["Product Image"] || 'https://cdn.pixabay.com/photo/2020/10/05/19/55/grocery-5630804_1280.jpg';
@@ -83,7 +75,7 @@ export const transformWillysJohannebergProducts = (willysJohannebergData: any[])
       }
       
       // Combine details from brand and weight with savings if available
-      let details = item["Brand and Weight"] || 'Ingen beskrivning tillgänglig';
+      let details = brandAndWeight || 'Ingen beskrivning tillgänglig';
       if (item["Savings"] && item["Savings"] !== '') {
         details += ` (${item["Savings"]})`;
       }
@@ -96,10 +88,12 @@ export const transformWillysJohannebergProducts = (willysJohannebergData: any[])
         offerBadge = item["Label 2"];
       }
       
+      console.log(`Processed Willys Johanneberg item: ${productName} (${productId}), category: ${category}, price: ${formattedPrice}`);
+      
       return {
         id: productId,
         image: imageUrl,
-        name: item["Product Name"],
+        name: productName,
         details: details,
         currentPrice: formattedPrice,
         originalPrice: originalPriceFormatted,

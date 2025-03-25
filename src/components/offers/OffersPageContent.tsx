@@ -6,6 +6,7 @@ import { ProductSection } from "@/components/ProductSection";
 import { PageHeader } from "@/components/PageHeader";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { NavItem } from "@/components/BottomNav";
+import { Button } from "@/components/ui/button";
 
 interface OffersPageContentProps {
   title: string;
@@ -75,7 +76,7 @@ export const OffersPageContent: React.FC<OffersPageContentProps> = ({
     }
   }, [supabaseProducts]);
 
-  // If we've been in a loading state for more than 10 seconds with no products,
+  // If we've been in a loading state for more than 15 seconds with no products,
   // trigger a refresh automatically
   useEffect(() => {
     let autoRefreshTimer: number | null = null;
@@ -84,7 +85,7 @@ export const OffersPageContent: React.FC<OffersPageContentProps> = ({
       autoRefreshTimer = window.setTimeout(() => {
         console.log("Auto-triggering refresh after extended loading period");
         handleRefresh();
-      }, 10000);
+      }, 15000);
     }
     
     return () => {
@@ -122,14 +123,18 @@ export const OffersPageContent: React.FC<OffersPageContentProps> = ({
               : "Laddar produkter från Supabase..."}
           />
         ) : supabaseProducts.length === 0 ? (
-          <div className="p-8 text-center">
-            <p className="text-gray-500 mb-4">Inga produkter hittades</p>
-            <button 
+          <div className="p-8 text-center flex flex-col items-center">
+            <p className="text-gray-500 mb-4">Inga produkter hittades i databasen</p>
+            <Button 
               onClick={handleRefresh}
               className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+              disabled={isRefreshing}
             >
-              Uppdatera produkter
-            </button>
+              {isRefreshing ? "Uppdaterar..." : "Uppdatera produkter"}
+            </Button>
+            <p className="text-sm text-gray-400 mt-4">
+              Det kan ta upp till 5 minuter att hämta erbjudanden från butikerna
+            </p>
           </div>
         ) : (
           <ProductSection

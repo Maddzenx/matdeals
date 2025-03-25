@@ -13,6 +13,7 @@ export const useProductRefresh = (refetch: () => Promise<{ success: boolean; err
   const { scraping: scrapingHemkop, handleScrapeHemkop } = useScrapeHemkop(refetch);
   const { isFirstLoad } = useAppSession();
   const isRefreshAttempted = useRef(false);
+  const isScrapingInProgress = useRef(false);
 
   // Auto-refresh data only on first app load
   useEffect(() => {
@@ -32,11 +33,22 @@ export const useProductRefresh = (refetch: () => Promise<{ success: boolean; err
   }, [isFirstLoad]);
 
   const handleRefresh = async (showNotification = true) => {
+    if (isScrapingInProgress.current) {
+      console.log("Refresh already in progress, skipping request");
+      if (showNotification) {
+        toast.info("Uppdatering pågår redan...", {
+          duration: 2000,
+        });
+      }
+      return { success: false, error: "Refresh already in progress" };
+    }
+
+    isScrapingInProgress.current = true;
     setIsRefreshing(true);
     
     if (showNotification) {
       toast.info("Uppdaterar produkter...", {
-        duration: 2000,
+        duration: 4000,
       });
     }
     
@@ -48,22 +60,40 @@ export const useProductRefresh = (refetch: () => Promise<{ success: boolean; err
       const result = await refetch();
       console.log("Fetch result:", result);
       
-      // Only scrape if explicitly requested or if there's no data
-      if (showNotification) {
-        console.log("Scraping new data from store websites");
+      // Check if we got any data
+      const hasNoData = !result.success || result.error;
+      
+      // Always scrape if explicitly requested (showNotification = true)
+      // or if there's no data
+      if (showNotification || hasNoData) {
+        console.log("Scraping new data from store websites", hasNoData ? "(no data was found in database)" : "(user requested refresh)");
         
-        // Prioritize Willys scraping 
-        await handleScrapeWillys(true).catch(err => {
-          console.error("Error scraping Willys:", err);
-        });
+        // Run all scraping requests in parallel with proper error handling
+        const scrapePromises = [
+          handleScrapeWillys(showNotification).catch(err => {
+            console.error("Error scraping Willys:", err);
+            return { success: false, error: err };
+          }),
+          
+          handleScrapeIca(showNotification).catch(err => {
+            console.error("Error scraping ICA:", err);
+            return { success: false, error: err };
+          }),
+          
+          handleScrapeHemkop(showNotification).catch(err => {
+            console.error("Error scraping Hemköp:", err);
+            return { success: false, error: err };
+          })
+        ];
         
-        await handleScrapeIca(true).catch(err => {
-          console.error("Error scraping ICA:", err);
-        });
-  
-        await handleScrapeHemkop(true).catch(err => {
-          console.error("Error scraping Hemköp:", err);
-        });
+        // Wait for all scraping operations to complete
+        const scrapeResults = await Promise.all(scrapePromises);
+        
+        // Log scrape results for debugging
+        console.log("Scrape results:", scrapeResults);
+        
+        // Check if any of the scraping operations were successful
+        const anyScrapeSuccessful = scrapeResults.some(r => r && r.success);
         
         // Refetch after scraping to get the latest data
         console.log("Refetching after scraping to get the latest data");
@@ -79,9 +109,10 @@ export const useProductRefresh = (refetch: () => Promise<{ success: boolean; err
         } else {
           if (showNotification) {
             toast.error("Kunde inte uppdatera produkter", {
-              description: "Försök igen senare",
+              description: "Försök igen senare eller kontrollera nätverksanslutningen",
             });
           }
+          console.error("Failed to refresh products:", refreshResult.error);
         }
         
         return refreshResult;
@@ -98,6 +129,7 @@ export const useProductRefresh = (refetch: () => Promise<{ success: boolean; err
       return { success: false, error };
     } finally {
       setIsRefreshing(false);
+      isScrapingInProgress.current = false;
     }
   };
 

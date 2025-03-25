@@ -31,15 +31,29 @@ const Index = () => {
     const triggerInitialLoad = async () => {
       console.log("Triggering initial data refresh");
       toast.info("Uppdaterar butikserbjudanden...", {
-        description: "Detta kan ta upp till 2 minuter"
+        description: "Hämtar erbjudanden från butiker, detta kan ta några minuter"
       });
       
-      // Force a full refresh from all store sources
-      await handleRefresh(true); // Set to true to show notifications
-      
-      toast.success("Uppdatering färdig!", {
-        description: "Butikserbjudanden har uppdaterats"
-      });
+      try {
+        // Force a full refresh from all store sources
+        const result = await handleRefresh(true); // Set to true to show notifications
+        
+        if (result && result.success) {
+          toast.success("Uppdatering färdig!", {
+            description: "Butikserbjudanden har uppdaterats"
+          });
+        } else {
+          console.error("Initial refresh failed:", result?.error);
+          toast.error("Kunde inte hämta erbjudanden", {
+            description: "Försök att klicka på uppdatera-knappen igen"
+          });
+        }
+      } catch (err) {
+        console.error("Error during initial refresh:", err);
+        toast.error("Ett fel uppstod vid uppdatering", {
+          description: "Kontrollera din internetanslutning och försök igen"
+        });
+      }
     };
     
     // Start loading immediately
@@ -55,6 +69,8 @@ const Index = () => {
         return acc;
       }, {} as Record<string, number>);
       console.log("Products by store:", storeCount);
+    } else {
+      console.log("No products loaded from Supabase yet");
     }
   }, [activeStores, supabaseProducts]);
 
