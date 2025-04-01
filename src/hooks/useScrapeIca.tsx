@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const useScrapeIca = (refetchProducts: () => Promise<{ success: boolean; error?: any }>) => {
   const [scraping, setScraping] = useState(false);
 
-  const handleScrapeIca = async (showNotification = true) => {
+  const handleScrapeIca = async (showNotification = false) => { // Default to false
     try {
       setScraping(true);
       
@@ -32,20 +32,9 @@ export const useScrapeIca = (refetchProducts: () => Promise<{ success: boolean; 
         throw new Error("Could not update products after scraping");
       }
       
-      const productsCount = data.products?.length || 0;
-      console.log(`Updated ${productsCount} products from ICA`);
-      
       return data;
     } catch (err: any) {
       console.error("Error scraping ICA:", err);
-      
-      try {
-        console.log("Attempting to refresh products despite error");
-        await refetchProducts();
-      } catch (refreshErr) {
-        console.error("Could not refresh products after error:", refreshErr);
-      }
-      
       throw err;
     } finally {
       setScraping(false);
