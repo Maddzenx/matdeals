@@ -5,6 +5,7 @@ import { Card, CardContent } from './ui/card';
 import { ProductCard } from './ProductCard';
 import { useProductSection } from '@/hooks/useProductSection';
 import { ProductSectionLayout } from './product-section/ProductSectionLayout';
+import { Product as DataProduct } from '@/data/types';
 
 interface ProductSectionProps {
   title?: string;
@@ -46,8 +47,8 @@ const ProductSection: React.FC<ProductSectionProps> = ({
 }) => {
   const [selectedStore, setSelectedStore] = useState<string>('all');
   
-  // If we have supabase products, transform them to match the Product interface
-  const displayProducts = supabaseProducts.length > 0 
+  // If we have supabase products, transform them to match the Product interface from data/types
+  const displayProducts: DataProduct[] = supabaseProducts.length > 0 
     ? supabaseProducts.map((product: any) => ({
         id: product.id || '',
         name: product.name || product.product_name || '',
@@ -59,7 +60,7 @@ const ProductSection: React.FC<ProductSectionProps> = ({
         image: product.image || 'https://assets.icanet.se/t_product_large_v1,f_auto/7310865085313.jpg', // Default image
         offerBadge: 'Erbjudande'
       }))
-    : products;
+    : products as unknown as DataProduct[]; // Cast to DataProduct[] since the structures match
   
   // If we have categories from props, use those
   const defaultCategories = [
@@ -160,7 +161,7 @@ const ProductSection: React.FC<ProductSectionProps> = ({
                   <Card key={product.id} className="hover:shadow-lg transition-shadow">
                     <CardContent className="p-4">
                       <div className="font-medium">{product.name}</div>
-                      <div className="text-lg font-bold">{product.currentPrice}</div>
+                      <div className="text-lg font-bold">{product.price}</div>
                       <div className="text-sm text-gray-500">{product.store}</div>
                     </CardContent>
                   </Card>
