@@ -18,13 +18,14 @@ export interface Recipe {
   
   // Optional fields that may not be in the database but used in frontend
   image_url?: string;
-  time_minutes?: number;
-  servings?: number;
-  difficulty?: string;
+  time_minutes?: number | null;
+  servings?: number | null;
+  difficulty?: string | null;
   author?: string;
   tags?: string[];
   original_price?: number | null;
   price?: number | null;
+  source_url?: string | null;
 }
 
 // Helper function to convert database recipe to frontend Recipe type
@@ -41,5 +42,6 @@ export function convertDatabaseRecipeToRecipe(dbRecipe: any): Recipe {
     time_minutes: dbRecipe.time_minutes || 30, // Default time
     servings: dbRecipe.servings || 4, // Default servings
     difficulty: dbRecipe.difficulty || "medium", // Default difficulty
+    source_url: dbRecipe.source_url || null // Add source_url field
   };
 }

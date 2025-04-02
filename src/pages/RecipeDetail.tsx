@@ -30,8 +30,10 @@ const RecipeDetail = () => {
     recipe,
     loading,
     error,
-    refreshing,
-    refreshRecipe
+    products: recipeProducts,
+    matchedIngredients,
+    handleAddToShoppingList,
+    handleAddToMealPlan
   } = useRecipeDetail(id);
 
   const { 
@@ -67,14 +69,21 @@ const RecipeDetail = () => {
     handleDropdownChange(false);
   }, [handleDropdownChange]);
 
+  // Function to retry loading the recipe
+  const refreshRecipe = useCallback(() => {
+    // Just force a re-render of the component to retry fetching
+    // This is a simple approach; in a real app, you might want to implement a more robust solution
+    window.location.reload();
+  }, []);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  if (loading || refreshing) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-white pb-20 flex flex-col items-center justify-center">
-        <LoadingIndicator message={refreshing ? "Uppdaterar recept..." : "Laddar recept..."} />
+        <LoadingIndicator message="Laddar recept..." />
       </div>
     );
   }
@@ -82,7 +91,7 @@ const RecipeDetail = () => {
   if (error || !recipe) {
     return (
       <RecipeError
-        message={error?.message}
+        message={error || "Failed to load recipe"}
         onGoBack={handleGoBack}
         onRetry={refreshRecipe}
       />
@@ -109,9 +118,9 @@ const RecipeDetail = () => {
         
         <div className="px-4 mt-4">
           <RecipeMetrics 
-            time_minutes={recipe.time_minutes}
-            servings={recipe.servings}
-            difficulty={recipe.difficulty}
+            time_minutes={recipe.time_minutes || 0}
+            servings={recipe.servings || 0}
+            difficulty={recipe.difficulty || ""}
           />
         </div>
         

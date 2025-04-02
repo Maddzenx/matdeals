@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,7 +16,7 @@ export function useRecipeDetail(recipeId: string | undefined) {
   const [matchedIngredients, setMatchedIngredients] = useState<any[]>([]);
   const navigate = useNavigate();
   const { addProduct } = useCart();
-  const { addRecipeToMealPlan } = useMealPlan();
+  const { addToMealPlan } = useMealPlan(); // Use addToMealPlan instead of addRecipeToMealPlan
   const { findMatchingProducts } = useProductMatch();
 
   useEffect(() => {
@@ -82,7 +83,7 @@ export function useRecipeDetail(recipeId: string | undefined) {
 
   const handleAddToMealPlan = async (recipe: Recipe) => {
     if (!recipe) return;
-    addRecipeToMealPlan(recipe);
+    addToMealPlan(recipe.id); // Adjust to match the actual function signature in useMealPlan
   };
   
   // Make sure to return the updated state

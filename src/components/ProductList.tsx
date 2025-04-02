@@ -2,7 +2,11 @@
 import React from 'react';
 import { Product } from '../types/product';
 
-const ProductList: React.FC<{ products: Product[] }> = ({ products }) => {
+interface ProductListProps {
+  products: Product[];
+}
+
+const ProductList: React.FC<ProductListProps> = ({ products }) => {
   return (
     <div className="space-y-4">
       {products.map((product: Product) => (
