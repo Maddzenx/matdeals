@@ -1,7 +1,7 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
-export const useStoreFilters = (initialStores: string[]) => {
+export const useStoreFilters = (initialStores: string[] = []) => {
   const [activeStores, setActiveStores] = useState<string[]>(initialStores);
   
   const handleRemoveTag = (id: string) => {

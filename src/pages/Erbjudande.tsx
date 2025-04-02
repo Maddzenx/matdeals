@@ -15,7 +15,7 @@ import { PageHeader } from '@/components/PageHeader';
 
 export default function Erbjudande() {
   const { navItems, setNavItems, handleProductQuantityChange } = useNavigationState();
-  const { activeStores, toggleStore } = useStoreFilters();
+  const { activeStores, handleStoreToggle, handleRemoveTag } = useStoreFilters([]);
   const [searchQuery, setSearchQuery] = useState('');
   const { viewMode, toggleViewMode } = useViewMode();
   const { products, loading, error, refetch } = useSupabaseProducts();
@@ -56,6 +56,7 @@ export default function Erbjudande() {
   };
 
   const filterProductsByCategory = (products: any[]) => {
+    if (!products || products.length === 0) return [];
     if (activeCategory === 'all') return products;
     return products.filter(product => {
       if (activeCategory === 'fruits') return product.category?.toLowerCase().includes('frukt') || product.category?.toLowerCase().includes('grönt');
@@ -68,6 +69,7 @@ export default function Erbjudande() {
   };
 
   const filterProductsBySearch = (products: any[]) => {
+    if (!products || products.length === 0) return [];
     if (!searchQuery.trim()) return products;
     const query = searchQuery.toLowerCase();
     return products.filter(product => 
@@ -78,6 +80,7 @@ export default function Erbjudande() {
   };
 
   const filterProductsByStore = (products: any[]) => {
+    if (!products || products.length === 0) return [];
     if (activeStores.length === 0) return products;
     return products.filter(product => 
       activeStores.some(storeId => 
@@ -88,7 +91,7 @@ export default function Erbjudande() {
 
   const filteredProducts = filterProductsByStore(
     filterProductsByCategory(
-      filterProductsBySearch(products)
+      filterProductsBySearch(products || [])
     )
   );
 
@@ -126,13 +129,13 @@ export default function Erbjudande() {
         />
         <SearchBar 
           activeStoreIds={activeStores}
-          onStoreToggle={toggleStore}
+          onStoreToggle={handleStoreToggle}
           onSearch={handleSearch}
         />
       </div>
 
       <div className="px-4 pt-2">
-        <StoreTags tags={storeTags} onRemove={toggleStore} />
+        <StoreTags tags={storeTags} onRemove={handleRemoveTag} />
       </div>
       
       <CategoryTabs
