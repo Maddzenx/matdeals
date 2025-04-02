@@ -6,7 +6,7 @@ import {
   fetchRecipesByCategory, 
   scrapeRecipesFromApi 
 } from "@/services/recipeService";
-import { getRecipeCategories, RecipeCategory } from "@/utils/recipeCategories";
+import { getRecipeCategories, RecipeCategory, defaultRecipeCategories } from "@/utils/recipeCategories";
 import { useAppSession } from "@/hooks/useAppSession";
 
 export type { Recipe } from "@/types/recipe";
@@ -39,11 +39,11 @@ export const useRecipes = (initialCategory: string = "Middag") => {
 
   const fetchCategories = useCallback(async () => {
     try {
-      const result = await getRecipeCategories();
+      const fetchedCategories = await getRecipeCategories();
       
-      if (Array.isArray(result)) {
+      if (Array.isArray(fetchedCategories) && fetchedCategories.length > 0) {
         // Extract category names and set them
-        const categoryNames = result.map((cat: RecipeCategory) => cat.name);
+        const categoryNames = fetchedCategories.map((cat: RecipeCategory) => cat.name);
         setCategories(categoryNames);
         
         // If active category not in the list, update it
@@ -51,21 +51,20 @@ export const useRecipes = (initialCategory: string = "Middag") => {
           setActiveCategory(categoryNames[0]);
         }
       } else {
-        // Handle the case where getRecipeCategories returns an object
-        const { categories: fetchedCategories, newActiveCategory } = result;
+        // Use default categories if no categories returned
+        console.log("Using default recipe categories");
+        const defaultCategoryNames = defaultRecipeCategories.map(cat => cat.name);
+        setCategories(defaultCategoryNames);
         
-        if (Array.isArray(fetchedCategories)) {
-          const categoryNames = fetchedCategories.map((cat: RecipeCategory) => cat.name);
-          setCategories(categoryNames);
-        }
-        
-        // Update active category if needed
-        if (newActiveCategory) {
-          setActiveCategory(newActiveCategory);
+        if (!defaultCategoryNames.includes(activeCategory)) {
+          setActiveCategory(defaultCategoryNames[0]);
         }
       }
     } catch (error) {
       console.error("Error fetching categories:", error);
+      // Fallback to default categories on error
+      const defaultCategoryNames = defaultRecipeCategories.map(cat => cat.name);
+      setCategories(defaultCategoryNames);
     }
   }, [activeCategory]);
 
