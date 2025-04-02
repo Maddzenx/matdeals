@@ -9,8 +9,10 @@ interface RecipeMetadataProps {
 
 export const RecipeMetadata: React.FC<RecipeMetadataProps> = ({ recipe }) => {
   // Determine difficulty icon and color
-  const getDifficultyProps = (difficulty: string | null) => {
-    switch (difficulty?.toLowerCase()) {
+  const getDifficultyProps = (difficulty: string | null | undefined) => {
+    if (!difficulty) return { color: "text-orange-500", level: "Medel" };
+    
+    switch (difficulty.toLowerCase()) {
       case "lätt":
         return { color: "text-green-600", level: "Lätt" };
       case "avancerad":
@@ -20,7 +22,7 @@ export const RecipeMetadata: React.FC<RecipeMetadataProps> = ({ recipe }) => {
     }
   };
 
-  const difficultyProps = getDifficultyProps(recipe.difficulty || null);
+  const difficultyProps = getDifficultyProps(recipe.difficulty);
 
   return (
     <div className="flex justify-between mb-4 text-sm text-gray-500">

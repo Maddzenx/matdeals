@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Product } from '../types/product';
 import { Card, CardContent } from './ui/card';
@@ -7,12 +6,39 @@ interface ProductSectionProps {
   title: string;
   products: Product[];
   stores?: string[];
+  categories?: { id: string; name: string }[];
+  storeTags?: { id: string; name: string }[];
+  activeStoreIds?: string[];
+  onProductQuantityChange?: (
+    productId: string, 
+    newQuantity: number, 
+    previousQuantity: number,
+    productDetails?: {
+      name: string;
+      details: string;
+      price: string;
+      image?: string;
+      store?: string;
+    }
+  ) => void;
+  onRemoveTag?: (id: string) => void;
+  viewMode?: "grid" | "list";
+  searchQuery?: string;
+  supabaseProducts?: any[];
 }
 
 const ProductSection: React.FC<ProductSectionProps> = ({ 
   title, 
   products,
-  stores = []
+  stores = [],
+  categories,
+  storeTags,
+  activeStoreIds,
+  onProductQuantityChange,
+  onRemoveTag,
+  viewMode,
+  searchQuery,
+  supabaseProducts
 }) => {
   const [selectedStore, setSelectedStore] = useState<string>('all');
   

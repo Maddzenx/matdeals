@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useCallback } from "react";
 import { Recipe } from "@/types/recipe";
 import { useSupabaseProducts } from "@/hooks/useSupabaseProducts";
@@ -6,7 +5,7 @@ import {
   fetchRecipesByCategory, 
   scrapeRecipesFromApi 
 } from "@/services/recipeService";
-import { getRecipeCategories } from "@/utils/recipeCategories";
+import { getRecipeCategories, RecipeCategory } from "@/utils/recipeCategories";
 import { useAppSession } from "@/hooks/useAppSession";
 
 export type { Recipe } from "@/types/recipe";
@@ -42,18 +41,21 @@ export const useRecipes = (initialCategory: string = "Middag") => {
       const result = await getRecipeCategories();
       
       if (Array.isArray(result)) {
-        setCategories(result);
+        // Extract category names and set them
+        const categoryNames = result.map(cat => cat.name);
+        setCategories(categoryNames);
         
         // If active category not in the list, update it
-        if (result.length > 0 && !result.includes(activeCategory)) {
-          setActiveCategory(result[0]);
+        if (categoryNames.length > 0 && !categoryNames.includes(activeCategory)) {
+          setActiveCategory(categoryNames[0]);
         }
       } else {
         // Handle the case where getRecipeCategories returns an object
         const { categories: fetchedCategories, newActiveCategory } = result;
         
         if (Array.isArray(fetchedCategories)) {
-          setCategories(fetchedCategories);
+          const categoryNames = fetchedCategories.map(cat => cat.name);
+          setCategories(categoryNames);
         }
         
         // Update active category if needed
