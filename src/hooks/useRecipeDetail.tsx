@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Recipe, convertDatabaseRecipeToRecipe } from "@/types/recipe";
 import { Product } from "@/data/types";
-import { useCart } from "./useCart";
+import { useCart } from "./useCartState";
 import { useProductMatch } from "./useProductMatch";
 import { useMealPlan } from "./useMealPlan";
 
@@ -16,7 +16,7 @@ export function useRecipeDetail(recipeId: string | undefined) {
   const [matchedIngredients, setMatchedIngredients] = useState<any[]>([]);
   const navigate = useNavigate();
   const { addProduct } = useCart();
-  const { addToMealPlan } = useMealPlan(); // Use addToMealPlan instead of addRecipeToMealPlan
+  const { addToMealPlan } = useMealPlan(); // Use addToMealPlan
   const { findMatchingProducts } = useProductMatch();
 
   useEffect(() => {
@@ -83,7 +83,7 @@ export function useRecipeDetail(recipeId: string | undefined) {
 
   const handleAddToMealPlan = async (recipe: Recipe) => {
     if (!recipe) return;
-    addToMealPlan(recipe.id); // Adjust to match the actual function signature in useMealPlan
+    addToMealPlan(recipe.id, "default"); // Add a default day parameter
   };
   
   // Make sure to return the updated state

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Card,
@@ -13,7 +14,6 @@ import { Product } from "@/data/types";
 import { RecipePrice } from "./RecipePrice";
 import { Badge } from "../ui/badge";
 import { ShoppingCart } from "lucide-react";
-import { Meal } from "@/types/meal";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 

@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import { SearchBar } from "@/components/SearchBar";
 import { BottomNav } from "@/components/BottomNav";
-import { ProductSection } from "@/components/ProductSection";
+import ProductSection from "@/components/ProductSection";
 import { PageHeader } from "@/components/PageHeader";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { NavItem } from "@/components/BottomNav";

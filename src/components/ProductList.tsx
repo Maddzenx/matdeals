@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Product } from '../types/product';
+import { Product } from '@/data/types';
 
 interface ProductListProps {
   products: Product[];
@@ -12,7 +12,7 @@ const ProductList: React.FC<ProductListProps> = ({ products }) => {
       {products.map((product: Product) => (
         <div key={product.id} className="border p-4 rounded-md">
           <h3 className="font-semibold">{product.name}</h3>
-          <p>{product.price}</p>
+          <p>{product.currentPrice}</p>
           <p>{product.store}</p>
           <p>{product.category}</p>
         </div>

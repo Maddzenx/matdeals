@@ -70,10 +70,10 @@ const RecipeDetail = () => {
   }, [handleDropdownChange]);
 
   // Function to retry loading the recipe
-  const refreshRecipe = useCallback(() => {
+  const refreshRecipe = useCallback(async () => {
     // Just force a re-render of the component to retry fetching
-    // This is a simple approach; in a real app, you might want to implement a more robust solution
     window.location.reload();
+    return true; // Return a promise that resolves to boolean for type compatibility
   }, []);
 
   useEffect(() => {

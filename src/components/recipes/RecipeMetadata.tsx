@@ -20,7 +20,7 @@ export const RecipeMetadata: React.FC<RecipeMetadataProps> = ({ recipe }) => {
     }
   };
 
-  const difficultyProps = getDifficultyProps(recipe.difficulty);
+  const difficultyProps = getDifficultyProps(recipe.difficulty || null);
 
   return (
     <div className="flex justify-between mb-4 text-sm text-gray-500">

@@ -6,7 +6,7 @@ import {
   fetchRecipesByCategory, 
   scrapeRecipesFromApi 
 } from "@/services/recipeService";
-import { fetchRecipeCategories } from "@/utils/recipeCategories";
+import { getRecipeCategories } from "@/utils/recipeCategories";
 import { useAppSession } from "@/hooks/useAppSession";
 
 export type { Recipe } from "@/types/recipe";
@@ -39,7 +39,7 @@ export const useRecipes = (initialCategory: string = "Middag") => {
 
   const fetchCategories = useCallback(async () => {
     const { categories: fetchedCategories, newActiveCategory } = 
-      await fetchRecipeCategories(activeCategory);
+      await getRecipeCategories(activeCategory);
     
     setCategories(fetchedCategories);
     
