@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Recipe, convertDatabaseRecipeToRecipe } from "@/types/recipe";
 import { Product } from "@/data/types";
-import { useCart } from "./useCartState";
+import { useCart } from "./useCart";
 import { useProductMatch } from "./useProductMatch";
 import { useMealPlan } from "./useMealPlan";
 

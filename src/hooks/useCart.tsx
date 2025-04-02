@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import { useCartState, CartItem } from "./useCartState";
 
 export interface ShoppingCartProduct {

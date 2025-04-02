@@ -38,14 +38,31 @@ export const useRecipes = (initialCategory: string = "Middag") => {
   }, [products]);
 
   const fetchCategories = useCallback(async () => {
-    const { categories: fetchedCategories, newActiveCategory } = 
-      await getRecipeCategories(activeCategory);
-    
-    setCategories(fetchedCategories);
-    
-    // Update active category if needed
-    if (newActiveCategory) {
-      setActiveCategory(newActiveCategory);
+    try {
+      const result = await getRecipeCategories();
+      
+      if (Array.isArray(result)) {
+        setCategories(result);
+        
+        // If active category not in the list, update it
+        if (result.length > 0 && !result.includes(activeCategory)) {
+          setActiveCategory(result[0]);
+        }
+      } else {
+        // Handle the case where getRecipeCategories returns an object
+        const { categories: fetchedCategories, newActiveCategory } = result;
+        
+        if (Array.isArray(fetchedCategories)) {
+          setCategories(fetchedCategories);
+        }
+        
+        // Update active category if needed
+        if (newActiveCategory) {
+          setActiveCategory(newActiveCategory);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
     }
   }, [activeCategory]);
 
