@@ -9,102 +9,129 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      recipes: {
+      products: {
         Row: {
-          category: string | null
           created_at: string | null
           description: string | null
-          difficulty: string | null
           id: string
           image_url: string | null
-          ingredients: string[] | null
-          instructions: string[] | null
+          label: string | null
+          offer_details: string | null
           original_price: number | null
+          position: number | null
           price: number | null
-          servings: number | null
-          source_url: string | null
-          tags: string[] | null
-          time_minutes: number | null
+          product_name: string
+          product_url: string | null
+          purchase_limit: string | null
+          savings: number | null
+          store: string
+          store_location: string | null
+          unit_price: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          label?: string | null
+          offer_details?: string | null
+          original_price?: number | null
+          position?: number | null
+          price?: number | null
+          product_name: string
+          product_url?: string | null
+          purchase_limit?: string | null
+          savings?: number | null
+          store: string
+          store_location?: string | null
+          unit_price?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          label?: string | null
+          offer_details?: string | null
+          original_price?: number | null
+          position?: number | null
+          price?: number | null
+          product_name?: string
+          product_url?: string | null
+          purchase_limit?: string | null
+          savings?: number | null
+          store?: string
+          store_location?: string | null
+          unit_price?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      recipes: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          ingredients: Json
+          instructions: string[]
           title: string
         }
         Insert: {
-          category?: string | null
+          category: string
           created_at?: string | null
           description?: string | null
-          difficulty?: string | null
           id?: string
-          image_url?: string | null
-          ingredients?: string[] | null
-          instructions?: string[] | null
-          original_price?: number | null
-          price?: number | null
-          servings?: number | null
-          source_url?: string | null
-          tags?: string[] | null
-          time_minutes?: number | null
+          ingredients: Json
+          instructions: string[]
           title: string
         }
         Update: {
-          category?: string | null
+          category?: string
           created_at?: string | null
           description?: string | null
-          difficulty?: string | null
           id?: string
-          image_url?: string | null
-          ingredients?: string[] | null
-          instructions?: string[] | null
-          original_price?: number | null
-          price?: number | null
-          servings?: number | null
-          source_url?: string | null
-          tags?: string[] | null
-          time_minutes?: number | null
+          ingredients?: Json
+          instructions?: string[]
           title?: string
         }
         Relationships: []
       }
       "Willys Johanneberg": {
         Row: {
-          "Brand and Weight": string | null
-          "Label 1": string | null
-          "Label 2": string | null
-          "Label 3": string | null
-          Position: number
-          Price: number | null
-          "Product Image": string | null
-          "Product Link": string | null
-          "Product Name": string
-          "Purchase Limit": string | null
-          Savings: string | null
-          "Unit Price": string | null
+          additional_info: string | null
+          brand: string
+          category: string
+          created_at: string
+          id: string
+          is_kortvara: boolean | null
+          name: string
+          price: string
+          unit: string
         }
         Insert: {
-          "Brand and Weight"?: string | null
-          "Label 1"?: string | null
-          "Label 2"?: string | null
-          "Label 3"?: string | null
-          Position: number
-          Price?: number | null
-          "Product Image"?: string | null
-          "Product Link"?: string | null
-          "Product Name": string
-          "Purchase Limit"?: string | null
-          Savings?: string | null
-          "Unit Price"?: string | null
+          additional_info?: string | null
+          brand: string
+          category: string
+          created_at?: string
+          id?: string
+          is_kortvara?: boolean | null
+          name: string
+          price: string
+          unit: string
         }
         Update: {
-          "Brand and Weight"?: string | null
-          "Label 1"?: string | null
-          "Label 2"?: string | null
-          "Label 3"?: string | null
-          Position?: number
-          Price?: number | null
-          "Product Image"?: string | null
-          "Product Link"?: string | null
-          "Product Name"?: string
-          "Purchase Limit"?: string | null
-          Savings?: string | null
-          "Unit Price"?: string | null
+          additional_info?: string | null
+          brand?: string
+          category?: string
+          created_at?: string
+          id?: string
+          is_kortvara?: boolean | null
+          name?: string
+          price?: string
+          unit?: string
         }
         Relationships: []
       }
@@ -113,7 +140,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      scrape_willys_products: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
