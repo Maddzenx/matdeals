@@ -6,7 +6,20 @@ import { Product } from '@/data/types';
 interface ProductListViewProps {
   products: Product[];
   viewMode: "grid" | "list";
-  onQuantityChange: (productId: string, newQuantity: number, previousQuantity: number, productDetails?: object) => void;
+  onQuantityChange: (
+    productId: string, 
+    newQuantity: number, 
+    previousQuantity: number, 
+    productDetails?: {
+      name: string;
+      details: string;
+      price: string;
+      image?: string;
+      store?: string;
+      recipeId?: string;
+      recipeTitle?: string;
+    }
+  ) => void;
   title?: string;
   categoryName?: string;
 }

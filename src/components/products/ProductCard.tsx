@@ -15,7 +15,20 @@ interface ProductCardProps {
     offerBadge?: string;
     unitPrice?: string;
   };
-  onQuantityChange: (productId: string, newQuantity: number, previousQuantity: number, productDetails?: object) => void;
+  onQuantityChange: (
+    productId: string, 
+    newQuantity: number, 
+    previousQuantity: number, 
+    productDetails?: {
+      name: string;
+      details: string;
+      price: string;
+      image?: string;
+      store?: string;
+      recipeId?: string;
+      recipeTitle?: string;
+    }
+  ) => void;
   viewMode: "grid" | "list";
 }
 
