@@ -2,28 +2,35 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Product } from "@/data/types";
-import { useProductFetching } from "@/hooks/useProductFetching";
-import { transformWillysJohannebergProducts } from "@/utils/transformers";
+import { supabase } from "@/integrations/supabase/client";
 
 export const useSupabaseProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const { refreshProducts, loading: fetchLoading } = useProductFetching();
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["supabaseProducts"],
     queryFn: async () => {
       try {
-        console.log("Executing query function for supabaseProducts");
-        const result = await refreshProducts(false);
+        console.log("Fetching products from the products table");
         
-        // Log table structure for debugging
-        console.log("Product refresh result:", result);
+        const { data: productsData, error: productsError } = await supabase
+          .from('products')
+          .select('*')
+          .order('created_at', { ascending: false });
         
-        if (!result.willysJohannebergData?.length) {
-          console.warn("No Willys Johanneberg data found in database");
+        if (productsError) {
+          console.error("Error fetching products:", productsError);
+          throw productsError;
         }
         
-        return result;
+        console.log("Fetched products:", productsData?.length || 0);
+        if (productsData && productsData.length > 0) {
+          console.log("Sample product:", productsData[0]);
+        } else {
+          console.warn("No products found in the products table");
+        }
+        
+        return productsData || [];
       } catch (error) {
         console.error("Error in fetch query function:", error);
         throw error;
@@ -39,10 +46,10 @@ export const useSupabaseProducts = () => {
   useEffect(() => {
     if (data) {
       try {
-        console.log("Processing data:", data);
+        console.log("Processing fetched products data:", data.length);
         
         // Create fallback products if no data available
-        if (!data.willysJohannebergData || data.willysJohannebergData.length === 0) {
+        if (!data || data.length === 0) {
           console.log("Creating fallback products since no data is available");
           const fallbackProducts: Product[] = [
             {
@@ -72,9 +79,21 @@ export const useSupabaseProducts = () => {
           return;
         }
         
-        // Transform data if available
-        const transformedProducts = transformWillysJohannebergProducts(data.willysJohannebergData);
-        console.log(`Transformed ${transformedProducts.length} Willys Johanneberg products`);
+        // Transform database products to match our Product type
+        const transformedProducts: Product[] = data.map(item => ({
+          id: item.id || `product-${Math.random().toString(36).substring(2, 9)}`,
+          name: item.product_name || 'Unnamed Product',
+          category: determineCategoryFromText(item.product_name || ''),
+          store: item.store || 'Unknown Store',
+          currentPrice: formatPrice(item.price),
+          details: item.description || '',
+          image: item.image_url || 'https://assets.icanet.se/t_product_large_v1,f_auto/7310865085313.jpg',
+          originalPrice: item.original_price ? formatPrice(item.original_price) : '',
+          offerBadge: item.label || 'Erbjudande',
+          unitPrice: item.unit_price || ''
+        }));
+        
+        console.log(`Transformed ${transformedProducts.length} products`);
         
         if (transformedProducts.length > 0) {
           console.log("Sample transformed product:", transformedProducts[0]);
@@ -104,7 +123,7 @@ export const useSupabaseProducts = () => {
 
   return {
     products,
-    loading: isLoading || fetchLoading,
+    loading: isLoading,
     error,
     refetch: async () => {
       try {
@@ -118,3 +137,43 @@ export const useSupabaseProducts = () => {
     }
   };
 };
+
+// Helper function to format price
+function formatPrice(price: number | null | undefined): string {
+  if (price === null || price === undefined) return '';
+  
+  const priceString = price.toString().replace('.', ',');
+  return `${priceString} kr`;
+}
+
+// Helper function to determine category from product name
+function determineCategoryFromText(text: string): string {
+  const lowerText = text.toLowerCase();
+  
+  if (lowerText.includes('äpple') || lowerText.includes('frukt') || lowerText.includes('grönt') || 
+      lowerText.includes('banan') || lowerText.includes('tomat') || lowerText.includes('gurka')) {
+    return 'fruits';
+  }
+  
+  if (lowerText.includes('bröd') || lowerText.includes('bageri') || 
+      lowerText.includes('kaka') || lowerText.includes('bulle')) {
+    return 'bread';
+  }
+  
+  if (lowerText.includes('kött') || lowerText.includes('fläsk') || 
+      lowerText.includes('nöt') || lowerText.includes('kyckl')) {
+    return 'meat';
+  }
+  
+  if (lowerText.includes('ost') || lowerText.includes('mjölk') || 
+      lowerText.includes('fil') || lowerText.includes('yog')) {
+    return 'dairy';
+  }
+  
+  if (lowerText.includes('dryck') || lowerText.includes('juice') || 
+      lowerText.includes('vatten') || lowerText.includes('läsk')) {
+    return 'beverages';
+  }
+  
+  return 'other';
+}
