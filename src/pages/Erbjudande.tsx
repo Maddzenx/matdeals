@@ -1,9 +1,12 @@
+
 import { useEffect, useState } from 'react';
 import { Product } from '../types/product';
 import { getProducts, getProductsByStore, getProductsByCategory } from '../services/productService';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { BottomNav } from '@/components/BottomNav';
+import { useNavigationState } from '@/hooks/useNavigationState';
 
 export default function Erbjudande() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -12,6 +15,22 @@ export default function Erbjudande() {
   const [filter, setFilter] = useState<'all' | 'store' | 'category'>('all');
   const [selectedStore, setSelectedStore] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+
+  const { 
+    navItems, 
+    setNavItems, 
+    handleProductQuantityChange 
+  } = useNavigationState();
+
+  const handleNavSelect = (id: string) => {
+    // Update active nav item
+    const updatedNavItems = navItems.map(item => 
+      item.id === id 
+        ? { ...item, active: true } 
+        : { ...item, active: false }
+    );
+    setNavItems(updatedNavItems);
+  };
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -52,7 +71,7 @@ export default function Erbjudande() {
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 pb-20">
       <h1 className="text-3xl font-bold mb-6">Erbjudanden</h1>
 
       <div className="flex gap-4 mb-6">
@@ -127,6 +146,11 @@ export default function Erbjudande() {
           </Card>
         ))}
       </div>
+      
+      <BottomNav 
+        items={navItems} 
+        onSelect={handleNavSelect} 
+      />
     </div>
   );
 } 
