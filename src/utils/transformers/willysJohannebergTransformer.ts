@@ -1,4 +1,3 @@
-
 import { Product } from "@/data/types";
 import { determineProductCategory } from "./determineCategory";
 
@@ -23,29 +22,43 @@ export const transformWillysJohannebergProducts = (willysJohannebergData: any[])
       // Sanitize product name to ensure it's a string
       const productName = String(item["Product Name"]).trim();
       
-      // Parse the price to ensure it's a number
+      // Parse the price - convert from öre/cents (integer) to kr/SEK (decimal)
       let price = null;
       if (typeof item.Price === 'number') {
-        price = item.Price;
+        // Convert from öre to kr (divide by 100)
+        price = item.Price / 100;
       } else if (typeof item.Price === 'string') {
-        // Try to parse as float
-        const priceStr = String(item.Price).replace(/[^\d,.]/g, '').replace(',', '.');
-        price = parseFloat(priceStr);
+        // Try to parse as integer first
+        const priceInt = parseInt(String(item.Price).replace(/[^\d]/g, ''));
+        // Then convert to kr
+        price = priceInt / 100;
       }
       
       // Format the price string for display
       let formattedPrice = 'N/A';
       if (price !== null && !isNaN(price)) {
-        // Format as "XX:YY kr", Swedish format
+        // Format as "XX:YY kr" for whole numbers, or "XX,YY kr" for decimals (Swedish format)
         if (Number.isInteger(price)) {
           formattedPrice = `${price}:- kr`;
         } else {
-          const [whole, decimal] = price.toFixed(2).split('.');
-          formattedPrice = `${whole}:${decimal} kr`;
+          // For decimal values, use comma as decimal separator (Swedish format)
+          const priceStr = price.toFixed(2).replace('.', ',');
+          formattedPrice = `${priceStr} kr`;
         }
       } else if (item.Price && typeof item.Price === 'string') {
         // If we couldn't parse it, use the original string if available
         formattedPrice = item.Price;
+      }
+      
+      // Get savings information and convert from öre to kr if available
+      let savings = null;
+      if (item["Savings"] && item["Savings"] !== null) {
+        if (typeof item["Savings"] === 'number') {
+          savings = item["Savings"] / 100;
+        } else if (typeof item["Savings"] === 'string') {
+          const savingsInt = parseInt(String(item["Savings"]).replace(/[^\d]/g, ''));
+          savings = savingsInt / 100;
+        }
       }
       
       // Original price is not available in this dataset, use unit price if available
@@ -76,8 +89,9 @@ export const transformWillysJohannebergProducts = (willysJohannebergData: any[])
       
       // Combine details from brand and weight with savings if available
       let details = brandAndWeight || 'Ingen beskrivning tillgänglig';
-      if (item["Savings"] && item["Savings"] !== '') {
-        details += ` (${item["Savings"]})`;
+      if (savings) {
+        const savingsFormatted = savings.toFixed(2).replace('.', ',');
+        details += ` (Spara ${savingsFormatted} kr)`;
       }
       
       // Determine offer badge based on labels

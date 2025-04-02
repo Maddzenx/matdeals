@@ -1,95 +1,159 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { corsHeaders } from "./cors.ts";
-import { storeProducts } from "./supabase-client.ts";
+import { corsHeaders } from "../shared/cors.ts";
 import { extractProducts } from "./products-extractor.ts";
-import { createSampleProducts } from "./extractors/fallback-extractor.ts";
-import { fetchHtmlContent } from "./utils/dom-utils.ts";
-import { createSuccessResponse, createErrorResponse } from "./utils/response-utils.ts";
-import { WILLYS_URLS, USER_AGENTS, BASE_URL, STORE_NAME } from "./config/scraper-config.ts";
+import { storeProducts, Product } from "../shared/product-storage.ts";
 
+// Define the function handler
 serve(async (req) => {
   // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
   }
-
+  
   try {
-    console.log("Starting Willys scraper function...");
+    // Extract request parameters
+    const { forceRefresh = false, source = "unknown", target = "willys" } = await req.json();
+    console.log(`Scrape request received - forceRefresh: ${forceRefresh}, source: ${source}, target: ${target}`);
     
-    // Parse request body to check for forceRefresh flag and target store
-    let forceRefresh = false;
-    let source = "unknown";
-    let target = "willys-johanneberg"; // Default to Willys Johanneberg since it's our only table
+    // Get Supabase credentials from environment
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
     
-    try {
-      const body = await req.json();
-      forceRefresh = body?.forceRefresh || false;
-      source = body?.source || "unknown";
-      target = body?.target || "willys-johanneberg";
-      console.log(`ForceRefresh flag: ${forceRefresh}, Source: ${source}, Target: ${target}`);
-    } catch (e) {
-      console.log("No valid JSON body or forceRefresh flag");
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error("Missing Supabase credentials");
     }
     
-    // Generate some sample products for the Willys Johanneberg table
-    // since we don't have real scraping logic for this specific store
-    console.log(`Generating sample products for Willys Johanneberg...`);
+    // Fetch the Willys webpage
+    console.log("Fetching Willys webpage...");
+    const response = await fetch("https://www.willys.se/butik/1214/erbjudanden");
     
-    const sampleProducts = createSampleProducts("willys johanneberg", 25);
-    console.log(`Created ${sampleProducts.length} sample products for Willys Johanneberg`);
-    
-    // Add some store-specific information 
-    const enhancedProducts = sampleProducts.map((product, index) => {
-      return {
-        ...product,
-        // These match the actual column names in the Willys Johanneberg table
-        "Product Name": `${product.name} - Special Offer`,
-        "Brand and Weight": product.description || "Various weights",
-        "Price": product.price,
-        "Product Image": product.image_url,
-        "Label 1": "Weekly Deal",
-        "Label 2": "Limited Stock",
-        "Savings": "Save 20%",
-        "Unit Price": `${(Number(product.price) * 1.2).toFixed(2)} per kg`,
-        "Position": index + 1,
-        store: "willys johanneberg"
-      };
-    });
-    
-    console.log("Enhanced products example:", enhancedProducts[0]);
-    
-    // Store the products in the Willys Johanneberg table
-    try {
-      console.log(`Storing ${enhancedProducts.length} products in Willys Johanneberg table...`);
-      
-      const insertedCount = await storeProducts(enhancedProducts);
-      console.log(`Successfully stored ${insertedCount} products in Willys Johanneberg table`);
-      
-      // Return success response
-      return createSuccessResponse(
-        `Successfully generated and stored ${insertedCount} sample products for Willys Johanneberg.`,
-        enhancedProducts
-      );
-    } catch (dbError) {
-      console.error("Error storing products in database:", dbError);
-      return createErrorResponse(dbError, enhancedProducts);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch Willys webpage: ${response.status} ${response.statusText}`);
     }
-
+    
+    const html = await response.text();
+    console.log(`Successfully fetched Willys webpage (${html.length} bytes)`);
+    
+    // Extract products from the HTML
+    console.log("Extracting products from HTML...");
+    const extractorResults = await extractProducts(html, target, "johanneberg");
+    console.log(`Extracted ${extractorResults.length} products from HTML`);
+    
+    // Convert ExtractorResult to Product
+    const products: Product[] = extractorResults.map(result => ({
+      product_name: result.name,
+      description: result.description,
+      price: result.price ? parseFloat(String(result.price).replace(',', '.').replace('kr', '').trim()) : null,
+      original_price: result.original_price ? parseFloat(String(result.original_price).replace(',', '.').replace('kr', '').trim()) : null,
+      image_url: result.image_url,
+      offer_details: result.offer_details,
+      label: result.offer_details,
+      unit_price: result.comparison_price,
+      store: result.store || "willys",
+      store_location: result.store_location || "johanneberg",
+      position: result.index || 1
+    }));
+    
+    // Store products in the database
+    const insertedCount = await storeProducts(
+      supabaseUrl,
+      supabaseKey,
+      products,
+      "willys",
+      "johanneberg"
+    );
+    
+    console.log(`Successfully stored ${insertedCount} products in the database`);
+    
+    // Return success response
+    return new Response(
+      JSON.stringify({
+        success: true,
+        products: extractorResults,
+        message: `Successfully extracted ${extractorResults.length} products and stored ${insertedCount}`
+      }),
+      {
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json"
+        }
+      }
+    );
   } catch (error) {
-    console.error("Error in Willys Johanneberg scraper:", error);
-    
-    // Create and store fallback products even when there's an error
-    console.log("Error occurred during scraping. Using sample products as fallback...");
-    const sampleProducts = createSampleProducts("willys johanneberg");
-    
+    console.error("Error in scrape-willys function:", error);
+
+    // If scraper fails, try to store sample products
     try {
-      const insertedCount = await storeProducts(sampleProducts);
-      console.log(`Stored ${insertedCount} fallback products in database`);
-    } catch (dbError) {
-      console.error("Error storing fallback products:", dbError);
+      console.log("Trying to store sample products as fallback...");
+      
+      // Import the createSampleProducts function
+      const { createSampleProducts } = await import("./extractors/fallback-extractor.ts");
+      const sampleProducts = createSampleProducts("willys");
+      
+      // Get Supabase credentials
+      const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+      
+      if (!supabaseUrl || !supabaseKey) {
+        throw new Error("Missing Supabase credentials");
+      }
+      
+      // Convert to Product format
+      const products: Product[] = sampleProducts.map((result, index) => ({
+        product_name: result.name,
+        description: result.description || null,
+        price: result.price ? parseFloat(String(result.price).replace(',', '.').replace('kr', '').trim()) : null,
+        original_price: result.original_price ? parseFloat(String(result.original_price).replace(',', '.').replace('kr', '').trim()) : null,
+        image_url: result.image_url,
+        offer_details: result.offer_details,
+        label: result.offer_details,
+        unit_price: result.comparison_price || null,
+        store: "willys",
+        store_location: "johanneberg",
+        position: index + 1
+      }));
+      
+      // Store sample products
+      const insertedCount = await storeProducts(
+        supabaseUrl,
+        supabaseKey,
+        products,
+        "willys",
+        "johanneberg"
+      );
+      
+      console.log(`Successfully stored ${insertedCount} sample products as fallback`);
+      
+      return new Response(
+        JSON.stringify({
+          success: false,
+          products: sampleProducts,
+          message: `Scraper error: ${error instanceof Error ? error.message : 'Unknown error'}. Stored ${insertedCount} sample products as fallback.`
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+    } catch (fallbackError) {
+      console.error("Fallback also failed:", fallbackError);
+      
+      // Return error response
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: `Error: ${error instanceof Error ? error.message : 'Unknown error'}. Fallback also failed: ${fallbackError instanceof Error ? fallbackError.message : 'Unknown error'}`
+        }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json"
+          }
+        }
+      );
     }
-    
-    return createErrorResponse(error, sampleProducts);
   }
 });

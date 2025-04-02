@@ -1,4 +1,3 @@
-
 /**
  * Extracts offer details from a card element
  */

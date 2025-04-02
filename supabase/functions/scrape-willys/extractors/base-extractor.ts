@@ -1,12 +1,16 @@
-
 // Base extractor with common utilities and shared functionality
 export interface ExtractorResult {
   name: string;
-  price: number | null;
   description: string | null;
-  image_url: string;
-  offer_details: string;
-  store?: string;
+  price: number | null;
+  original_price: number | null;
+  comparison_price: string | null;
+  image_url: string | null;
+  offer_details: string | null;
+  quantity_info: string | null;
+  is_member_price: boolean;
+  store: string;
+  store_location: string | null;
 }
 
 export const DEFAULT_IMAGE_URL = 'https://assets.icanet.se/t_product_large_v1,f_auto/7300156501245.jpg';
