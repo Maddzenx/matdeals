@@ -1,3 +1,4 @@
+
 export interface Product {
   name: string;
   price: number;
@@ -27,4 +28,4 @@ export interface Region {
   code: string;
   name: string;
   municipalities: Municipality[];
-} 
+}

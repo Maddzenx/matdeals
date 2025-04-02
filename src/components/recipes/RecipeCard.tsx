@@ -1,140 +1,116 @@
-
 import React, { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Recipe } from "@/types/recipe";
+import { Product } from "@/data/types";
+import { RecipePrice } from "./RecipePrice";
+import { Badge } from "../ui/badge";
+import { ShoppingCart } from "lucide-react";
+import { Meal } from "@/types/meal";
+import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
-import { useNavigationState } from "@/hooks/useNavigationState";
-import { useMealPlan } from "@/hooks/useMealPlan";
-import { RecipeCardImage } from "./RecipeCardImage";
-import { RecipeDiscountedProducts } from "./RecipeDiscountedProducts";
-import { RecipeMetadata } from "./RecipeMetadata";
-import { RecipeCardActions } from "./RecipeCardActions";
 
-interface RecipeCardProps {
-  recipe: Recipe;
-  hidePricing?: boolean;
-}
-
-export const RecipeCard: React.FC<RecipeCardProps> = ({ 
+export const RecipeCard = ({
   recipe,
-  hidePricing = true
+  products = [],
+  onAddToShoppingList,
+  onAddToMealPlan,
+  isShort = false
+}: {
+  recipe: Recipe;
+  products?: Product[];
+  onAddToShoppingList?: (recipe: Recipe) => void;
+  onAddToMealPlan?: (recipe: Recipe) => void;
+  isShort?: boolean;
 }) => {
+  const [showDetails, setShowDetails] = useState(false);
+  const { toast } = useToast();
   const navigate = useNavigate();
-  const { handleProductQuantityChange } = useNavigationState();
-  const { toggleFavorite, favoriteIds, mealPlan, addToMealPlan, addToMultipleDays } = useMealPlan();
-  const [showProducts, setShowProducts] = useState(false);
-  
-  // Determine if recipe has discounted ingredients
-  const hasSavings = recipe.matchedProducts && recipe.matchedProducts.length > 0;
-  
-  // Check if the recipe is a favorite
-  const isFavorite = favoriteIds.includes(recipe.id);
-  
+
+  const handleAddToShoppingListClick = (recipe: Recipe) => {
+    onAddToShoppingList?.(recipe);
+    toast({
+      title: "Recept tillagt i inköpslistan!",
+      description: "Du hittar receptet i inköpslistan.",
+    });
+  };
+
+  const handleAddToMealPlanClick = (recipe: Recipe) => {
+    onAddToMealPlan?.(recipe);
+    toast({
+      title: "Recept tillagt i matsedeln!",
+      description: "Du hittar receptet i matsedeln.",
+    });
+  };
+
   const handleCardClick = () => {
-    console.log(`Navigating to recipe: ${recipe.id}, title: ${recipe.title}, image: ${recipe.image_url || 'no image'}`);
     navigate(`/recipe/${recipe.id}`);
   };
-  
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click when button is clicked
-    
-    // Add all discounted ingredients to cart
-    if (recipe.matchedProducts && recipe.matchedProducts.length > 0) {
-      recipe.matchedProducts.forEach(product => {
-        handleProductQuantityChange(
-          product.id, 
-          1, 
-          0, 
-          {
-            name: product.name,
-            details: product.details,
-            price: product.currentPrice,
-            image: product.image,
-            store: product.store
-          }
-        );
-      });
-    }
-  };
 
-  // Add to meal plan
-  const handleAddToMealPlan = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click
-    navigate("/meal-plan");
-  };
+  const hasDiscount = Boolean(
+    recipe.calculatedOriginalPrice && 
+    recipe.calculatedPrice && 
+    recipe.calculatedOriginalPrice > recipe.calculatedPrice
+  );
 
-  // Select day for meal plan
-  const handleSelectDay = (day: string, recipeId: string) => {
-    addToMealPlan(day, recipeId);
-  };
-
-  // Select multiple days for meal plan
-  const handleSelectMultipleDays = (days: string[], recipeId: string) => {
-    addToMultipleDays(days, recipeId);
-  };
-
-  // Toggle favorite status
-  const handleFavoriteToggle = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click
-    toggleFavorite(recipe.id);
-  };
-
-  // Toggle showing matched products
-  const toggleProductsList = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click
-    setShowProducts(!showProducts);
-  };
-  
   return (
-    <Card 
-      className="overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer relative touch-feedback"
+    <Card
+      className="bg-white shadow-md rounded-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
       onClick={handleCardClick}
     >
-      <RecipeCardImage 
-        recipe={recipe} 
-        hasSavings={hasSavings} 
-        showProducts={showProducts} 
-        toggleProductsList={toggleProductsList} 
-      />
-
+      <CardHeader className="p-4">
+        <CardTitle className="text-lg font-semibold line-clamp-2">
+          {recipe.title}
+        </CardTitle>
+        <CardDescription className="text-gray-500 line-clamp-2">
+          {recipe.description}
+        </CardDescription>
+      </CardHeader>
       <CardContent className="p-4">
-        <RecipeDiscountedProducts 
-          products={recipe.matchedProducts || []} 
-          show={showProducts} 
-        />
-
-        <div className="flex gap-2 mb-2 flex-wrap">
-          {recipe.tags?.slice(0, 3).map((tag) => (
-            <span 
-              key={tag}
-              className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-xs font-medium"
-            >
-              {tag}
-            </span>
-          ))}
+        <div className="flex items-center justify-between">
+          <RecipePrice recipe={recipe} compact={isShort} />
+          {hasDiscount && recipe.savings && recipe.savings > 0 && (
+            <Badge className="bg-green-500 text-white font-medium">
+              Spara {recipe.savings.toFixed(2)} kr
+            </Badge>
+          )}
         </div>
-        
-        <RecipeMetadata recipe={recipe} />
-        
-        {recipe.description && (
-          <p className="text-sm text-gray-700 mb-4 line-clamp-2">
-            {recipe.description}
-          </p>
-        )}
-        
-        <div className="flex justify-end mt-2">
-          <RecipeCardActions 
-            isFavorite={isFavorite}
-            onFavoriteToggle={handleFavoriteToggle}
-            onAddToMealPlan={handleAddToMealPlan}
-            onAddToCart={handleAddToCart}
-            recipeId={recipe.id}
-            mealPlan={mealPlan}
-            onSelectDay={handleSelectDay}
-            onSelectMultipleDays={handleSelectMultipleDays}
-          />
+        <div className="flex gap-2 mt-2">
+          <Badge variant="outline">{recipe.category}</Badge>
+          {recipe.difficulty && (
+            <Badge variant="outline">{recipe.difficulty}</Badge>
+          )}
         </div>
       </CardContent>
+      <CardFooter className="flex justify-between items-center p-4">
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleAddToShoppingListClick(recipe);
+          }}
+        >
+          <ShoppingCart className="mr-2 h-4 w-4" />
+          Inköpslista
+        </Button>
+        <Button
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleAddToMealPlanClick(recipe);
+          }}
+        >
+          Matsedel
+        </Button>
+      </CardFooter>
     </Card>
   );
 };

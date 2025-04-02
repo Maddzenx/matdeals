@@ -5,20 +5,41 @@ export interface Recipe {
   id: string;
   title: string;
   description: string | null;
-  image_url: string | null;
-  time_minutes: number | null;
-  servings: number | null;
-  difficulty: string | null;
-  tags: string[] | null;
-  ingredients: string[] | null;
-  instructions: string[] | null;
-  source_url: string | null;
-  category: string | null;
-  price: number | null;
-  original_price: number | null;
-  // Calculated prices from ingredients
+  instructions: string[];
+  category: string;
+  created_at?: string | null;
+  ingredients: any; // Use more specific type if known
+  
+  // Frontend-calculated fields
   calculatedPrice?: number | null;
   calculatedOriginalPrice?: number | null;
   savings?: number;
   matchedProducts?: Product[];
+  
+  // Optional fields that may not be in the database but used in frontend
+  image_url?: string;
+  time_minutes?: number;
+  servings?: number;
+  difficulty?: string;
+  author?: string;
+  tags?: string[];
+  original_price?: number | null;
+  price?: number | null;
+}
+
+// Helper function to convert database recipe to frontend Recipe type
+export function convertDatabaseRecipeToRecipe(dbRecipe: any): Recipe {
+  return {
+    id: dbRecipe.id,
+    title: dbRecipe.title,
+    description: dbRecipe.description,
+    instructions: dbRecipe.instructions || [],
+    category: dbRecipe.category,
+    created_at: dbRecipe.created_at,
+    ingredients: dbRecipe.ingredients,
+    image_url: dbRecipe.image_url || "https://placehold.co/600x400?text=No+Image", // Default image
+    time_minutes: dbRecipe.time_minutes || 30, // Default time
+    servings: dbRecipe.servings || 4, // Default servings
+    difficulty: dbRecipe.difficulty || "medium", // Default difficulty
+  };
 }

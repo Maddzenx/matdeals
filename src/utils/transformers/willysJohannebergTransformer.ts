@@ -14,7 +14,7 @@ export function transformWillysJohannebergProducts(products: any[]): Product[] {
   
   return products.map((product) => {
     // Create a stable ID
-    const id = product.id || `willys-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    const id = product.id?.toString() || `willys-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     
     // Determine price format
     let formattedPrice = 'N/A';

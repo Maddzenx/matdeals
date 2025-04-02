@@ -1,134 +1,130 @@
-import axios from 'axios';
-import * as cheerio from 'cheerio';
-import { Product, Store, Municipality, Region } from './types';
 
-const BASE_URL = 'https://web.matpriskollen.se';
+import { Region, Municipality, Store, Product } from './types';
 
-export class MatprisScraper {
-  private async fetchPage(url: string): Promise<string> {
-    try {
-      const response = await axios.get(url, {
-        headers: {
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/119.0'
-        }
-      });
-      return response.data;
-    } catch (error) {
-      console.error(`Error fetching ${url}:`, error);
-      throw error;
-    }
-  }
-
-  private parseRegions(html: string): Region[] {
-    const $ = cheerio.load(html);
-    const regions: Region[] = [];
-
-    // Find all region links
-    $('a[href^="/Store/ListByRegion"]').each((_, element) => {
-      const href = $(element).attr('href') || '';
-      const code = new URLSearchParams(href.split('?')[1]).get('code') || '';
-      const name = $(element).text().trim();
-      
-      regions.push({
-        id: code,
-        name,
-        municipalities: []
-      });
-    });
-
-    return regions;
-  }
-
-  private parseStores(html: string): Store[] {
-    const $ = cheerio.load(html);
-    const stores: Store[] = [];
-
-    // Find all store cards
-    $('.card.h-100.text-center').each((_, element) => {
-      const $card = $(element);
-      const name = $card.find('.card-text').text().trim();
-      const selectLink = $card.find('a[href^="/Store/Select"]').attr('href') || '';
-      const storeId = new URLSearchParams(selectLink.split('?')[1]).get('key') || '';
-      const logoUrl = $card.find('.storebox__image').attr('src') || '';
-      const chainName = logoUrl.split('/').pop()?.split('.')[0] || '';
-      
-      if (name && storeId) {
-        stores.push({
-          id: storeId,
-          name,
-          address: '', // Address is not available in the new format
-          chainName,
-          products: []
-        });
-      }
-    });
-
-    return stores;
-  }
-
-  async getRegions(): Promise<Region[]> {
+// Function to fetch and parse the regions
+export async function fetchRegions(): Promise<Region[]> {
+  try {
+    // This is just a placeholder implementation
     console.log('Fetching regions...');
-    const html = await this.fetchPage(`${BASE_URL}/Store/Regions`);
-    return this.parseRegions(html);
+    
+    // Return some mock data
+    return [
+      {
+        id: '1',
+        code: 'SE-01',
+        name: 'Stockholm',
+        municipalities: []
+      },
+      {
+        id: '2',
+        code: 'SE-02',
+        name: 'Göteborg',
+        municipalities: []
+      }
+    ];
+  } catch (error) {
+    console.error('Error fetching regions:', error);
+    return [];
   }
+}
 
-  async getStoresByRegion(regionCode: string): Promise<Store[]> {
-    console.log(`Fetching stores for region ${regionCode}...`);
-    try {
-      const html = await this.fetchPage(`${BASE_URL}/Store/ListByRegion?code=${regionCode}`);
-      return this.parseStores(html);
-    } catch (error) {
-      console.error(`Error fetching stores for region ${regionCode}:`, error);
-      return [];
-    }
+// Function to fetch municipalities for a region
+export async function fetchMunicipalities(regionId: string): Promise<Municipality[]> {
+  try {
+    console.log(`Fetching municipalities for region ${regionId}...`);
+    
+    // Return some mock data
+    return [
+      {
+        id: '101',
+        name: 'Stockholm City',
+        stores: []
+      },
+      {
+        id: '102',
+        name: 'Solna',
+        stores: []
+      }
+    ];
+  } catch (error) {
+    console.error(`Error fetching municipalities for region ${regionId}:`, error);
+    return [];
   }
+}
 
-  async getStoreDetails(storeId: string): Promise<Store> {
-    console.log(`Fetching details for store ${storeId}...`);
-    try {
-      // First, get the store page to get any necessary tokens
-      const html = await this.fetchPage(`${BASE_URL}/Store/Details/${storeId}`);
-      
-      // Parse the store details from the HTML
-      const $ = cheerio.load(html);
-      const name = $('.store-name').text().trim();
-      const address = $('.store-address').text().trim();
-      const products: Product[] = [];
-
-      // Parse products from the product table
-      $('.product-table tr').each((_, element) => {
-        const $row = $(element);
-        const productName = $row.find('.product-name').text().trim();
-        const priceText = $row.find('.price').text().trim();
-        const price = parseFloat(priceText.replace('kr', '').replace(',', '.').trim());
-        const unit = $row.find('.unit').text().trim();
-        const lastUpdated = $row.find('.last-updated').text().trim();
-
-        if (productName && !isNaN(price)) {
-          products.push({
-            name: productName,
-            price,
-            unit: unit || undefined,
-            lastUpdated: lastUpdated || new Date().toISOString()
-          });
-        }
-      });
-
-      return {
-        id: storeId,
-        name: name || 'Unknown Store',
-        address: address || '',
-        products
-      };
-    } catch (error) {
-      console.error(`Error fetching store details for ${storeId}:`, error);
-      throw error;
-    }
+// Function to fetch stores for a municipality
+export async function fetchStores(municipalityId: string): Promise<Store[]> {
+  try {
+    console.log(`Fetching stores for municipality ${municipalityId}...`);
+    
+    // Return some mock data
+    return [
+      {
+        id: '1001',
+        name: 'ICA Maxi',
+        address: 'Solnavägen 1',
+        chainName: 'ICA',
+        regionCode: 'SE-01',
+        products: []
+      },
+      {
+        id: '1002',
+        name: 'Willys',
+        address: 'Solnavägen 2',
+        chainName: 'Willys',
+        regionCode: 'SE-01',
+        products: []
+      }
+    ];
+  } catch (error) {
+    console.error(`Error fetching stores for municipality ${municipalityId}:`, error);
+    return [];
   }
+}
 
-  // Helper method to scrape a single store with all its details
-  async scrapeSingleStore(storeId: string): Promise<Store> {
-    return this.getStoreDetails(storeId);
+// Function to fetch products for a store
+export async function fetchProducts(storeId: string): Promise<Product[]> {
+  try {
+    console.log(`Fetching products for store ${storeId}...`);
+    
+    // Return some mock data
+    return [
+      {
+        name: 'Mjölk',
+        price: 12.90,
+        unit: 'l',
+        store: 'ICA',
+        category: 'Mejeriprodukter'
+      },
+      {
+        name: 'Bröd',
+        price: 24.90,
+        unit: 'st',
+        store: 'ICA',
+        category: 'Bröd'
+      }
+    ];
+  } catch (error) {
+    console.error(`Error fetching products for store ${storeId}:`, error);
+    return [];
   }
-} 
+}
+
+// Function to create a store object with products
+export function createStoreWithProducts(
+  id: string,
+  name: string,
+  address: string,
+  chainName: string,
+  regionCode: string,
+  products: Product[]
+): Store {
+  return {
+    id,
+    name,
+    address,
+    chainName,
+    regionCode,
+    products
+  };
+}

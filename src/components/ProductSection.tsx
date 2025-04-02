@@ -1,136 +1,83 @@
 
-import React, { useEffect } from "react";
-import { CategoryData, Product } from "@/data/types";
-import { useProductUtils } from "@/hooks/useProductUtils";
-import { useProductSection } from "@/hooks/useProductSection";
-import { ProductSectionLayout } from "@/components/product-section/ProductSectionLayout";
+import React, { useState } from 'react';
+import { Product } from '../types/product';
+import { Card, CardContent } from './ui/card';
 
 interface ProductSectionProps {
-  categories: CategoryData[];
-  storeTags: { id: string; name: string }[];
-  activeStoreIds: string[];
-  onProductQuantityChange: (
-    productId: string, 
-    newQuantity: number, 
-    previousQuantity: number,
-    productDetails?: {
-      name: string;
-      details: string;
-      price: string;
-      image?: string;
-      store?: string;
-    }
-  ) => void;
-  onRemoveTag: (id: string) => void;
-  viewMode?: "grid" | "list";
-  searchQuery?: string;
-  supabaseProducts?: Product[];
+  title: string;
+  products: Product[];
+  stores?: string[];
 }
 
-export const ProductSection: React.FC<ProductSectionProps> = ({
-  categories,
-  storeTags,
-  activeStoreIds,
-  onProductQuantityChange,
-  onRemoveTag,
-  viewMode = "grid",
-  searchQuery = "",
-  supabaseProducts = []
+const ProductSection: React.FC<ProductSectionProps> = ({ 
+  title, 
+  products,
+  stores = []
 }) => {
-  const { getProductsWithCategories } = useProductUtils(categories);
-  const allLocalProducts = getProductsWithCategories();
+  const [selectedStore, setSelectedStore] = useState<string>('all');
   
-  useEffect(() => {
-    console.log("ProductSection rendered with supabaseProducts:", supabaseProducts.length);
-    if (supabaseProducts.length > 0) {
-      console.log("Supabase products first few:", supabaseProducts.slice(0, 3));
-      
-      // Log store information for debugging
-      const storeDistribution = supabaseProducts.reduce((acc, p) => {
-        const store = p.store?.toLowerCase() || 'unknown';
-        acc[store] = (acc[store] || 0) + 1;
-        return acc;
-      }, {});
-      console.log("Store distribution in supabase products:", storeDistribution);
-      console.log("Active store IDs for filtering:", activeStoreIds);
-    }
-  }, [supabaseProducts, activeStoreIds]);
+  // Filter products by selected store if needed
+  const filteredProducts = selectedStore === 'all' 
+    ? products 
+    : products.filter(p => p.store === selectedStore);
   
-  const allProducts = React.useMemo(() => {
-    console.log("Combining products - local:", allLocalProducts.length, "supabase:", supabaseProducts.length);
-    return [...allLocalProducts, ...supabaseProducts];
-  }, [allLocalProducts, supabaseProducts]);
+  // Group products by category for better organization
+  const groupedProducts: Record<string, Product[]> = {};
   
-  // Modified useProductSection hook usage
-  const { 
-    filteredProducts,
-    activeCategory,
-    nonEmptyCategories,
-    allCategoryNames,
-    handleCategorySelect
-  } = useProductSection(
-    categories,
-    allProducts,
-    activeStoreIds,
-    storeTags,
-    searchQuery
-  );
-
-  useEffect(() => {
-    console.log("After filtering - products to display:", filteredProducts.length);
-    
-    if (filteredProducts.length === 0 && allProducts.length > 0) {
-      console.warn("No products after filtering. Check filtering logic:");
-      console.warn("Active store IDs:", activeStoreIds);
-      console.warn("Search query:", searchQuery);
-      console.warn("Active category:", activeCategory);
-      
-      // Debug the filtering logic
-      const productsAfterStoreFilter = allProducts.filter(product => {
-        const productStore = product.store?.toLowerCase();
-        return productStore && activeStoreIds.includes(productStore);
-      });
-      
-      console.log("Products after store filter only:", productsAfterStoreFilter.length);
-      
-      if (productsAfterStoreFilter.length === 0 && allProducts.length > 0) {
-        console.log("Store filtering is eliminating all products. Sample products stores:");
-        allProducts.slice(0, 5).forEach(p => console.log("Product store:", p.store));
-      }
+  filteredProducts.forEach(product => {
+    const category = product.category || 'Other';
+    if (!groupedProducts[category]) {
+      groupedProducts[category] = [];
     }
-  }, [filteredProducts, activeStoreIds, searchQuery, activeCategory, allProducts]);
-
-  const handleQuantityChange = (productId: string, newQuantity: number, previousQuantity: number) => {
-    const product = allProducts.find(p => p.id === productId);
-    if (product) {
-      onProductQuantityChange(
-        productId, 
-        newQuantity, 
-        previousQuantity, 
-        {
-          name: product.name,
-          details: product.details,
-          price: product.currentPrice,
-          image: product.image,
-          store: product.store
-        }
-      );
-    } else {
-      onProductQuantityChange(productId, newQuantity, previousQuantity);
-    }
-  };
+    groupedProducts[category].push(product);
+  });
+  
+  // Get categories
+  const categories = Object.keys(groupedProducts).sort();
   
   return (
-    <ProductSectionLayout
-      storeTags={storeTags}
-      onRemoveTag={onRemoveTag}
-      categories={nonEmptyCategories.length > 0 ? nonEmptyCategories : categories}
-      activeCategory={activeCategory}
-      onCategorySelect={handleCategorySelect}
-      products={filteredProducts}
-      allCategoryNames={allCategoryNames}
-      onQuantityChange={handleQuantityChange}
-      viewMode={viewMode}
-    />
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">{title}</h2>
+        
+        {stores.length > 0 && (
+          <select 
+            value={selectedStore} 
+            onChange={(e) => setSelectedStore(e.target.value)}
+            className="border rounded px-3 py-1 text-sm"
+          >
+            <option value="all">All Stores</option>
+            {stores.map(store => (
+              <option key={store} value={store}>{store}</option>
+            ))}
+          </select>
+        )}
+      </div>
+      
+      {categories.length === 0 ? (
+        <p className="text-gray-500">No products found</p>
+      ) : (
+        <div className="space-y-8">
+          {categories.map(category => (
+            <div key={category} className="space-y-4">
+              <h3 className="text-xl font-semibold">{category}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {groupedProducts[category].map(product => (
+                  <Card key={product.id} className="hover:shadow-lg transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="font-medium">{product.name}</div>
+                      <div className="text-lg font-bold">{product.price}</div>
+                      <div className="text-sm text-gray-500">{product.store}</div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
+
+export default ProductSection;

@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Recipe } from "@/types/recipe";
+import { Recipe, convertDatabaseRecipeToRecipe } from "@/types/recipe";
 import { Product } from "@/data/types";
 import { calculateRecipeSavings } from "@/utils/ingredientsMatchUtils";
 
@@ -29,8 +29,11 @@ export const fetchRecipesByCategory = async (
     console.log(`Fetched ${data?.length || 0} recipes`);
     
     if (data) {
-      // Add calculated prices based on matching ingredients with products
-      return data.map((recipe: Recipe) => {
+      // Convert database recipes to frontend Recipe type and add calculated prices
+      return data.map((dbRecipe) => {
+        // First convert the database recipe to our frontend Recipe type
+        const recipe = convertDatabaseRecipeToRecipe(dbRecipe);
+        
         // Calculate price info based on matching ingredients with products
         const { discountedPrice, originalPrice, savings, matchedProducts } = 
           calculateRecipeSavings(recipe.ingredients, products);

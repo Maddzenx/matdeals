@@ -1,49 +1,51 @@
-
 import React from "react";
 import { Recipe } from "@/types/recipe";
 
-interface RecipePriceProps {
-  recipe: Recipe;
-  hasSavings: boolean;
-  hidePricing?: boolean;
-}
-
-export const RecipePrice: React.FC<RecipePriceProps> = ({ 
-  recipe, 
-  hasSavings,
-  hidePricing = false 
-}) => {
-  if (hidePricing) {
-    return null;
-  }
+export function RecipePrice({ recipe, compact = false }: { recipe: Recipe; compact?: boolean }) {
+  const hasDiscount = Boolean(
+    (recipe.calculatedOriginalPrice || 0) > 0 && 
+    (recipe.calculatedPrice || 0) < (recipe.calculatedOriginalPrice || 0)
+  );
   
-  // Format price helper
-  const formatPrice = (price: number | null) => {
-    if (price === null) return "";
-    return `${price} kr`;
+  // Format with two decimals and replace dot with comma (Swedish format)
+  const formatPrice = (price: number | null | undefined): string => {
+    if (price === null || price === undefined) return '-';
+    return `${price.toFixed(2).replace('.', ',')} kr`;
   };
+  
+  if (compact) {
+    return (
+      <div className="flex items-center space-x-1 text-sm">
+        <span className="font-semibold">
+          {formatPrice(recipe.calculatedPrice || 0)}
+        </span>
+        {hasDiscount && (
+          <span className="text-gray-500 line-through text-xs">
+            {formatPrice(recipe.calculatedOriginalPrice || 0)}
+          </span>
+        )}
+      </div>
+    );
+  }
 
   return (
-    <div className="flex items-baseline">
-      {recipe.calculatedOriginalPrice && recipe.calculatedOriginalPrice > recipe.calculatedPrice ? (
-        <span className="text-gray-500 line-through text-sm mr-2">
-          {formatPrice(recipe.calculatedOriginalPrice)}
+    <div className="flex flex-col">
+      <div className="flex items-baseline gap-2">
+        <span className="text-xl font-bold">
+          {formatPrice(recipe.calculatedPrice || 0)}
         </span>
-      ) : recipe.original_price ? (
-        <span className="text-gray-500 line-through text-sm mr-2">
-          {formatPrice(recipe.original_price)}
-        </span>
-      ) : null}
+        {hasDiscount && (
+          <span className="text-gray-500 line-through">
+            {formatPrice(recipe.calculatedOriginalPrice || 0)}
+          </span>
+        )}
+      </div>
       
-      <span className="text-[#DB2C17] font-bold text-lg">
-        {recipe.calculatedPrice ? formatPrice(recipe.calculatedPrice) : formatPrice(recipe.price)}
-      </span>
-      
-      {hasSavings && recipe.savings && recipe.savings > 0 && (
-        <span className="ml-2 text-green-600 text-xs font-semibold">
-          (spara {recipe.savings} kr)
-        </span>
+      {hasDiscount && recipe.savings && recipe.savings > 0 && (
+        <p className="text-green-600 text-sm font-medium">
+          Spara {formatPrice(recipe.savings)}
+        </p>
       )}
     </div>
   );
-};
+}

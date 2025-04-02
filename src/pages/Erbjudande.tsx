@@ -128,16 +128,16 @@ export default function Erbjudande() {
             <CardHeader>
               <CardTitle className="text-xl">{product.name}</CardTitle>
               <div className="flex gap-2 mt-2">
-                <Badge variant="outline">{product.brand}</Badge>
+                <Badge variant="outline">{product.brand || ''}</Badge>
                 {product.is_kortvara && <Badge variant="destructive">Kortvara</Badge>}
               </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
                 <p className="text-2xl font-bold">{product.price}</p>
-                <p className="text-sm text-gray-500">{product.unit}</p>
-                <p className="text-sm">{product.category}</p>
-                <p className="text-sm font-medium">{product.store}</p>
+                <p className="text-sm text-gray-500">{product.unit || ''}</p>
+                <p className="text-sm">{product.category || ''}</p>
+                <p className="text-sm font-medium">{product.store || ''}</p>
                 {product.additional_info && (
                   <p className="text-sm text-gray-600 mt-2">{product.additional_info}</p>
                 )}
@@ -153,4 +153,4 @@ export default function Erbjudande() {
       />
     </div>
   );
-} 
+}

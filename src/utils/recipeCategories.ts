@@ -1,65 +1,63 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-export const fetchRecipeCategories = async (activeCategory: string): Promise<{
-  categories: string[];
-  newActiveCategory?: string;
-}> => {
+export interface RecipeCategory {
+  id: string;
+  name: string;
+  count: number;
+}
+
+export const getRecipeCategories = async (): Promise<RecipeCategory[]> => {
   try {
-    const { data, error: queryError } = await supabase
+    // Get all recipe categories
+    // First attempt to get unique tags
+    const { data: recipesData, error } = await supabase
       .from('recipes')
-      .select('tags, category');
+      .select('category');
       
-    if (queryError) {
-      console.error("Error fetching categories:", queryError);
-      throw queryError;
+    if (error) {
+      console.error("Error fetching recipe categories:", error);
+      throw error;
     }
     
-    if (data) {
-      const allTags = data.flatMap(recipe => recipe.tags || []);
-      const categoryValues = data.map(recipe => recipe.category).filter(Boolean);
-      
-      const allCategories = [...allTags, ...categoryValues];
-      const uniqueCategories = [...new Set(allCategories)];
-      
-      uniqueCategories.sort();
-      
-      // Default categories to show even if no recipes yet
-      const priorityCategories = ["Middag", "Vegetariskt", "Budget", "Veganskt", "Matlådevänligt"];
-      
-      const regularCategories = uniqueCategories.filter(
-        cat => !priorityCategories.includes(cat)
-      );
-      
-      // Combine priority categories that exist with other categories
-      const availableCategories = [
-        ...priorityCategories.filter(cat => uniqueCategories.includes(cat) || data.length === 0),
-        ...regularCategories
-      ];
-      
-      // If no categories are found, use default categories
-      const finalCategories = availableCategories.length > 0 
-        ? availableCategories 
-        : ["Middag", "Vegetariskt"];
-      
-      console.log("Available categories:", finalCategories);
-      
-      // If current active category is not in the available categories, return the first one
-      let newActiveCategory;
-      if (finalCategories.length > 0 && !finalCategories.includes(activeCategory)) {
-        newActiveCategory = finalCategories[0];
+    if (!recipesData || recipesData.length === 0) {
+      return [];
+    }
+    
+    // Count unique categories
+    const categoryCount: Record<string, number> = {};
+    
+    recipesData.forEach(recipe => {
+      const category = recipe.category;
+      if (category) {
+        if (!categoryCount[category]) {
+          categoryCount[category] = 0;
+        }
+        categoryCount[category]++;
       }
-      
-      return { 
-        categories: finalCategories,
-        newActiveCategory
-      };
-    }
+    });
     
-    return { categories: ["Middag", "Vegetariskt"] };
+    // Convert to array of category objects
+    const categories: RecipeCategory[] = Object.entries(categoryCount)
+      .map(([name, count]) => ({
+        id: name,
+        name,
+        count
+      }))
+      .sort((a, b) => b.count - a.count);
+      
+    return categories;
   } catch (err) {
-    console.error("Error loading categories:", err);
-    // Set default categories if none found
-    return { categories: ["Middag", "Vegetariskt"] };
+    console.error("Error getting recipe categories:", err);
+    return [];
   }
 };
+
+// Default recipe categories in case we can't fetch from the server
+export const defaultRecipeCategories: RecipeCategory[] = [
+  { id: 'dinner', name: 'Middag', count: 0 },
+  { id: 'lunch', name: 'Lunch', count: 0 },
+  { id: 'breakfast', name: 'Frukost', count: 0 },
+  { id: 'dessert', name: 'Efterrätt', count: 0 },
+  { id: 'vegetarian', name: 'Vegetariskt', count: 0 }
+];

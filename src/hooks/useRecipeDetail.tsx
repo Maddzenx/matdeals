@@ -1,105 +1,98 @@
-
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Recipe } from "@/types/recipe";
-import { useToast } from "@/hooks/use-toast";
-import { scrapeRecipesFromApi } from "@/services/recipeService";
+import { Recipe, convertDatabaseRecipeToRecipe } from "@/types/recipe";
+import { Product } from "@/data/types";
+import { useCart } from "./useCart";
+import { useProductMatch } from "./useProductMatch";
+import { useMealPlan } from "./useMealPlan";
 
-export const useRecipeDetail = (id: string | undefined) => {
+export function useRecipeDetail(recipeId: string | undefined) {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [refreshing, setRefreshing] = useState<boolean>(false);
-  const { toast } = useToast();
-
-  const fetchRecipe = async (recipeId: string) => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      console.log(`Fetching recipe with ID: ${recipeId}`);
-      
-      const { data, error: queryError } = await supabase
-        .from('recipes')
-        .select('*')
-        .eq('id', recipeId)
-        .maybeSingle();
-
-      if (queryError) {
-        console.error("Error fetching recipe:", queryError);
-        throw queryError;
-      }
-
-      if (data) {
-        console.log("Recipe data found:", data.title);
-        setRecipe(data as Recipe);
-        return true;
-      } else {
-        console.error(`Recipe with ID ${recipeId} not found in database`);
-        setError(new Error(`Recipe with ID ${recipeId} not found`));
-        return false;
-      }
-    } catch (err) {
-      console.error("Error fetching recipe details:", err);
-      setError(err instanceof Error ? err : new Error("Unknown error occurred"));
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const refreshRecipe = async () => {
-    if (!id) {
-      console.error("Cannot refresh recipe: No recipe ID provided");
-      return false;
-    }
-
-    try {
-      setRefreshing(true);
-      
-      console.log(`Attempting to refresh recipe with ID: ${id}`);
-      
-      // Call the edge function to scrape this specific recipe
-      const result = await scrapeRecipesFromApi(false, id);
-      
-      if (!result.success) {
-        console.error("Failed to refresh recipe:", result.error);
-        return false;
-      }
-      
-      if (result.recipe) {
-        console.log("Successfully refreshed recipe:", result.recipe.title);
-        setRecipe(result.recipe);
-        setError(null);
-        return true;
-      }
-      
-      // If we got success but no recipe, try fetching again
-      return await fetchRecipe(id);
-      
-    } catch (err) {
-      console.error("Error refreshing recipe:", err);
-      return false;
-    } finally {
-      setRefreshing(false);
-    }
-  };
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [recipeProducts, setRecipeProducts] = useState<Product[]>([]);
+  const [matchedIngredients, setMatchedIngredients] = useState<any[]>([]);
+  const navigate = useNavigate();
+  const { addProduct } = useCart();
+  const { addRecipeToMealPlan } = useMealPlan();
+  const { findMatchingProducts } = useProductMatch();
 
   useEffect(() => {
-    if (!id) {
-      setError(new Error("No recipe ID provided"));
-      setLoading(false);
+    
+    async function fetchRecipeDetails() {
+      if (!recipeId) return;
+      
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('recipes')
+          .select('*')
+          .eq('id', recipeId)
+          .single();
+          
+        if (error) {
+          throw error;
+        }
+        
+        if (data) {
+          // Convert database recipe to frontend Recipe type
+          const recipe = convertDatabaseRecipeToRecipe(data);
+          setRecipe(recipe);
+          
+          // Find matching products for the recipe
+          if (recipe?.ingredients) {
+            const { matchedProducts, matchedIngredients } = findMatchingProducts(recipe.ingredients);
+            setRecipeProducts(matchedProducts);
+            setMatchedIngredients(matchedIngredients);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching recipe:', error);
+        setError(error instanceof Error ? error.message : 'Failed to fetch recipe');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchRecipeDetails();
+  }, [recipeId, navigate, findMatchingProducts]);
+
+  const handleAddToShoppingList = async (recipe: Recipe) => {
+    if (!recipe) return;
+
+    // Check if recipe has matched products
+    if (!recipe.matchedProducts || recipe.matchedProducts.length === 0) {
+      console.warn("No matched products found for this recipe.");
       return;
     }
 
-    fetchRecipe(id);
-  }, [id]);
-
-  return { 
-    recipe, 
-    loading, 
-    error, 
-    refreshing,
-    refreshRecipe
+    // Add each matched product to the shopping list
+    recipe.matchedProducts.forEach(product => {
+      addProduct({
+        id: product.id,
+        name: product.name,
+        price: parseFloat(product.currentPrice.replace(/[^0-9,.]/g, '').replace(',', '.')),
+        image: product.image,
+        quantity: 1,
+        checked: false
+      });
+    });
   };
-};
+
+  const handleAddToMealPlan = async (recipe: Recipe) => {
+    if (!recipe) return;
+    addRecipeToMealPlan(recipe);
+  };
+  
+  // Make sure to return the updated state
+  return {
+    recipe,
+    loading,
+    error,
+    products: recipeProducts,
+    matchedIngredients,
+    handleAddToShoppingList,
+    handleAddToMealPlan
+  };
+}
