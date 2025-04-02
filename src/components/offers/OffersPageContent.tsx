@@ -146,6 +146,7 @@ export const OffersPageContent: React.FC<OffersPageContentProps> = ({
           </div>
         ) : (
           <ProductSection
+            title={title}
             categories={categoriesData}
             storeTags={filteredStoreTags}
             activeStoreIds={activeStores}

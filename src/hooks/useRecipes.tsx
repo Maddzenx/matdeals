@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useCallback } from "react";
 import { Recipe } from "@/types/recipe";
 import { useSupabaseProducts } from "@/hooks/useSupabaseProducts";
@@ -42,7 +43,7 @@ export const useRecipes = (initialCategory: string = "Middag") => {
       
       if (Array.isArray(result)) {
         // Extract category names and set them
-        const categoryNames = result.map(cat => cat.name);
+        const categoryNames = result.map((cat: RecipeCategory) => cat.name);
         setCategories(categoryNames);
         
         // If active category not in the list, update it
@@ -54,7 +55,7 @@ export const useRecipes = (initialCategory: string = "Middag") => {
         const { categories: fetchedCategories, newActiveCategory } = result;
         
         if (Array.isArray(fetchedCategories)) {
-          const categoryNames = fetchedCategories.map(cat => cat.name);
+          const categoryNames = fetchedCategories.map((cat: RecipeCategory) => cat.name);
           setCategories(categoryNames);
         }
         

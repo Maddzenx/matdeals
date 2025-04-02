@@ -1,10 +1,14 @@
+
 import React, { useState } from 'react';
 import { Product } from '../types/product';
 import { Card, CardContent } from './ui/card';
+import { ProductCard } from './ProductCard';
+import { useProductSection } from '@/hooks/useProductSection';
+import { ProductSectionLayout } from './product-section/ProductSectionLayout';
 
 interface ProductSectionProps {
-  title: string;
-  products: Product[];
+  title?: string;
+  products?: Product[];
   stores?: string[];
   categories?: { id: string; name: string }[];
   storeTags?: { id: string; name: string }[];
@@ -28,29 +32,95 @@ interface ProductSectionProps {
 }
 
 const ProductSection: React.FC<ProductSectionProps> = ({ 
-  title, 
-  products,
+  title = "Products", 
+  products = [],
   stores = [],
-  categories,
-  storeTags,
-  activeStoreIds,
+  categories = [],
+  storeTags = [],
+  activeStoreIds = [],
   onProductQuantityChange,
   onRemoveTag,
-  viewMode,
-  searchQuery,
-  supabaseProducts
+  viewMode = "grid",
+  searchQuery = "",
+  supabaseProducts = []
 }) => {
   const [selectedStore, setSelectedStore] = useState<string>('all');
   
+  // If we have supabase products, use those instead of the passed in products
+  const displayProducts = supabaseProducts.length > 0 
+    ? supabaseProducts.map((product: any) => ({
+        id: product.id || '',
+        name: product.name || product.product_name || '',
+        price: product.price || '',
+        category: product.category || 'Other',
+        store: product.store || '',
+        brand: product.brand || '',
+        unit: product.unit || '',
+        is_kortvara: product.is_kortvara || false,
+        additional_info: product.additional_info || '',
+        originalPriceText: product.original_price || '',
+        created_at: product.created_at || ''
+      }))
+    : products;
+  
+  // If we have categories from props, use those
+  const defaultCategories = [
+    { id: "all", name: "All" },
+    { id: "fruits", name: "Fruit & Vegetables" },
+    { id: "meat", name: "Meat" },
+    { id: "dairy", name: "Dairy" },
+    { id: "fish", name: "Fish" },
+    { id: "bread", name: "Bread" },
+    { id: "drinks", name: "Drinks" },
+    { id: "other", name: "Other" }
+  ];
+  
+  const productCategories = categories.length > 0 ? categories : defaultCategories;
+  
+  // Use the hook to manage filtering and category selection
+  const {
+    filteredProducts,
+    activeCategory,
+    nonEmptyCategories,
+    allCategoryNames,
+    handleCategorySelect
+  } = useProductSection(
+    productCategories,
+    displayProducts,
+    activeStoreIds,
+    storeTags || [],
+    searchQuery
+  );
+  
+  // Display the ProductSectionLayout if we have supabase products
+  if (supabaseProducts && supabaseProducts.length > 0) {
+    return (
+      <div className="container mx-auto px-4">
+        <ProductSectionLayout
+          storeTags={storeTags || []}
+          onRemoveTag={onRemoveTag || (() => {})}
+          categories={nonEmptyCategories}
+          activeCategory={activeCategory}
+          onCategorySelect={handleCategorySelect}
+          products={filteredProducts}
+          allCategoryNames={allCategoryNames}
+          onQuantityChange={onProductQuantityChange || (() => {})}
+          viewMode={viewMode}
+        />
+      </div>
+    );
+  }
+  
+  // Legacy display for non-supabase products
   // Filter products by selected store if needed
-  const filteredProducts = selectedStore === 'all' 
+  const filteredLegacyProducts = selectedStore === 'all' 
     ? products 
     : products.filter(p => p.store === selectedStore);
   
   // Group products by category for better organization
   const groupedProducts: Record<string, Product[]> = {};
   
-  filteredProducts.forEach(product => {
+  filteredLegacyProducts.forEach(product => {
     const category = product.category || 'Other';
     if (!groupedProducts[category]) {
       groupedProducts[category] = [];
@@ -58,8 +128,8 @@ const ProductSection: React.FC<ProductSectionProps> = ({
     groupedProducts[category].push(product);
   });
   
-  // Get categories
-  const categories = Object.keys(groupedProducts).sort();
+  // Get legacy categories
+  const legacyCategories = Object.keys(groupedProducts).sort();
   
   return (
     <div className="space-y-6">
@@ -80,11 +150,11 @@ const ProductSection: React.FC<ProductSectionProps> = ({
         )}
       </div>
       
-      {categories.length === 0 ? (
+      {legacyCategories.length === 0 ? (
         <p className="text-gray-500">No products found</p>
       ) : (
         <div className="space-y-8">
-          {categories.map(category => (
+          {legacyCategories.map(category => (
             <div key={category} className="space-y-4">
               <h3 className="text-xl font-semibold">{category}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
