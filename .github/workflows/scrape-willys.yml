@@ -54,11 +54,14 @@ jobs:
       - name: Create issue for results
         if: always()
         uses: actions/github-script@v7
+        env:
+          SCRAPE_STATUS: ${{ steps.scrape.outputs.scrape_failed }}
+          CHECK_STATUS: ${{ steps.check.outputs.check_failed }}
         with:
           script: |
             const date = new Date().toISOString().split('T')[0];
-            const status = steps.scrape.outputs.scrape_failed === 'true' ? '❌ Failed' : '✅ Success';
-            const checkStatus = steps.check.outputs.check_failed === 'true' ? '❌ Failed' : '✅ Success';
+            const status = process.env.SCRAPE_STATUS === 'true' ? '❌ Failed' : '✅ Success';
+            const checkStatus = process.env.CHECK_STATUS === 'true' ? '❌ Failed' : '✅ Success';
             
             const issueTitle = `Scraping Results - ${date}`;
             const issueBody = [
