@@ -19,10 +19,41 @@ function cleanText(text) {
 // Helper function to extract numeric price
 function extractPrice(priceText) {
     if (!priceText) return null;
-    const match = priceText.match(/(\d+(?:,\d+)?)/);
-    if (match) {
-        return parseFloat(match[1].replace(',', '.'));
+    
+    // Handle "X for Y kr" format (e.g., "2 for 45 kr")
+    const multiForPriceMatch = priceText.match(/(\d+)\s+for\s+(\d+(?:,\d+)?)/i);
+    if (multiForPriceMatch) {
+        const quantity = parseInt(multiForPriceMatch[1]);
+        const totalPrice = parseFloat(multiForPriceMatch[2].replace(',', '.'));
+        return totalPrice / quantity;
     }
+    
+    // Handle "X st Y kr" format (e.g., "2 st 45 kr")
+    const multiStPriceMatch = priceText.match(/(\d+)\s+st\s+(\d+(?:,\d+)?)/i);
+    if (multiStPriceMatch) {
+        const quantity = parseInt(multiStPriceMatch[1]);
+        const totalPrice = parseFloat(multiStPriceMatch[2].replace(',', '.'));
+        return totalPrice / quantity;
+    }
+    
+    // Handle "X kr/st" format
+    const perUnitMatch = priceText.match(/(\d+(?:,\d+)?)\s*kr\/st/i);
+    if (perUnitMatch) {
+        return parseFloat(perUnitMatch[1].replace(',', '.'));
+    }
+    
+    // Handle "X kr/kg" format
+    const perKgMatch = priceText.match(/(\d+(?:,\d+)?)\s*kr\/kg/i);
+    if (perKgMatch) {
+        return parseFloat(perKgMatch[1].replace(',', '.'));
+    }
+    
+    // Handle simple numeric price
+    const simpleMatch = priceText.match(/(\d+(?:,\d+)?)/);
+    if (simpleMatch) {
+        return parseFloat(simpleMatch[1].replace(',', '.'));
+    }
+    
     return null;
 }
 
@@ -126,7 +157,7 @@ async function scrapeWillysProducts() {
                 original_price: null,
                 image_url: null,
                 product_url: null,
-                offer_details: cleanText(product.additional_info),
+                offer_details: cleanText(product.additional_info) + (product.additional_info ? '<br>' : '') + product.price,
                 label: product.is_kortvara ? 'Kortvara' : null,
                 savings: null,
                 unit_price: cleanText(product.unit),
