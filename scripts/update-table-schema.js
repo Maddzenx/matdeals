@@ -13,90 +13,43 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function main() {
   try {
-    console.log('Updating products table schema...');
+    console.log('Adding category column to products table...');
     
-    // First, get the current table structure
+    // Add category column
+    const { error: addColumnError } = await supabase.rpc('exec_sql', {
+      sql: 'ALTER TABLE products ADD COLUMN IF NOT EXISTS category TEXT;'
+    });
+    
+    if (addColumnError) {
+      console.error('Error adding category column:', addColumnError);
+      return;
+    }
+    
+    console.log('Successfully added category column');
+    
+    // Create index for category
+    const { error: createIndexError } = await supabase.rpc('exec_sql', {
+      sql: 'CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);'
+    });
+    
+    if (createIndexError) {
+      console.error('Error creating category index:', createIndexError);
+      return;
+    }
+    
+    console.log('Successfully created category index');
+    
+    // Verify the changes
     const { data: tableInfo, error: tableInfoError } = await supabase
       .from('products')
       .select('*')
       .limit(1);
       
     if (tableInfoError) {
-      console.error('Error getting table info:', tableInfoError);
-      return;
+      console.error('Error verifying changes:', tableInfoError);
+    } else {
+      console.log('Table structure verified:', tableInfo);
     }
-    
-    console.log('Current table structure:', tableInfo);
-    
-    // Create a new table with the updated schema
-    const { error: createTableError } = await supabase.rpc('create_products_table', {
-      table_name: 'products_new',
-      columns: {
-        id: 'SERIAL PRIMARY KEY',
-        product_name: 'TEXT NOT NULL',
-        description: 'TEXT',
-        price: 'TEXT',
-        original_price: 'DECIMAL(10,2)',
-        image_url: 'TEXT',
-        product_url: 'TEXT',
-        offer_details: 'TEXT',
-        label: 'TEXT',
-        savings: 'DECIMAL(10,2)',
-        unit_price: 'TEXT',
-        purchase_limit: 'TEXT',
-        store: 'TEXT NOT NULL',
-        store_location: 'TEXT',
-        position: 'INTEGER',
-        created_at: 'TIMESTAMP WITH TIME ZONE DEFAULT now()',
-        updated_at: 'TIMESTAMP WITH TIME ZONE DEFAULT now()'
-      }
-    });
-    
-    if (createTableError) {
-      console.error('Error creating new table:', createTableError);
-      return;
-    }
-    
-    console.log('Successfully created new table');
-    
-    // Copy data from old table to new table
-    const { error: copyDataError } = await supabase.rpc('copy_table_data', {
-      source_table: 'products',
-      target_table: 'products_new'
-    });
-    
-    if (copyDataError) {
-      console.error('Error copying data:', copyDataError);
-      return;
-    }
-    
-    console.log('Successfully copied data to new table');
-    
-    // Drop the old table
-    const { error: dropTableError } = await supabase.rpc('drop_table', {
-      table_name: 'products'
-    });
-    
-    if (dropTableError) {
-      console.error('Error dropping old table:', dropTableError);
-      return;
-    }
-    
-    console.log('Successfully dropped old table');
-    
-    // Rename the new table
-    const { error: renameTableError } = await supabase.rpc('rename_table', {
-      old_name: 'products_new',
-      new_name: 'products'
-    });
-    
-    if (renameTableError) {
-      console.error('Error renaming new table:', renameTableError);
-      return;
-    }
-    
-    console.log('Successfully renamed new table');
-    console.log('Table schema update completed successfully');
   } catch (error) {
     console.error('Unexpected error:', error);
   }

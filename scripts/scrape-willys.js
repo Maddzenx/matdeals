@@ -116,6 +116,71 @@ function formatPriceText(priceText) {
     return priceText;
 }
 
+// Helper function to determine product category
+function determineProductCategory(productName, description = '') {
+    const name = productName.toLowerCase();
+    const desc = description.toLowerCase();
+
+    // Categories and their keywords
+    const categories = {
+        'Frukt & Grönt': [
+            'äpple', 'banan', 'apelsin', 'päron', 'kiwi', 'melon', 'druvor', 'jordgubbar',
+            'hallon', 'blåbär', 'lingon', 'morötter', 'potatis', 'lök', 'vitlök', 'tomat',
+            'gurka', 'paprika', 'sallad', 'spenat', 'broccoli', 'blomkål', 'kål', 'purjolök',
+            'selleri', 'squash', 'aubergine', 'zucchini', 'avokado', 'citron', 'lime'
+        ],
+        'Mejeri': [
+            'mjölk', 'yoghurt', 'grädde', 'smör', 'ost', 'bregott', 'fil', 'kvarg',
+            'keso', 'crème fraiche', 'riven ost', 'feta', 'mozzarella', 'ricotta'
+        ],
+        'Kött & Chark': [
+            'kyckling', 'nötkött', 'fläsk', 'kalkon', 'lamm', 'korv', 'skinka', 'bacon',
+            'pancetta', 'prosciutto', 'salami', 'chorizo', 'pärs', 'rökt', 'rökt skinka'
+        ],
+        'Fisk & Skaldjur': [
+            'lax', 'torsk', 'sill', 'makrill', 'räkor', 'musslor', 'bläckfisk', 'tonfisk',
+            'sej', 'kolja', 'röding', 'abborre', 'gädda', 'krabba', 'hummer'
+        ],
+        'Skafferi': [
+            'pasta', 'ris', 'mjöl', 'socker', 'salt', 'peppar', 'olivolja', 'vinäger',
+            'soja', 'ketchup', 'majonnäs', 'senap', 'buljong', 'kryddor', 'krydda',
+            'nötter', 'frön', 'müsli', 'havregryn', 'cornflakes', 'müsli'
+        ],
+        'Färdigmat': [
+            'pizza', 'lasagne', 'köttbullar', 'fiskpinnar', 'nuggets', 'färdigrätter',
+            'soppa', 'wok', 'curry', 'stuvning', 'gratäng', 'paj', 'quiche'
+        ],
+        'Dryck': [
+            'läsk', 'vatten', 'juice', 'saft', 'öl', 'vin', 'cider', 'kaffe', 'te',
+            'kakao', 'energidryck', 'smoothie', 'protein', 'shaker'
+        ],
+        'Godis & Snacks': [
+            'choklad', 'godis', 'kex', 'chips', 'popcorn', 'nötter', 'torkad frukt',
+            'kola', 'lakrits', 'gelé', 'marshmallows', 'kakor', 'biscuits'
+        ],
+        'Hygien': [
+            'tvål', 'schampo', 'balsam', 'deodorant', 'tandkräm', 'tandborste',
+            'toalettpapper', 'servetter', 'hushållspapper', 'diskmedel', 'tvättmedel'
+        ],
+        'Husdjur': [
+            'hundmat', 'kattmat', 'fiskmat', 'fågelmat', 'hamstermat', 'kaninmat',
+            'hundgodis', 'kattgodis', 'sand', 'strö', 'bur', 'koppel', 'halsband'
+        ]
+    };
+
+    // Check each category's keywords
+    for (const [category, keywords] of Object.entries(categories)) {
+        for (const keyword of keywords) {
+            if (name.includes(keyword) || desc.includes(keyword)) {
+                return category;
+            }
+        }
+    }
+
+    // Default category if no match found
+    return 'Övrigt';
+}
+
 async function scrapeWillysProducts() {
     console.log('Starting Willys Johanneberg product scraping...');
     
@@ -208,12 +273,15 @@ async function scrapeWillysProducts() {
             
             return true;
         }).map((product, index) => {
+            // Determine category
+            const category = determineProductCategory(product.name, product.brand);
+            
             // Extract price using the extractPrice function
             const { price, format } = extractPrice(product.price);
             console.log(`Product: ${product.name}, Raw price text: ${product.price}, Extracted price: ${price}, Format: ${format}`);
             
-            // Map to products table schema
-            return {
+            // Create the base product object
+            const productObject = {
                 product_name: product.name,
                 description: product.brand,
                 price: price,
@@ -231,38 +299,88 @@ async function scrapeWillysProducts() {
                 store_location: 'Johanneberg',
                 position: index + 1
             };
+
+            // Only add category if it's supported by the schema
+            try {
+                productObject.category = category;
+            } catch (error) {
+                console.warn('Category column not available yet:', error.message);
+            }
+
+            return productObject;
         });
         
         if (validProducts.length !== products.length) {
             console.log(`Filtered out ${products.length - validProducts.length} invalid products`);
         }
         
-        console.log(`Storing ${validProducts.length} valid products in Supabase products table`);
-        console.log("First product example:", JSON.stringify(validProducts[0]));
-        
-        // Try inserting a single product first to test
-        console.log("Testing insertion with first product");
-        const { data: testData, error: testError } = await supabase
-            .from('products')
-            .insert([validProducts[0]])
-            .select();
-
-        // Insert new products
-        const { error: insertError } = await supabase
-            .from('products')
-            .insert(validProducts);
-
-        if (insertError) {
-            throw insertError;
-        }
-
-        console.log('Successfully updated products in the database');
+        await storeProducts(validProducts);
         
     } catch (error) {
         console.error('Error during scraping:', error);
         throw error;
     } finally {
         await browser.close();
+    }
+}
+
+async function storeProducts(products) {
+    try {
+        console.log(`Storing ${products.length} valid products in Supabase products table`);
+        const firstProduct = products[0];
+        console.log('First product example:', JSON.stringify(firstProduct));
+
+        // Create base product objects without category
+        const productsToInsert = products.map(product => ({
+            product_name: product.product_name,
+            description: product.description,
+            price: product.price,
+            original_price: product.original_price,
+            image_url: product.image_url,
+            product_url: product.product_url,
+            offer_details: product.offer_details,
+            label: product.label,
+            savings: product.savings,
+            unit_price: product.unit_price,
+            purchase_limit: product.purchase_limit,
+            store: product.store,
+            store_location: product.store_location,
+            position: product.position
+        }));
+
+        console.log('Inserting products without category...');
+        const { data: insertedProducts, error: insertError } = await supabase
+            .from('products')
+            .insert(productsToInsert)
+            .select();
+
+        if (insertError) {
+            console.error('Error inserting products:', insertError);
+            return;
+        }
+
+        console.log(`Successfully inserted ${insertedProducts.length} products`);
+
+        // Try to update categories separately
+        console.log('Attempting to update categories...');
+        for (const [index, product] of products.entries()) {
+            try {
+                const { error: updateError } = await supabase
+                    .from('products')
+                    .update({ category: product.category })
+                    .eq('product_name', product.product_name)
+                    .eq('store_location', product.store_location);
+
+                if (updateError) {
+                    console.warn(`Warning: Could not update category for product ${product.product_name}:`, updateError);
+                }
+            } catch (err) {
+                console.warn(`Warning: Error updating category for product ${product.product_name}:`, err);
+            }
+        }
+    } catch (error) {
+        console.error('Error in storeProducts:', error);
+        throw error;
     }
 }
 
