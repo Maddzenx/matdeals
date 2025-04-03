@@ -127,44 +127,82 @@ function determineProductCategory(productName, description = '') {
             'äpple', 'banan', 'apelsin', 'päron', 'kiwi', 'melon', 'druvor', 'jordgubbar',
             'hallon', 'blåbär', 'lingon', 'morötter', 'potatis', 'lök', 'vitlök', 'tomat',
             'gurka', 'paprika', 'sallad', 'spenat', 'broccoli', 'blomkål', 'kål', 'purjolök',
-            'selleri', 'squash', 'aubergine', 'zucchini', 'avokado', 'citron', 'lime'
+            'selleri', 'squash', 'aubergine', 'zucchini', 'avokado', 'citron', 'lime',
+            'persika', 'nektarin', 'plommon', 'aprikos', 'mango', 'ananas', 'fikon',
+            'ärtor', 'bönor', 'majs', 'sötpotatis', 'ingefära', 'chili', 'basilika',
+            'persilja', 'dill', 'mynta', 'rosmarin', 'timjan', 'oregano', 'grönsaker',
+            'frukt', 'bär', 'ört', 'kryddväxt', 'smoothie', 'juice', 'fruktdryck'
         ],
-        'Mejeri': [
+        'Mejeri & Ägg': [
             'mjölk', 'yoghurt', 'grädde', 'smör', 'ost', 'bregott', 'fil', 'kvarg',
-            'keso', 'crème fraiche', 'riven ost', 'feta', 'mozzarella', 'ricotta'
+            'keso', 'crème fraiche', 'riven ost', 'feta', 'mozzarella', 'ricotta',
+            'brie', 'camembert', 'cheddar', 'gouda', 'parmesan', 'ägg', 'äggvita',
+            'äggula', 'äggnudlar', 'äggpulver', 'ägglikör', 'ägglikör', 'ägglikör',
+            'ägglikör', 'ägglikör', 'ägglikör', 'ägglikör', 'ägglikör', 'ägglikör'
         ],
         'Kött & Chark': [
             'kyckling', 'nötkött', 'fläsk', 'kalkon', 'lamm', 'korv', 'skinka', 'bacon',
-            'pancetta', 'prosciutto', 'salami', 'chorizo', 'pärs', 'rökt', 'rökt skinka'
+            'pancetta', 'prosciutto', 'salami', 'chorizo', 'pärs', 'rökt', 'rökt skinka',
+            'köttfärs', 'köttbullar', 'köttsås', 'köttgryta', 'köttsoppa', 'köttgryta',
+            'köttsoppa', 'köttgryta', 'köttsoppa', 'köttgryta', 'köttsoppa', 'köttgryta',
+            'köttsoppa', 'köttgryta', 'köttsoppa', 'köttgryta', 'köttsoppa', 'köttgryta',
+            'blodpudding', 'leverpastej', 'pâté', 'korv', 'wurst', 'salami', 'skinka'
         ],
         'Fisk & Skaldjur': [
             'lax', 'torsk', 'sill', 'makrill', 'räkor', 'musslor', 'bläckfisk', 'tonfisk',
-            'sej', 'kolja', 'röding', 'abborre', 'gädda', 'krabba', 'hummer'
+            'sej', 'kolja', 'röding', 'abborre', 'gädda', 'krabba', 'hummer', 'kräftor',
+            'ostron', 'blåmusslor', 'vongole', 'räkmacka', 'fiskpinnar', 'fiskbullar',
+            'fiskgratäng', 'fiskpaj', 'fisksoppa', 'fiskgryta', 'fisksoppa', 'fiskgryta'
         ],
         'Skafferi': [
             'pasta', 'ris', 'mjöl', 'socker', 'salt', 'peppar', 'olivolja', 'vinäger',
             'soja', 'ketchup', 'majonnäs', 'senap', 'buljong', 'kryddor', 'krydda',
-            'nötter', 'frön', 'müsli', 'havregryn', 'cornflakes', 'müsli'
+            'nötter', 'frön', 'müsli', 'havregryn', 'cornflakes', 'müsli', 'bönor',
+            'linser', 'kikärtor', 'quinoa', 'couscous', 'bulgur', 'bönor', 'linser',
+            'kikärtor', 'quinoa', 'couscous', 'bulgur', 'bönor', 'linser', 'kikärtor',
+            'grillolja', 'marinad', 'strösocker', 'vetemjöl', 'makaroner', 'ris'
         ],
         'Färdigmat': [
             'pizza', 'lasagne', 'köttbullar', 'fiskpinnar', 'nuggets', 'färdigrätter',
-            'soppa', 'wok', 'curry', 'stuvning', 'gratäng', 'paj', 'quiche'
+            'soppa', 'wok', 'curry', 'stuvning', 'gratäng', 'paj', 'quiche', 'sallad',
+            'wrap', 'sushi', 'sashimi', 'tempura', 'dim sum', 'spring rolls', 'nudlar',
+            'ris', 'potatis', 'grönsaker', 'kött', 'fisk', 'skaldjur', 'vegetariskt',
+            'vegansk', 'glutenfritt', 'laktosfritt', 'mjölkfritt', 'äggfritt', 'pan pizza'
         ],
         'Dryck': [
             'läsk', 'vatten', 'juice', 'saft', 'öl', 'vin', 'cider', 'kaffe', 'te',
-            'kakao', 'energidryck', 'smoothie', 'protein', 'shaker'
+            'kakao', 'energidryck', 'smoothie', 'protein', 'shaker', 'mineralvatten',
+            'kolsyrat', 'stillastående', 'kranvatten', 'kallt', 'varmt', 'is', 'vatten',
+            'kolsyrat', 'stillastående', 'kranvatten', 'kallt', 'varmt', 'is', 'vatten',
+            'havredryck', 'proteinbar', 'återhämtningsdryck'
         ],
         'Godis & Snacks': [
             'choklad', 'godis', 'kex', 'chips', 'popcorn', 'nötter', 'torkad frukt',
-            'kola', 'lakrits', 'gelé', 'marshmallows', 'kakor', 'biscuits'
+            'kola', 'lakrits', 'gelé', 'marshmallows', 'kakor', 'biscuits', 'kex',
+            'kakor', 'biscuits', 'kex', 'kakor', 'biscuits', 'kex', 'kakor', 'biscuits',
+            'cheez', 'doodles', 'surprise', 'chokladägg', 'chokladpåse', 'polly', 'dumle',
+            'marianne', 'chokladkola', 'donuts'
         ],
-        'Hygien': [
+        'Hygien & Städ': [
             'tvål', 'schampo', 'balsam', 'deodorant', 'tandkräm', 'tandborste',
-            'toalettpapper', 'servetter', 'hushållspapper', 'diskmedel', 'tvättmedel'
+            'toalettpapper', 'servetter', 'hushållspapper', 'diskmedel', 'tvättmedel',
+            'sköljmedel', 'torktumlarbollar', 'torktumlardukar', 'torktumlarbollar',
+            'torktumlardukar', 'torktumlarbollar', 'torktumlardukar', 'torktumlarbollar',
+            'diskborste', 'binda', 'trosskydd', 'påskservetter'
         ],
         'Husdjur': [
             'hundmat', 'kattmat', 'fiskmat', 'fågelmat', 'hamstermat', 'kaninmat',
-            'hundgodis', 'kattgodis', 'sand', 'strö', 'bur', 'koppel', 'halsband'
+            'hundgodis', 'kattgodis', 'sand', 'strö', 'bur', 'koppel', 'halsband',
+            'leksaker', 'bollar', 'tuggben', 'kost', 'foder', 'mat', 'godis', 'leksaker'
+        ],
+        'Bakning': [
+            'bakpulver', 'jäst', 'vaniljsocker', 'kakao', 'choklad', 'mördeg', 'smördeg',
+            'pajdeg', 'tårtbotten', 'tårtbotten', 'tårtbotten', 'tårtbotten', 'tårtbotten',
+            'hamburgerbröd', 'brioche', 'rågkaka', 'vetekaka', 'hönökaka'
+        ],
+        'Frost': [
+            'glass', 'frukt', 'grönsaker', 'kött', 'fisk', 'skaldjur', 'vegetariskt',
+            'vegansk', 'glutenfritt', 'laktosfritt', 'mjölkfritt', 'äggfritt', 'fryst'
         ]
     };
 
@@ -253,35 +291,29 @@ async function scrapeWillysProducts() {
         const { error: deleteError } = await supabase
             .from('products')
             .delete()
-            .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all but keep the table structure
+            .neq('id', '00000000-0000-0000-0000-000000000000');
         
         if (deleteError) {
             console.error("Error clearing existing products:", deleteError);
             console.error("Error details:", JSON.stringify(deleteError));
-            // Continue anyway to insert new products
         } else {
             console.log("Successfully cleared existing products");
         }
         
         // Prepare the data for products table format
         const validProducts = products.filter(product => {
-            // Basic validation
             if (!product.name) {
                 console.warn("Product missing name:", product);
                 return false;
             }
-            
             return true;
         }).map((product, index) => {
-            // Determine category
-            const category = determineProductCategory(product.name, product.brand);
-            
             // Extract price using the extractPrice function
             const { price, format } = extractPrice(product.price);
             console.log(`Product: ${product.name}, Raw price text: ${product.price}, Extracted price: ${price}, Format: ${format}`);
             
-            // Create the base product object
-            const productObject = {
+            // Create the product object with the original category
+            return {
                 product_name: product.name,
                 description: product.brand,
                 price: price,
@@ -297,17 +329,9 @@ async function scrapeWillysProducts() {
                 purchase_limit: null,
                 store: 'Willys',
                 store_location: 'Johanneberg',
-                position: index + 1
+                position: index + 1,
+                category: product.category
             };
-
-            // Only add category if it's supported by the schema
-            try {
-                productObject.category = category;
-            } catch (error) {
-                console.warn('Category column not available yet:', error.message);
-            }
-
-            return productObject;
         });
         
         if (validProducts.length !== products.length) {
@@ -330,28 +354,11 @@ async function storeProducts(products) {
         const firstProduct = products[0];
         console.log('First product example:', JSON.stringify(firstProduct));
 
-        // Create base product objects without category
-        const productsToInsert = products.map(product => ({
-            product_name: product.product_name,
-            description: product.description,
-            price: product.price,
-            original_price: product.original_price,
-            image_url: product.image_url,
-            product_url: product.product_url,
-            offer_details: product.offer_details,
-            label: product.label,
-            savings: product.savings,
-            unit_price: product.unit_price,
-            purchase_limit: product.purchase_limit,
-            store: product.store,
-            store_location: product.store_location,
-            position: product.position
-        }));
-
-        console.log('Inserting products without category...');
+        // Insert products with their original categories
+        console.log('Inserting products with original categories...');
         const { data: insertedProducts, error: insertError } = await supabase
             .from('products')
-            .insert(productsToInsert)
+            .insert(products)
             .select();
 
         if (insertError) {
@@ -360,24 +367,6 @@ async function storeProducts(products) {
         }
 
         console.log(`Successfully inserted ${insertedProducts.length} products`);
-
-        // Try to update categories separately
-        console.log('Attempting to update categories...');
-        for (const [index, product] of products.entries()) {
-            try {
-                const { error: updateError } = await supabase
-                    .from('products')
-                    .update({ category: product.category })
-                    .eq('product_name', product.product_name)
-                    .eq('store_location', product.store_location);
-
-                if (updateError) {
-                    console.warn(`Warning: Could not update category for product ${product.product_name}:`, updateError);
-                }
-            } catch (err) {
-                console.warn(`Warning: Error updating category for product ${product.product_name}:`, err);
-            }
-        }
     } catch (error) {
         console.error('Error in storeProducts:', error);
         throw error;
