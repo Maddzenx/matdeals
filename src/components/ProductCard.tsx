@@ -7,7 +7,6 @@ import { ProductDetailsDialog } from "./product/ProductDetailsDialog";
 
 interface ProductCardProps {
   id: string;
-  image: string;
   name: string;
   details: string;
   currentPrice: string;
@@ -20,7 +19,6 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({
   id,
-  image,
   name,
   details,
   currentPrice,
@@ -35,7 +33,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   // Enhanced check for meaningful offer badges
-  // Filter out generic badges that don't provide useful information
   const shouldDisplayBadge = offerBadge && 
     offerBadge.trim() !== "" && 
     !["erbjudande", "veckans erbjudande", "weekly offer", "offer"].includes(offerBadge.toLowerCase().trim());
@@ -82,7 +79,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
   const productData = {
     id,
-    image,
     name,
     details,
     currentPrice,
@@ -97,7 +93,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       <>
         <GridProductCard
           id={id}
-          image={image}
           name={name}
           details={details}
           currentPrice={currentPrice}
@@ -128,7 +123,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     <>
       <ListProductCard
         id={id}
-        image={image}
         name={name}
         details={details}
         currentPrice={currentPrice}

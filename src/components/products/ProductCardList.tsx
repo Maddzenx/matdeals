@@ -6,7 +6,6 @@ interface ProductCardListProps {
     id: string;
     name: string;
     details: string;
-    image: string;
     currentPrice: string;
     originalPrice: string;
     store: string;
@@ -45,21 +44,6 @@ export function ProductCardList({ product, onQuantityChange }: ProductCardListPr
 
   return (
     <div className="bg-white border border-gray-100 rounded-lg overflow-hidden shadow-sm flex">
-      <div className="relative h-20 w-20 bg-gray-50 flex-shrink-0">
-        <img 
-          src={product.image} 
-          alt={product.name}
-          className="w-full h-full object-contain"
-          onError={(e) => {
-            e.currentTarget.src = 'https://assets.icanet.se/t_product_large_v1,f_auto/7310865085313.jpg';
-          }}
-        />
-        {product.offerBadge && (
-          <div className="absolute top-1 right-1 bg-yellow-400 text-[#DB2C17] font-bold text-[8px] px-1 py-0.5 rounded-full">
-            {product.offerBadge}
-          </div>
-        )}
-      </div>
       <div className="p-3 flex-grow flex flex-col justify-between">
         <div>
           <h3 className="font-bold text-[#1C1C1C] text-sm mb-0.5 line-clamp-1">{product.name}</h3>
@@ -110,6 +94,11 @@ export function ProductCardList({ product, onQuantityChange }: ProductCardListPr
           )}
         </div>
       </div>
+      {product.offerBadge && (
+        <div className="absolute top-1 right-1 bg-yellow-400 text-[#DB2C17] font-bold text-[8px] px-1 py-0.5 rounded-full">
+          {product.offerBadge}
+        </div>
+      )}
     </div>
   );
 }

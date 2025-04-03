@@ -3,7 +3,7 @@ import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { QuantityControls } from "./QuantityControls";
-import { ShoppingCart, Store } from "lucide-react";
+import { Store } from "lucide-react";
 
 interface ProductDetailsDialogProps {
   open: boolean;
@@ -69,7 +69,6 @@ export const ProductDetailsDialog: React.FC<ProductDetailsDialogProps> = ({
             <div className="pt-2">
               <div className="bg-neutral-50 p-3 rounded-md">
                 <div className="flex items-center gap-2">
-                  <ShoppingCart size={18} className="text-[#1C1C1C]" />
                   <span className="text-sm font-medium">Lägg till i inköpslistan</span>
                 </div>
                 <div className="mt-2 max-w-[200px] mx-auto">

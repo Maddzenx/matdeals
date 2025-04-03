@@ -6,7 +6,6 @@ interface ProductCardGridProps {
     id: string;
     name: string;
     details: string;
-    image: string;
     currentPrice: string;
     originalPrice: string;
     store: string;
@@ -45,21 +44,6 @@ export function ProductCardGrid({ product, onQuantityChange }: ProductCardGridPr
 
   return (
     <div className="bg-white border border-gray-100 rounded-lg overflow-hidden shadow-sm">
-      <div className="relative h-36 bg-gray-50">
-        <img 
-          src={product.image} 
-          alt={product.name}
-          className="w-full h-full object-contain"
-          onError={(e) => {
-            e.currentTarget.src = 'https://assets.icanet.se/t_product_large_v1,f_auto/7310865085313.jpg';
-          }}
-        />
-        {product.offerBadge && (
-          <div className="absolute top-2 right-2 bg-yellow-400 text-[#DB2C17] font-bold text-xs px-2 py-1 rounded-full">
-            {product.offerBadge}
-          </div>
-        )}
-      </div>
       <div className="p-3">
         <h3 className="font-bold text-[#1C1C1C] text-sm mb-0.5 line-clamp-1">{product.name}</h3>
         <p className="text-xs text-gray-600 mb-1.5 line-clamp-1">{product.details}</p>
@@ -105,6 +89,11 @@ export function ProductCardGrid({ product, onQuantityChange }: ProductCardGridPr
           </div>
         )}
       </div>
+      {product.offerBadge && (
+        <div className="absolute top-2 right-2 bg-yellow-400 text-[#DB2C17] font-bold text-xs px-2 py-1 rounded-full">
+          {product.offerBadge}
+        </div>
+      )}
     </div>
   );
 }
