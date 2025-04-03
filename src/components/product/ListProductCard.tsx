@@ -1,11 +1,9 @@
 
 import React from "react";
-import { ProductImage } from "./ProductImage";
 import { CompactQuantityControls } from "./CompactQuantityControls";
 
 interface ListProductCardProps {
   id: string;
-  image: string;
   name: string;
   details: string;
   currentPrice: string;
@@ -20,7 +18,6 @@ interface ListProductCardProps {
 }
 
 export const ListProductCard: React.FC<ListProductCardProps> = ({
-  image,
   name,
   details,
   currentPrice,
@@ -44,53 +41,30 @@ export const ListProductCard: React.FC<ListProductCardProps> = ({
     onClick();
   };
 
-  // Function to properly format store names
-  const formatStoreName = (storeName: string): string => {
-    const lowerName = storeName.toLowerCase();
-    
-    if (lowerName === "ica") return "ICA";
-    if (lowerName === "willys") return "Willys";
-    if (lowerName === "willys johanneberg") return "Willys Johanneberg";
-    if (lowerName === "hemkop") return "Hemköp";
-    
-    // Default formatting for other store names
-    return storeName.split(' ').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
-  };
-
   return (
     <div 
       className="shadow-sm relative bg-white p-3 rounded-lg flex justify-between items-center border border-neutral-100 cursor-pointer transition-all hover:shadow-md"
       onClick={handleCardClick}
     >
-      <div className="flex items-center gap-3 flex-grow pr-2">
-        <ProductImage 
-          src={image} 
-          alt={name} 
-          height={70} 
-          className="w-[70px] h-[70px] flex-shrink-0"
-        />
-        <div className="flex-grow min-w-0">
-          <div className="flex justify-between items-start">
-            <h3 className="text-sm font-bold text-[#1C1C1C] line-clamp-1">{name}</h3>
-          </div>
-          <p className="text-xs font-medium text-[#6A6A6A] line-clamp-1 mb-1">{details}</p>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <span className="text-sm font-extrabold text-[#1C1C1C]">
-                {currentPrice}
-              </span>
-              {originalPrice && (
-                <span className="text-xs font-medium text-[#6A6A6A] line-through">
-                  {originalPrice}
-                </span>
-              )}
-            </div>
-            <span className="text-xs font-semibold text-[#1C1C1C] bg-neutral-100 px-1.5 py-0.5 rounded-sm ml-1 truncate max-w-[80px]">
-              {formatStoreName(store)}
+      <div className="flex-grow min-w-0">
+        <div className="flex justify-between items-start">
+          <h3 className="text-sm font-bold text-[#1C1C1C] line-clamp-1">{name}</h3>
+        </div>
+        <p className="text-xs font-medium text-[#6A6A6A] line-clamp-1 mb-1">{details}</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1">
+            <span className="text-sm font-extrabold text-[#1C1C1C]">
+              {currentPrice}
             </span>
+            {originalPrice && (
+              <span className="text-xs font-medium text-[#6A6A6A] line-through">
+                {originalPrice}
+              </span>
+            )}
           </div>
+          <span className="text-xs font-semibold text-[#1C1C1C] bg-neutral-100 px-1.5 py-0.5 rounded-sm ml-1 truncate max-w-[80px]">
+            {store}
+          </span>
         </div>
       </div>
 
