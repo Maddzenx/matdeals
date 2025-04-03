@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { ProductDetailsDialog } from '@/components/product/ProductDetailsDialog';
 import { Store, Tag } from 'lucide-react';
 

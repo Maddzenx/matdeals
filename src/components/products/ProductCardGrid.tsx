@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ProductDetailsDialog } from '@/components/product/ProductDetailsDialog';
 import { Store, Tag } from 'lucide-react';
 
@@ -52,7 +52,7 @@ export function ProductCardGrid({ product, onQuantityChange }: ProductCardGridPr
         onClick={handleCardClick}
       >
         <div className="p-3 flex-grow relative">
-          {product.is_kortvara && ( // Only show badge for member price products
+          {product.is_kortvara && (
             <div className="absolute top-3 right-3">
               <div className="bg-[#FEF7CD] text-[#8D6E15] text-xs font-medium py-1 px-2 rounded-full flex items-center">
                 <Tag size={12} className="mr-1" />
