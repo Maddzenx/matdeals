@@ -1,5 +1,6 @@
+
 export function formatMemberPrice(product: any): string | undefined {
-  // If the product is a member price (kortvara), return "Medlemspris"
+  // Replace 'kortvara' with 'Medlemspris'
   if (product.is_kortvara) {
     return "Medlemspris";
   }

@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { ProductDetailsDialog } from '@/components/product/ProductDetailsDialog';
 import { Store, Tag } from 'lucide-react';
 
@@ -12,6 +11,7 @@ interface ProductCardListProps {
     originalPrice: string;
     store: string;
     offerBadge?: string;
+    is_kortvara?: boolean;
     unitPrice?: string;
     offer_details?: string;
   };
@@ -46,11 +46,20 @@ export function ProductCardList({ product, onQuantityChange }: ProductCardListPr
 
   return (
     <>
-      <div
-        className="flex bg-white border border-neutral-100 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow p-3"
+      <div 
+        className="flex bg-white border border-neutral-100 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
         onClick={handleCardClick}
       >
-        <div className="flex-grow">
+        <div className="p-3 flex-grow relative w-full">
+          {product.is_kortvara && (
+            <div className="absolute top-3 right-3">
+              <div className="bg-[#FEF7CD] text-[#8D6E15] text-xs font-medium py-1 px-2 rounded-full flex items-center">
+                <Tag size={12} className="mr-1" />
+                Medlemspris
+              </div>
+            </div>
+          )}
+          
           <div className="flex items-start justify-between">
             <h3 className="text-base font-semibold leading-tight text-neutral-900 mb-1">
               {product.name}

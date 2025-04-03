@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { ProductDetailsDialog } from '@/components/product/ProductDetailsDialog';
 import { Store, Tag } from 'lucide-react';
 
@@ -12,6 +12,7 @@ interface ProductCardGridProps {
     originalPrice: string;
     store: string;
     offerBadge?: string;
+    is_kortvara?: boolean;
     unitPrice?: string;
     offer_details?: string;
   };
@@ -51,11 +52,11 @@ export function ProductCardGrid({ product, onQuantityChange }: ProductCardGridPr
         onClick={handleCardClick}
       >
         <div className="p-3 flex-grow relative">
-          {product.offerBadge && (
+          {product.is_kortvara && ( // Only show badge for member price products
             <div className="absolute top-3 right-3">
-              <div className="bg-red-100 text-red-600 text-xs font-medium py-1 px-2 rounded-full flex items-center">
+              <div className="bg-[#FEF7CD] text-[#8D6E15] text-xs font-medium py-1 px-2 rounded-full flex items-center">
                 <Tag size={12} className="mr-1" />
-                {product.offerBadge}
+                Medlemspris
               </div>
             </div>
           )}
