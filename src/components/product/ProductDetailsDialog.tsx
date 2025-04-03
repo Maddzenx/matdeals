@@ -54,6 +54,16 @@ export const ProductDetailsDialog: React.FC<ProductDetailsDialogProps> = ({
 
   const offerDates = extractDates(offer_details);
 
+  // Format offer details for display
+  const formatOfferDetailsForDisplay = (details?: string) => {
+    if (!details) return null;
+    
+    // Return the details split by line breaks for rendering
+    return details.split(/\r?\n|<br>/).filter(line => line.trim() !== '');
+  };
+  
+  const formattedOfferDetails = formatOfferDetailsForDisplay(offer_details);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md mx-auto p-0 overflow-hidden">
@@ -87,20 +97,13 @@ export const ProductDetailsDialog: React.FC<ProductDetailsDialogProps> = ({
             </div>
 
             {/* Offer Badge and Details Section */}
-            {(offerBadge || unitPrice || offer_details) && (
+            {(offerBadge || unitPrice || formattedOfferDetails?.length > 0) && (
               <div className="bg-neutral-50 p-3 rounded-md mt-2">
                 <div className="flex flex-col gap-2">
                   {offerBadge && (
                     <div className="flex items-center gap-2">
-                      <Tag size={16} className="text-red-500" />
-                      <span className="text-sm font-semibold text-red-500">{offerBadge}</span>
-                    </div>
-                  )}
-                  
-                  {unitPrice && (
-                    <div className="flex items-center gap-2">
-                      <Info size={16} className="text-gray-600" />
-                      <span className="text-sm text-gray-600">{unitPrice}</span>
+                      <Tag size={16} className="text-[#8D6E15]" />
+                      <span className="text-sm font-semibold text-[#8D6E15]">{offerBadge}</span>
                     </div>
                   )}
                   
@@ -110,6 +113,24 @@ export const ProductDetailsDialog: React.FC<ProductDetailsDialogProps> = ({
                       <span className="text-sm text-gray-600">
                         Giltigt {offerDates.start} - {offerDates.end}
                       </span>
+                    </div>
+                  )}
+                  
+                  {formattedOfferDetails && formattedOfferDetails.length > 0 && (
+                    <div className="flex flex-col gap-1 mt-1">
+                      {formattedOfferDetails.map((line, index) => (
+                        <div key={index} className="flex items-start gap-2">
+                          <Info size={16} className="text-gray-600 mt-0.5 flex-shrink-0" />
+                          <span className="text-sm text-gray-600">{line}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {unitPrice && !formattedOfferDetails?.some(detail => detail.includes(unitPrice)) && (
+                    <div className="flex items-center gap-2">
+                      <Info size={16} className="text-gray-600" />
+                      <span className="text-sm text-gray-600">{unitPrice}</span>
                     </div>
                   )}
                 </div>
