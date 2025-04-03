@@ -1,4 +1,3 @@
-
 import React from "react";
 import { QuantityControls } from "./QuantityControls";
 
@@ -31,7 +30,6 @@ export const GridProductCard: React.FC<GridProductCardProps> = ({
   onClick,
 }) => {
   const handleCardClick = (e: React.MouseEvent) => {
-    // Prevent click event from firing when interacting with quantity controls
     if (
       e.target instanceof Element && 
       (e.target.closest('button') || e.target.tagName === 'BUTTON')
@@ -71,7 +69,7 @@ export const GridProductCard: React.FC<GridProductCardProps> = ({
         />
       </div>
       {offerBadge && (
-        <div className="absolute text-[#DB2C17] text-xs font-bold bg-[#FFCD2A] px-2 py-1 rounded-[27px] right-1 top-1">
+        <div className="absolute text-[#4CAF50] text-xs font-bold bg-[#E8F5E9] px-2 py-1 rounded-[27px] right-1 top-1">
           {offerBadge}
         </div>
       )}

@@ -78,7 +78,7 @@ export const ListProductCard: React.FC<ListProductCardProps> = ({
       </div>
 
       {offerBadge && (
-        <div className="absolute text-[#DB2C17] text-xs font-bold bg-[#FFCD2A] px-2 py-1 rounded-[27px] right-1 top-1">
+        <div className="absolute text-[#4CAF50] text-xs font-bold bg-[#E8F5E9] px-2 py-1 rounded-[27px] right-1 top-1">
           {offerBadge}
         </div>
       )}

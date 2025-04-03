@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { GridProductCard } from "./product/GridProductCard";
 import { ListProductCard } from "./product/ListProductCard";
 import { ProductDetailsDialog } from "./product/ProductDetailsDialog";
+import { formatMemberPrice } from "@/utils/transformers/determineCategory";
 
 interface ProductCardProps {
   id: string;
@@ -12,7 +12,7 @@ interface ProductCardProps {
   currentPrice: string;
   originalPrice: string;
   store: string;
-  offerBadge?: string;
+  is_kortvara: boolean;
   onQuantityChange?: (productId: string, newQuantity: number, previousQuantity: number) => void;
   viewMode?: "grid" | "list";
 }
@@ -24,7 +24,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   currentPrice,
   originalPrice,
   store,
-  offerBadge,
+  is_kortvara,
   onQuantityChange,
   viewMode = "grid",
 }) => {
@@ -32,12 +32,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const [quantity, setQuantity] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
-  // Enhanced check for meaningful offer badges
-  const shouldDisplayBadge = offerBadge && 
-    offerBadge.trim() !== "" && 
-    !["erbjudande", "veckans erbjudande", "weekly offer", "offer"].includes(offerBadge.toLowerCase().trim());
+  const offerBadge = formatMemberPrice({ is_kortvara });
   
-  // Sync with global cart state
   useEffect(() => {
     const item = cartItems.find(item => item.id === id);
     if (item) {
@@ -84,10 +80,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     currentPrice,
     originalPrice,
     store,
-    offerBadge: shouldDisplayBadge ? offerBadge : undefined
+    offerBadge,
+    is_kortvara
   };
 
-  // Choose between grid and list view
   if (viewMode === "grid") {
     return (
       <>
@@ -98,7 +94,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           currentPrice={currentPrice}
           originalPrice={originalPrice}
           store={store}
-          offerBadge={shouldDisplayBadge ? offerBadge : undefined}
+          offerBadge={offerBadge}
           quantity={quantity}
           onAdd={handleAdd}
           onIncrement={handleIncrement}
@@ -118,7 +114,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     );
   }
 
-  // Default to list view
   return (
     <>
       <ListProductCard
@@ -128,7 +123,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         currentPrice={currentPrice}
         originalPrice={originalPrice}
         store={store}
-        offerBadge={shouldDisplayBadge ? offerBadge : undefined}
+        offerBadge={offerBadge}
         quantity={quantity}
         onAdd={handleAdd}
         onIncrement={handleIncrement}
