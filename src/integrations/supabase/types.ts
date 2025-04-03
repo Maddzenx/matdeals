@@ -19,7 +19,7 @@ export type Database = {
           offer_details: string | null
           original_price: number | null
           position: number | null
-          price: number | null
+          price: string | null
           product_name: string
           product_url: string | null
           purchase_limit: string | null
@@ -38,7 +38,7 @@ export type Database = {
           offer_details?: string | null
           original_price?: number | null
           position?: number | null
-          price?: number | null
+          price?: string | null
           product_name: string
           product_url?: string | null
           purchase_limit?: string | null
@@ -57,7 +57,7 @@ export type Database = {
           offer_details?: string | null
           original_price?: number | null
           position?: number | null
-          price?: number | null
+          price?: string | null
           product_name?: string
           product_url?: string | null
           purchase_limit?: string | null

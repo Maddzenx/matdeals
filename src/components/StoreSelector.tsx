@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search } from "lucide-react";
+import { Search, Store } from "lucide-react";
 
 interface StoreSelectorProps {
   stores: { id: string; name: string }[];
@@ -80,7 +80,7 @@ export const StoreSelector: React.FC<StoreSelectorProps> = ({
         aria-label="Select stores"
         aria-expanded={isOpen}
       >
-        <i className="ti ti-adjustments text-xl" />
+        <Store className="h-6 w-6 text-gray-700" />
       </button>
 
       {isOpen && (

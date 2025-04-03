@@ -1,5 +1,7 @@
 
 import React, { useState } from 'react';
+import { ProductDetailsDialog } from '@/components/product/ProductDetailsDialog';
+import { Store, Tag } from 'lucide-react';
 
 interface ProductCardGridProps {
   product: {
@@ -11,89 +13,92 @@ interface ProductCardGridProps {
     store: string;
     offerBadge?: string;
     unitPrice?: string;
+    offer_details?: string;
   };
   onQuantityChange: (newQuantity: number, previousQuantity: number) => void;
 }
 
 export function ProductCardGrid({ product, onQuantityChange }: ProductCardGridProps) {
   const [quantity, setQuantity] = useState(0);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  const handleAdd = () => {
+    const newQuantity = 1;
+    setQuantity(newQuantity);
+    onQuantityChange(newQuantity, 0);
+  };
 
   const handleIncrement = () => {
-    const prevQuantity = quantity;
-    const newQuantity = prevQuantity + 1;
+    const newQuantity = quantity + 1;
     setQuantity(newQuantity);
-    onQuantityChange(newQuantity, prevQuantity);
+    onQuantityChange(newQuantity, quantity);
   };
 
   const handleDecrement = () => {
-    if (quantity > 0) {
-      const prevQuantity = quantity;
-      const newQuantity = prevQuantity - 1;
-      setQuantity(newQuantity);
-      onQuantityChange(newQuantity, prevQuantity);
-    }
+    const newQuantity = Math.max(0, quantity - 1);
+    setQuantity(newQuantity);
+    onQuantityChange(newQuantity, quantity);
   };
 
-  const handleAddToList = () => {
-    if (quantity === 0) {
-      const newQuantity = 1;
-      setQuantity(newQuantity);
-      onQuantityChange(newQuantity, 0);
-    }
+  const handleCardClick = () => {
+    setIsDialogOpen(true);
   };
 
   return (
-    <div className="bg-white border border-gray-100 rounded-lg overflow-hidden shadow-sm">
-      <div className="p-3">
-        <h3 className="font-bold text-[#1C1C1C] text-sm mb-0.5 line-clamp-1">{product.name}</h3>
-        <p className="text-xs text-gray-600 mb-1.5 line-clamp-1">{product.details}</p>
-        {product.unitPrice && (
-          <p className="text-xs text-gray-500 mb-1">{product.unitPrice}</p>
-        )}
-        <div className="flex items-baseline gap-2 mb-1">
-          <span className="text-lg font-extrabold text-[#1C1C1C]">
-            {product.currentPrice}
-          </span>
-          {product.originalPrice && (
-            <span className="text-xs text-gray-500 line-through">
-              {product.originalPrice}
-            </span>
+    <>
+      <div
+        className="flex flex-col bg-white border border-neutral-100 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+        onClick={handleCardClick}
+      >
+        <div className="p-3 flex-grow relative">
+          {product.offerBadge && (
+            <div className="absolute top-3 right-3">
+              <div className="bg-red-100 text-red-600 text-xs font-medium py-1 px-2 rounded-full flex items-center">
+                <Tag size={12} className="mr-1" />
+                {product.offerBadge}
+              </div>
+            </div>
           )}
-        </div>
-        <div className="text-xs font-medium text-gray-700 mb-2.5 py-0.5 px-1 bg-gray-100 rounded text-center">
-          {product.store}
-        </div>
-        
-        {quantity === 0 ? (
-          <button
-            onClick={handleAddToList}
-            className="w-full bg-[#DB2C17] text-white rounded-md py-2.5 text-sm font-medium"
-          >
-            Lägg till
-          </button>
-        ) : (
-          <div className="flex items-center justify-between bg-gray-100 rounded-md">
-            <button
-              onClick={handleDecrement}
-              className="h-10 w-10 flex items-center justify-center text-[#DB2C17] font-bold text-xl"
-            >
-              -
-            </button>
-            <span className="text-sm font-medium">{quantity} st</span>
-            <button
-              onClick={handleIncrement}
-              className="h-10 w-10 flex items-center justify-center text-white bg-[#DB2C17] rounded-r-md font-bold text-xl"
-            >
-              +
-            </button>
+          
+          <h3 className="text-sm font-semibold leading-tight line-clamp-2 text-neutral-900 mb-1">
+            {product.name}
+          </h3>
+          
+          <p className="text-xs text-neutral-600 line-clamp-2 mb-2">
+            {product.details}
+          </p>
+          
+          <div className="mt-auto flex justify-between items-center">
+            <div>
+              <div className="text-base font-bold text-neutral-900">
+                {product.currentPrice}
+              </div>
+              {product.originalPrice && (
+                <div className="text-xs text-neutral-500 line-through">
+                  {product.originalPrice}
+                </div>
+              )}
+            </div>
+            
+            <div className="flex items-center">
+              <Store size={14} className="text-neutral-700 mr-1" />
+              <span className="text-xs font-medium text-neutral-700 bg-neutral-100 px-1.5 py-0.5 rounded">
+                {product.store}
+              </span>
+            </div>
           </div>
-        )}
-      </div>
-      {product.offerBadge && (
-        <div className="absolute top-2 right-2 bg-yellow-400 text-[#DB2C17] font-bold text-xs px-2 py-1 rounded-full">
-          {product.offerBadge}
         </div>
-      )}
-    </div>
+      </div>
+      
+      <ProductDetailsDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        product={product}
+        quantity={quantity}
+        onAdd={handleAdd}
+        onIncrement={handleIncrement}
+        onDecrement={handleDecrement}
+      />
+    </>
   );
 }

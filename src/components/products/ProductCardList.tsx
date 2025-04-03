@@ -1,5 +1,7 @@
 
 import React, { useState } from 'react';
+import { ProductDetailsDialog } from '@/components/product/ProductDetailsDialog';
+import { Store, Tag } from 'lucide-react';
 
 interface ProductCardListProps {
   product: {
@@ -11,94 +13,92 @@ interface ProductCardListProps {
     store: string;
     offerBadge?: string;
     unitPrice?: string;
+    offer_details?: string;
   };
   onQuantityChange: (newQuantity: number, previousQuantity: number) => void;
 }
 
 export function ProductCardList({ product, onQuantityChange }: ProductCardListProps) {
   const [quantity, setQuantity] = useState(0);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  const handleAdd = () => {
+    const newQuantity = 1;
+    setQuantity(newQuantity);
+    onQuantityChange(newQuantity, 0);
+  };
 
   const handleIncrement = () => {
-    const prevQuantity = quantity;
-    const newQuantity = prevQuantity + 1;
+    const newQuantity = quantity + 1;
     setQuantity(newQuantity);
-    onQuantityChange(newQuantity, prevQuantity);
+    onQuantityChange(newQuantity, quantity);
   };
 
   const handleDecrement = () => {
-    if (quantity > 0) {
-      const prevQuantity = quantity;
-      const newQuantity = prevQuantity - 1;
-      setQuantity(newQuantity);
-      onQuantityChange(newQuantity, prevQuantity);
-    }
+    const newQuantity = Math.max(0, quantity - 1);
+    setQuantity(newQuantity);
+    onQuantityChange(newQuantity, quantity);
   };
 
-  const handleAddToList = () => {
-    if (quantity === 0) {
-      const newQuantity = 1;
-      setQuantity(newQuantity);
-      onQuantityChange(newQuantity, 0);
-    }
+  const handleCardClick = () => {
+    setIsDialogOpen(true);
   };
 
   return (
-    <div className="bg-white border border-gray-100 rounded-lg overflow-hidden shadow-sm flex">
-      <div className="p-3 flex-grow flex flex-col justify-between">
-        <div>
-          <h3 className="font-bold text-[#1C1C1C] text-sm mb-0.5 line-clamp-1">{product.name}</h3>
-          <p className="text-xs text-gray-600 mb-1 line-clamp-1">{product.details}</p>
-          {product.unitPrice && (
-            <p className="text-xs text-gray-500">{product.unitPrice}</p>
-          )}
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-baseline gap-2">
-            <span className="text-sm font-extrabold text-[#1C1C1C]">
-              {product.currentPrice}
-            </span>
-            {product.originalPrice && (
-              <span className="text-xs text-gray-500 line-through">
-                {product.originalPrice}
-              </span>
+    <>
+      <div
+        className="flex bg-white border border-neutral-100 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow p-3"
+        onClick={handleCardClick}
+      >
+        <div className="flex-grow">
+          <div className="flex items-start justify-between">
+            <h3 className="text-base font-semibold leading-tight text-neutral-900 mb-1">
+              {product.name}
+            </h3>
+            
+            {product.offerBadge && (
+              <div className="bg-red-100 text-red-600 text-xs font-medium py-1 px-2 rounded-full flex items-center ml-2">
+                <Tag size={12} className="mr-1" />
+                {product.offerBadge}
+              </div>
             )}
           </div>
-          <div className="text-xs font-medium text-gray-700 px-1 py-0.5 bg-gray-100 rounded">
-            {product.store}
+          
+          <p className="text-sm text-neutral-600 mb-2">
+            {product.details}
+          </p>
+          
+          <div className="flex justify-between items-end">
+            <div className="flex items-end">
+              <div className="text-lg font-bold text-neutral-900 mr-2">
+                {product.currentPrice}
+              </div>
+              {product.originalPrice && (
+                <div className="text-sm text-neutral-500 line-through mb-0.5">
+                  {product.originalPrice}
+                </div>
+              )}
+            </div>
+            
+            <div className="flex items-center">
+              <Store size={16} className="text-neutral-700 mr-1" />
+              <span className="text-sm font-medium text-neutral-700 bg-neutral-100 px-2 py-1 rounded">
+                {product.store}
+              </span>
+            </div>
           </div>
         </div>
-        <div className="mt-2">
-          {quantity === 0 ? (
-            <button
-              onClick={handleAddToList}
-              className="w-full bg-[#DB2C17] text-white rounded-md py-1.5 text-xs font-medium"
-            >
-              Lägg till
-            </button>
-          ) : (
-            <div className="flex items-center justify-between bg-gray-100 rounded-md">
-              <button
-                onClick={handleDecrement}
-                className="h-8 w-8 flex items-center justify-center text-[#DB2C17] font-bold text-sm"
-              >
-                -
-              </button>
-              <span className="text-xs font-medium">{quantity} st</span>
-              <button
-                onClick={handleIncrement}
-                className="h-8 w-8 flex items-center justify-center text-white bg-[#DB2C17] rounded-r-md font-bold text-sm"
-              >
-                +
-              </button>
-            </div>
-          )}
-        </div>
       </div>
-      {product.offerBadge && (
-        <div className="absolute top-1 right-1 bg-yellow-400 text-[#DB2C17] font-bold text-[8px] px-1 py-0.5 rounded-full">
-          {product.offerBadge}
-        </div>
-      )}
-    </div>
+      
+      <ProductDetailsDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        product={product}
+        quantity={quantity}
+        onAdd={handleAdd}
+        onIncrement={handleIncrement}
+        onDecrement={handleDecrement}
+      />
+    </>
   );
 }

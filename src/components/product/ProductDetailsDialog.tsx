@@ -3,7 +3,7 @@ import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { QuantityControls } from "./QuantityControls";
-import { Store } from "lucide-react";
+import { Store, Tag, Calendar, Info } from "lucide-react";
 
 interface ProductDetailsDialogProps {
   open: boolean;
@@ -16,6 +16,8 @@ interface ProductDetailsDialogProps {
     originalPrice: string;
     store: string;
     offerBadge?: string;
+    offer_details?: string;
+    unitPrice?: string;
   };
   quantity: number;
   onAdd: () => void;
@@ -32,7 +34,25 @@ export const ProductDetailsDialog: React.FC<ProductDetailsDialogProps> = ({
   onIncrement,
   onDecrement,
 }) => {
-  const { id, name, details, currentPrice, originalPrice, store, offerBadge } = product;
+  const { id, name, details, currentPrice, originalPrice, store, offerBadge, offer_details, unitPrice } = product;
+
+  // Parse offer dates if available
+  const extractDates = (offerDetails?: string) => {
+    if (!offerDetails) return null;
+    
+    const dateRegex = /Giltig (\d{1,2}\/\d{1,2}) - (\d{1,2}\/\d{1,2})/i;
+    const match = offerDetails.match(dateRegex);
+    
+    if (match && match.length >= 3) {
+      return {
+        start: match[1],
+        end: match[2]
+      };
+    }
+    return null;
+  };
+
+  const offerDates = extractDates(offer_details);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -65,6 +85,36 @@ export const ProductDetailsDialog: React.FC<ProductDetailsDialogProps> = ({
                 </span>
               </div>
             </div>
+
+            {/* Offer Badge and Details Section */}
+            {(offerBadge || unitPrice || offer_details) && (
+              <div className="bg-neutral-50 p-3 rounded-md mt-2">
+                <div className="flex flex-col gap-2">
+                  {offerBadge && (
+                    <div className="flex items-center gap-2">
+                      <Tag size={16} className="text-red-500" />
+                      <span className="text-sm font-semibold text-red-500">{offerBadge}</span>
+                    </div>
+                  )}
+                  
+                  {unitPrice && (
+                    <div className="flex items-center gap-2">
+                      <Info size={16} className="text-gray-600" />
+                      <span className="text-sm text-gray-600">{unitPrice}</span>
+                    </div>
+                  )}
+                  
+                  {offerDates && (
+                    <div className="flex items-center gap-2">
+                      <Calendar size={16} className="text-gray-600" />
+                      <span className="text-sm text-gray-600">
+                        Giltigt {offerDates.start} - {offerDates.end}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="pt-2">
               <div className="bg-neutral-50 p-3 rounded-md">

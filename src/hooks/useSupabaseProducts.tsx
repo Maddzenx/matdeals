@@ -87,10 +87,10 @@ export const useSupabaseProducts = () => {
           store: item.store || 'Unknown Store',
           currentPrice: formatPrice(item.price),
           details: item.description || '',
-          image: item.image_url || 'https://assets.icanet.se/t_product_large_v1,f_auto/7310865085313.jpg',
           originalPrice: item.original_price ? formatPrice(item.original_price) : '',
           offerBadge: item.label || 'Erbjudande',
-          unitPrice: item.unit_price || ''
+          unitPrice: item.unit_price || '',
+          offer_details: item.offer_details || ''
         }));
         
         console.log(`Transformed ${transformedProducts.length} products`);

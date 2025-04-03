@@ -8,12 +8,12 @@ interface ProductCardProps {
     id: string;
     name: string;
     details: string;
-    image: string;
     currentPrice: string;
     originalPrice: string;
     store: string;
     offerBadge?: string;
     unitPrice?: string;
+    offer_details?: string;
   };
   onQuantityChange: (
     productId: string, 
@@ -23,7 +23,6 @@ interface ProductCardProps {
       name: string;
       details: string;
       price: string;
-      image?: string;
       store?: string;
       recipeId?: string;
       recipeTitle?: string;
@@ -42,7 +41,6 @@ export function ProductCard({ product, onQuantityChange, viewMode }: ProductCard
         name: product.name,
         details: product.details,
         price: product.currentPrice,
-        image: product.image,
         store: product.store
       }
     );
