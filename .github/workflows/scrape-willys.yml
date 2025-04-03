@@ -1,0 +1,77 @@
+name: Scrape Willys Products
+
+on:
+  schedule:
+    - cron: '0 4 * * 1'  # Run every Monday at 4 AM
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          cd scripts
+          npm install
+
+      - name: Run scraping script
+        id: scrape
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          cd scripts
+          if ! node scrape-willys.js; then
+            echo "scrape_failed=true" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          echo "scrape_failed=false" >> $GITHUB_OUTPUT
+
+      - name: Check if products were updated
+        if: steps.scrape.outputs.scrape_failed == 'false'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          cd scripts
+          if ! node check-prices.js; then
+            echo "check_failed=true" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          echo "check_failed=false" >> $GITHUB_OUTPUT
+
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const message = `❌ Scraping workflow failed! Please check the logs.`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });
+
+      - name: Notify on success
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const message = `✅ Scraping workflow completed successfully! Products have been updated.`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            }); 
