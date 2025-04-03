@@ -20,41 +20,100 @@ function cleanText(text) {
 function extractPrice(priceText) {
     if (!priceText) return null;
     
-    // Handle "X for Y kr" format (e.g., "2 for 45 kr")
-    const multiForPriceMatch = priceText.match(/(\d+)\s+for\s+(\d+(?:,\d+)?)/i);
-    if (multiForPriceMatch) {
-        const quantity = parseInt(multiForPriceMatch[1]);
-        const totalPrice = parseFloat(multiForPriceMatch[2].replace(',', '.'));
-        return totalPrice / quantity;
+    console.log(`Extracting price from: ${priceText}`);
+    
+    // Handle "X för Y kr" format
+    const forMatch = priceText.match(/(\d+)\s+för\s+(\d+(?:[,.]\d+)?)/i);
+    if (forMatch) {
+        const quantity = forMatch[1];
+        const totalPrice = forMatch[2];
+        const format = `${quantity} för ${totalPrice}`;
+        console.log(`Found "för" format: ${format}`);
+        return {
+            price: format,
+            format: null
+        };
     }
     
-    // Handle "X st Y kr" format (e.g., "2 st 45 kr")
-    const multiStPriceMatch = priceText.match(/(\d+)\s+st\s+(\d+(?:,\d+)?)/i);
-    if (multiStPriceMatch) {
-        const quantity = parseInt(multiStPriceMatch[1]);
-        const totalPrice = parseFloat(multiStPriceMatch[2].replace(',', '.'));
-        return totalPrice / quantity;
+    // Handle "X st Y kr" format
+    const stPriceMatch = priceText.match(/(\d+)\s+st\s+(\d+(?:[,.]\d+)?)/i);
+    if (stPriceMatch) {
+        const quantity = stPriceMatch[1];
+        const totalPrice = stPriceMatch[2];
+        const format = `${quantity} st ${totalPrice}`;
+        console.log(`Found "st" format: ${format}`);
+        return {
+            price: format,
+            format: null
+        };
+    }
+    
+    // Handle "X kr/frp" format
+    const frpMatch = priceText.match(/(\d+(?:[,.]\d+)?)\s*\/frp/i);
+    if (frpMatch) {
+        const frpPrice = frpMatch[1];
+        console.log(`Found "kr/frp" format: ${frpPrice} kr/frp`);
+        return {
+            price: `${frpPrice} kr/frp`,
+            format: null
+        };
     }
     
     // Handle "X kr/st" format
-    const perUnitMatch = priceText.match(/(\d+(?:,\d+)?)\s*kr\/st/i);
-    if (perUnitMatch) {
-        return parseFloat(perUnitMatch[1].replace(',', '.'));
+    const stMatch = priceText.match(/(\d+(?:[,.]\d+)?)\s*\/st/i);
+    if (stMatch) {
+        const stPrice = stMatch[1];
+        console.log(`Found "kr/st" format: ${stPrice} kr/st`);
+        return {
+            price: `${stPrice} kr/st`,
+            format: null
+        };
     }
     
     // Handle "X kr/kg" format
-    const perKgMatch = priceText.match(/(\d+(?:,\d+)?)\s*kr\/kg/i);
-    if (perKgMatch) {
-        return parseFloat(perKgMatch[1].replace(',', '.'));
+    const kgMatch = priceText.match(/(\d+(?:[,.]\d+)?)\s*\/kg/i);
+    if (kgMatch) {
+        const kgPrice = kgMatch[1];
+        console.log(`Found "kr/kg" format: ${kgPrice} kr/kg`);
+        return {
+            price: `${kgPrice} kr/kg`,
+            format: null
+        };
     }
     
-    // Handle simple numeric price
-    const simpleMatch = priceText.match(/(\d+(?:,\d+)?)/);
+    // Handle simple "X kr" format
+    const simpleMatch = priceText.match(/(\d+(?:[,.]\d+)?)\s*kr(?!\s*\/)/i);
     if (simpleMatch) {
-        return parseFloat(simpleMatch[1].replace(',', '.'));
+        const simplePrice = simpleMatch[1];
+        console.log(`Found simple format: ${simplePrice} kr`);
+        return {
+            price: `${simplePrice} kr`,
+            format: null
+        };
     }
     
-    return null;
+    // Handle basic price format (just numbers)
+    const basicMatch = priceText.match(/(\d+(?:[,.]\d+)?)/);
+    if (basicMatch) {
+        const basicPrice = basicMatch[1];
+        console.log(`Found basic format: ${basicPrice}`);
+        return {
+            price: basicPrice,
+            format: null
+        };
+    }
+    
+    console.log(`No price format matched for: ${priceText}`);
+    return {
+        price: null,
+        format: null
+    };
+}
+
+// Helper function to format price text
+function formatPriceText(priceText) {
+    if (!priceText) return '';
+    return priceText;
 }
 
 async function scrapeWillysProducts() {
@@ -149,15 +208,21 @@ async function scrapeWillysProducts() {
             
             return true;
         }).map((product, index) => {
+            // Extract price using the extractPrice function
+            const { price, format } = extractPrice(product.price);
+            console.log(`Product: ${product.name}, Raw price text: ${product.price}, Extracted price: ${price}, Format: ${format}`);
+            
             // Map to products table schema
             return {
                 product_name: product.name,
                 description: product.brand,
-                price: extractPrice(product.price),
+                price: price,
                 original_price: null,
                 image_url: null,
                 product_url: null,
-                offer_details: cleanText(product.additional_info) + (product.additional_info ? '<br>' : '') + product.price,
+                offer_details: cleanText(product.additional_info) + 
+                    (product.additional_info ? '<br>' : '') + 
+                    (format ? format : formatPriceText(product.price)),
                 label: product.is_kortvara ? 'Kortvara' : null,
                 savings: null,
                 unit_price: cleanText(product.unit),
