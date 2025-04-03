@@ -54,39 +54,56 @@ jobs:
           fi
           echo "check_failed=false" >> $GITHUB_OUTPUT
 
+      - name: Debug outputs
+        if: always()
+        run: |
+          echo "Scrape status: ${{ steps.scrape.outputs.scrape_failed }}"
+          echo "Check status: ${{ steps.check.outputs.check_failed }}"
+
       - name: Create issue for results
         if: always()
         uses: actions/github-script@v7
-        env:
-          SCRAPE_STATUS: ${{ steps.scrape.outputs.scrape_failed }}
-          CHECK_STATUS: ${{ steps.check.outputs.check_failed }}
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const date = new Date().toISOString().split('T')[0];
-            const status = process.env.SCRAPE_STATUS === 'true' ? '❌ Failed' : '✅ Success';
-            const checkStatus = process.env.CHECK_STATUS === 'true' ? '❌ Failed' : '✅ Success';
-            
-            const issueTitle = `Scraping Results - ${date}`;
-            const issueBody = [
-              `# Scraping Results for ${date}`,
-              '',
-              '## Status',
-              `- Scraping: ${status}`,
-              `- Price Check: ${checkStatus}`,
-              '',
-              '## Workflow Details',
-              `- Run ID: ${context.runId}`,
-              `- Triggered by: ${context.eventName}`,
-              `- Commit: ${context.sha}`,
-              '',
-              '## Next Steps',
-              status === '❌ Failed' ? 'Please check the workflow logs for error details.' : 'Products have been successfully updated.'
-            ].join('\n');
+            try {
+              const date = new Date().toISOString().split('T')[0];
+              const scrapeFailed = '${{ steps.scrape.outputs.scrape_failed }}' === 'true';
+              const checkFailed = '${{ steps.check.outputs.check_failed }}' === 'true';
+              
+              console.log('Scrape failed:', scrapeFailed);
+              console.log('Check failed:', checkFailed);
+              
+              const status = scrapeFailed ? '❌ Failed' : '✅ Success';
+              const checkStatus = checkFailed ? '❌ Failed' : '✅ Success';
+              
+              const issueTitle = `Scraping Results - ${date}`;
+              const issueBody = [
+                `# Scraping Results for ${date}`,
+                '',
+                '## Status',
+                `- Scraping: ${status}`,
+                `- Price Check: ${checkStatus}`,
+                '',
+                '## Workflow Details',
+                `- Run ID: ${context.runId}`,
+                `- Triggered by: ${context.eventName}`,
+                `- Commit: ${context.sha}`,
+                '',
+                '## Next Steps',
+                status === '❌ Failed' ? 'Please check the workflow logs for error details.' : 'Products have been successfully updated.'
+              ].join('\n');
 
-            await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: issueTitle,
-              body: issueBody,
-              labels: ['scraping', status === '❌ Failed' ? 'failed' : 'success']
-            }); 
+              const response = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: issueTitle,
+                body: issueBody,
+                labels: ['scraping', status === '❌ Failed' ? 'failed' : 'success']
+              });
+              
+              console.log('Issue created:', response.data.html_url);
+            } catch (error) {
+              console.error('Error creating issue:', error);
+              throw error;
+            } 
