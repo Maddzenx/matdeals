@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 import { Product } from '../types/product';
 
@@ -61,4 +62,28 @@ export const getProductsByCategory = async (category: string): Promise<Product[]
 
   console.log('Fetched products for category:', data);
   return data || [];
-}; 
+};
+
+export const searchProducts = async (query: string): Promise<Product[]> => {
+  console.log('Searching products with query:', query);
+  
+  if (!query || query.trim() === '') {
+    return getProducts();
+  }
+  
+  const searchTerm = `%${query.toLowerCase()}%`;
+  
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .or(`product_name.ilike.${searchTerm},description.ilike.${searchTerm},category.ilike.${searchTerm},offer_details.ilike.${searchTerm}`)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error searching products:', error);
+    throw error;
+  }
+
+  console.log('Found products:', data?.length || 0);
+  return data || [];
+};

@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from 'react';
-import { Product } from '@/data/types';
+import { Product } from '@/types/product';
 
 export function useProductFilters() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -15,11 +15,20 @@ export function useProductFilters() {
   const filterProductsBySearch = useCallback((products: Product[] | undefined) => {
     if (!products || products.length === 0) return [];
     if (!searchQuery.trim()) return products;
+    
     const query = searchQuery.toLowerCase();
-    return products.filter(product => 
-      product.name?.toLowerCase().includes(query) || 
-      product.details?.toLowerCase().includes(query)
-    );
+    
+    return products.filter(product => {
+      // Check all possible fields where we might find relevant product information
+      const nameMatch = product.name?.toLowerCase().includes(query);
+      const descriptionMatch = product.description?.toLowerCase().includes(query);
+      const categoryMatch = product.category?.toLowerCase().includes(query);
+      const storeMatch = product.store?.toLowerCase().includes(query);
+      const offerDetailsMatch = product.offer_details?.toLowerCase().includes(query);
+      
+      // If any field matches, return true to include the product
+      return nameMatch || descriptionMatch || categoryMatch || storeMatch || offerDetailsMatch;
+    });
   }, [searchQuery]);
 
   const filterProductsByStore = useCallback((products: Product[] | undefined, activeStores: string[]) => {

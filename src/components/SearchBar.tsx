@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect } from "react";
-import { Search, Store } from "lucide-react";
+import { Search, Store, X } from "lucide-react";
 import { StoreSelector } from "@/components/StoreSelector";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface SearchBarProps {
   activeStoreIds: string[];
@@ -33,9 +34,19 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     onSearch(searchQuery);
   };
 
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    onSearch("");
+  };
+
+  // Auto-submit search after typing stops for 500ms
   useEffect(() => {
-    // Add any store information loading logic here if needed
-  }, []);
+    const debounceTimer = setTimeout(() => {
+      onSearch(searchQuery);
+    }, 500);
+    
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery, onSearch]);
 
   return (
     <div className="bg-white px-4 py-3 border-b border-gray-100">
@@ -47,8 +58,17 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             placeholder="Sök erbjudanden..."
             value={searchQuery}
             onChange={handleSearchChange}
-            className="pl-10 h-11 pr-4 w-full rounded-xl focus:ring-blue-500 bg-neutral-100 border-none"
+            className="pl-10 h-11 pr-10 w-full rounded-xl focus:ring-blue-500 bg-neutral-100 border-none"
           />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={handleClearSearch}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 hover:text-gray-600"
+            >
+              <X size={18} />
+            </button>
+          )}
         </div>
         <StoreSelector
           stores={stores}
