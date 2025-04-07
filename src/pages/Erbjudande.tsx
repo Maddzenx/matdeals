@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { BottomNav } from '@/components/BottomNav';
 import { useNavigationState } from '@/hooks/useNavigationState';
@@ -8,7 +7,6 @@ import { StoreTags } from '@/components/StoreTags';
 import { useStoreFilters } from '@/hooks/useStoreFilters';
 import { useSupabaseProducts } from '@/hooks/useSupabaseProducts';
 import { LoadingIndicator } from '@/components/LoadingIndicator';
-import { Button } from '@/components/ui/button';
 import { useViewMode } from '@/hooks/useViewMode';
 import { PageHeader } from '@/components/PageHeader';
 import { ProductListView } from '@/components/products/ProductListView';
@@ -21,7 +19,6 @@ export default function Erbjudande() {
   const { products, loading, error, refetch } = useSupabaseProducts();
   const [isRefreshing, setIsRefreshing] = useState(false);
   
-  // Use our custom hook for filtering
   const {
     searchQuery,
     setSearchQuery,
@@ -63,10 +60,8 @@ export default function Erbjudande() {
     setSearchQuery(query);
   };
 
-  // Apply all filters to the products
   const filteredProducts = applyAllFilters(products, activeStores);
 
-  // Prepare store tags for display
   const storeTags = activeStores.map(storeId => {
     let displayName = storeId;
     if (storeId.toLowerCase() === 'willys') displayName = 'Willys';
@@ -76,7 +71,6 @@ export default function Erbjudande() {
     return { id: storeId, name: displayName };
   });
 
-  // Get the active category name for display
   const activeCategoryName = activeCategory === 'all' 
     ? 'Alla erbjudanden' 
     : categories.find(c => c.id === activeCategory)?.name || 'Erbjudanden';
@@ -119,13 +113,6 @@ export default function Erbjudande() {
         ) : filteredProducts.length === 0 ? (
           <div className="p-8 text-center flex flex-col items-center">
             <p className="text-gray-500 mb-4">Inga produkter hittades</p>
-            <Button 
-              onClick={handleRefresh}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-              disabled={isRefreshing}
-            >
-              {isRefreshing ? "Uppdaterar..." : "Uppdatera produkter"}
-            </Button>
           </div>
         ) : (
           <ProductListView
