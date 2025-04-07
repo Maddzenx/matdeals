@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Product } from "@/types/product";
@@ -24,12 +23,6 @@ export const useSupabaseProducts = () => {
         }
         
         console.log("Fetched products:", productsData?.length || 0);
-        if (productsData && productsData.length > 0) {
-          console.log("Sample product:", productsData[0]);
-        } else {
-          console.warn("No products found in the products table");
-        }
-        
         return productsData || [];
       } catch (error) {
         console.error("Error in fetch query function:", error);
@@ -63,18 +56,6 @@ export const useSupabaseProducts = () => {
               originalPrice: "29:- kr",
               offerBadge: "Erbjudande",
               price: 24
-            },
-            {
-              id: "fallback-2",
-              name: "Färsk Kycklingfilé",
-              category: "meat",
-              store: "willys",
-              currentPrice: "89:- kr",
-              details: "Kronfågel, Sverige, 700-925g",
-              image: "https://assets.icanet.se/e_sharpen:100,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_226367/cf_259/morotter_i_knippe.jpg",
-              originalPrice: "109:- kr",
-              offerBadge: "Erbjudande",
-              price: 89
             }
           ];
           setProducts(fallbackProducts);
@@ -83,24 +64,22 @@ export const useSupabaseProducts = () => {
         
         // Transform database products to match our Product type
         const transformedProducts: Product[] = data.map(item => {
-          // Parse price values
-          const priceVal = typeof item.price === 'string' 
-            ? parseFloat(item.price.replace(/[^\d.,]/g, '').replace(',', '.')) || 0 
-            : item.price || 0;
-            
+          // Enhanced price parsing to handle complex formats
+          const currentPrice = parseProductPrice(item.price);
+          
           return {
             id: item.id || `product-${Math.random().toString(36).substring(2, 9)}`,
             name: item.product_name || 'Unnamed Product',
             category: item.category || determineCategoryFromText(item.product_name || ''),
             store: item.store || 'Unknown Store',
-            currentPrice: formatPrice(priceVal),
+            currentPrice: currentPrice,
             details: item.description || '',
             originalPrice: item.original_price ? formatPrice(item.original_price) : '',
             offerBadge: item.label || 'Erbjudande',
             unitPrice: item.unit_price || '',
             offer_details: item.offer_details || '',
             image: item.image_url || "https://assets.icanet.se/e_sharpen:100,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_226367/cf_259/morotter_i_knippe.jpg",
-            price: priceVal,
+            price: typeof item.price === 'string' ? item.price : undefined,
             position: item.position || undefined
           };
         });
@@ -126,7 +105,7 @@ export const useSupabaseProducts = () => {
             image: "https://assets.icanet.se/e_sharpen:100,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_226367/cf_259/morotter_i_knippe.jpg",
             originalPrice: "89:- kr",
             offerBadge: "Veckans erbjudande",
-            price: 69,
+            price: "69:- kr",
             position: 1
           }
         ];
@@ -152,12 +131,38 @@ export const useSupabaseProducts = () => {
   };
 };
 
+// Enhanced price parsing function
+function parseProductPrice(priceValue: string | number | null | undefined): string {
+  if (priceValue === null || priceValue === undefined) return '';
+  
+  // If it's already a formatted price string, return as-is
+  if (typeof priceValue === 'string') {
+    // Check for special formats like "3 för 22"
+    const specialFormatMatch = priceValue.match(/([\d]+)\s+(för|st)\s+([\d.,]+)/);
+    if (specialFormatMatch) {
+      return priceValue;
+    }
+    
+    // Try to convert to Swedish price format
+    const priceString = priceValue.toString().replace('.', ',');
+    return priceString.includes(',') || priceString.includes(':') 
+      ? `${priceString} kr` 
+      : `${priceString}:- kr`;
+  }
+  
+  // Numeric price conversion
+  const priceString = priceValue.toString().replace('.', ',');
+  return `${priceString}:- kr`;
+}
+
 // Helper function to format price
-function formatPrice(price: number | null | undefined): string {
+function formatPrice(price: number | string | null | undefined): string {
   if (price === null || price === undefined) return '';
   
   const priceString = price.toString().replace('.', ',');
-  return `${priceString} kr`;
+  return priceString.includes(',') || priceString.includes(':') 
+    ? `${priceString} kr` 
+    : `${priceString}:- kr`;
 }
 
 // Helper function to determine category from product name
@@ -189,5 +194,5 @@ function determineCategoryFromText(text: string): string {
     return 'beverages';
   }
   
-  return 'other';
+  return 'Övrigt';
 }
