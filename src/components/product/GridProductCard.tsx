@@ -1,3 +1,4 @@
+
 import React from "react";
 import { QuantityControls } from "./QuantityControls";
 
@@ -10,6 +11,7 @@ interface GridProductCardProps {
   store: string;
   offerBadge?: string;
   quantity: number;
+  image?: string;
   onAdd: () => void;
   onIncrement: () => void;
   onDecrement: () => void;
@@ -28,6 +30,7 @@ export const GridProductCard: React.FC<GridProductCardProps> = ({
   onIncrement,
   onDecrement,
   onClick,
+  image,
 }) => {
   const handleCardClick = (e: React.MouseEvent) => {
     if (

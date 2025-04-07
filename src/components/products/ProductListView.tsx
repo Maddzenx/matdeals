@@ -58,7 +58,8 @@ export function ProductListView({
               offerBadge: product.offerBadge,
               unitPrice: product.unitPrice,
               offer_details: product.offer_details,
-              image: product.image || product.image_url
+              image: product.image || product.image_url,
+              is_kortvara: product.is_kortvara
             }}
             onQuantityChange={(productId, newQuantity, previousQuantity) => {
               onQuantityChange(productId, newQuantity, previousQuantity, {

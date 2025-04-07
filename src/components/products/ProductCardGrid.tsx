@@ -15,6 +15,7 @@ interface ProductCardGridProps {
     is_kortvara?: boolean;
     unitPrice?: string;
     offer_details?: string;
+    image?: string;
   };
   onQuantityChange: (newQuantity: number, previousQuantity: number) => void;
 }

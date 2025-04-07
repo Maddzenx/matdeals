@@ -10,6 +10,7 @@ interface ListProductCardProps {
   originalPrice: string;
   store: string;
   offerBadge?: string;
+  image?: string;
   quantity: number;
   onAdd: () => void;
   onIncrement: () => void;
@@ -29,6 +30,7 @@ export const ListProductCard: React.FC<ListProductCardProps> = ({
   onIncrement,
   onDecrement,
   onClick,
+  image,
 }) => {
   const handleCardClick = (e: React.MouseEvent) => {
     // Prevent click event from firing when interacting with quantity controls
