@@ -1,0 +1,13 @@
+
+# Ignore Deno lock file
+deno.lock
+
+# Ignore generated files
+.DS_Store
+*.log
+
+# Only needed for local development with Deno
+.vscode/
+
+# TypeScript compilation output
+*.js.map
