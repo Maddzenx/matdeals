@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useCallback } from "react";
 import { Recipe } from "@/types/recipe";
 import { useSupabaseProducts } from "@/hooks/useSupabaseProducts";
@@ -9,6 +10,7 @@ import {
 } from "@/services/recipeService";
 import { getRecipeCategories, RecipeCategory, defaultRecipeCategories } from "@/utils/recipeCategories";
 import { useAppSession } from "@/hooks/useAppSession";
+import { adaptToDataProducts } from "@/utils/productAdapter";
 
 export type { Recipe } from "@/types/recipe";
 
@@ -35,7 +37,9 @@ export const useRecipes = (initialCategory: string = "Middag") => {
       }
       
       console.log('Fetching recipes with category:', category);
-      const fetchedRecipes = await fetchRecipesByCategory(category, products);
+      // Convert products to the expected type format before passing to fetchRecipesByCategory
+      const adaptedProducts = adaptToDataProducts(products);
+      const fetchedRecipes = await fetchRecipesByCategory(category, adaptedProducts);
       console.log('Fetched recipes:', fetchedRecipes.length);
       
       if (fetchedRecipes.length === 0) {
@@ -71,8 +75,9 @@ export const useRecipes = (initialCategory: string = "Middag") => {
         return false;
       }
       
-      // Generate recipes based on discounted products
-      const generatedRecipes = await generateRecipesFromDiscountedProducts(products);
+      // Generate recipes based on discounted products - using adapter for type conversion
+      const adaptedProducts = adaptToDataProducts(products);
+      const generatedRecipes = await generateRecipesFromDiscountedProducts(adaptedProducts);
       console.log('Generated recipes:', generatedRecipes.length);
       
       if (generatedRecipes.length === 0) {

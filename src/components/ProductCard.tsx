@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { GridProductCard } from "./product/GridProductCard";
@@ -12,7 +13,8 @@ interface ProductCardProps {
   currentPrice: string;
   originalPrice: string;
   store: string;
-  is_kortvara: boolean;
+  is_kortvara?: boolean;
+  image?: string;
   onQuantityChange?: (productId: string, newQuantity: number, previousQuantity: number) => void;
   viewMode?: "grid" | "list";
 }
@@ -25,6 +27,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   originalPrice,
   store,
   is_kortvara,
+  image,
   onQuantityChange,
   viewMode = "grid",
 }) => {
@@ -32,7 +35,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const [quantity, setQuantity] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
-  const offerBadge = formatMemberPrice({ is_kortvara });
+  const offerBadge = formatMemberPrice({ is_kortvara: is_kortvara || false });
   
   useEffect(() => {
     const item = cartItems.find(item => item.id === id);
@@ -81,7 +84,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     originalPrice,
     store,
     offerBadge,
-    is_kortvara
+    is_kortvara,
+    image
   };
 
   if (viewMode === "grid") {
@@ -100,6 +104,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           onIncrement={handleIncrement}
           onDecrement={handleDecrement}
           onClick={handleCardClick}
+          image={image}
         />
         <ProductDetailsDialog
           open={isDialogOpen}
@@ -129,6 +134,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         onIncrement={handleIncrement}
         onDecrement={handleDecrement}
         onClick={handleCardClick}
+        image={image}
       />
       <ProductDetailsDialog
         open={isDialogOpen}

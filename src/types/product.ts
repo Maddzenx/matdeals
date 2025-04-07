@@ -18,4 +18,5 @@ export interface Product {
   unitPrice?: string;
   image?: string;
   offerBadge?: string;
+  is_kortvara?: boolean;
 }

@@ -1,27 +1,39 @@
+export function determineProductCategory(name: string, description: string): string {
+  const lowerName = name.toLowerCase();
+  const lowerDescription = description.toLowerCase();
 
-export function formatMemberPrice(product: any): string | undefined {
-  // Replace 'kortvara' with 'Medlemspris'
-  if (product.is_kortvara) {
-    return "Medlemspris";
+  if (lowerName.includes('äpple') || lowerName.includes('frukt') || lowerName.includes('grönt') ||
+      lowerName.includes('banan') || lowerName.includes('tomat') || lowerName.includes('gurka')) {
+    return 'fruits';
   }
-  return undefined;
+
+  if (lowerName.includes('bröd') || lowerName.includes('bageri') ||
+      lowerName.includes('kaka') || lowerName.includes('bulle')) {
+    return 'bread';
+  }
+
+  if (lowerName.includes('kött') || lowerName.includes('fläsk') ||
+      lowerName.includes('nöt') || lowerName.includes('kyckl')) {
+    return 'meat';
+  }
+
+  if (lowerName.includes('ost') || lowerName.includes('mjölk') ||
+      lowerName.includes('fil') || lowerName.includes('yog')) {
+    return 'dairy';
+  }
+
+  if (lowerName.includes('dryck') || lowerName.includes('juice') ||
+      lowerName.includes('vatten') || lowerName.includes('läsk')) {
+    return 'beverages';
+  }
+
+  return 'other';
 }
 
-export function determineProductCategory(name: string, description?: string): string {
-  const normalizedName = (name || '').toLowerCase();
-  const normalizedDesc = (description || '').toLowerCase();
-
-  if (normalizedName.includes('mjölk') || normalizedName.includes('yoghurt') || normalizedName.includes('ost')) {
-    return 'mejeriprodukter';
-  } else if (normalizedName.includes('kött') || normalizedName.includes('fläsk') || normalizedName.includes('kyckling')) {
-    return 'kött';
-  } else if (normalizedName.includes('frukt') || normalizedName.includes('äpple') || normalizedName.includes('banan')) {
-    return 'frukt';
-  } else if (normalizedName.includes('grönsak') || normalizedName.includes('tomat') || normalizedName.includes('gurka')) {
-    return 'grönsaker';
-  } else if (normalizedName.includes('bröd') || normalizedName.includes('bulle')) {
-    return 'bröd';
-  } else {
-    return 'övrigt';
+// Add a new helper function for member price formatting
+export const formatMemberPrice = ({ is_kortvara }: { is_kortvara?: boolean }): string => {
+  if (is_kortvara) {
+    return 'Kortpris';
   }
-}
+  return 'Erbjudande';
+};

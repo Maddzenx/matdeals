@@ -60,7 +60,15 @@ export function ProductListView({
               offer_details: product.offer_details,
               image: product.image || product.image_url
             }}
-            onQuantityChange={onQuantityChange}
+            onQuantityChange={(productId, newQuantity, previousQuantity) => {
+              onQuantityChange(productId, newQuantity, previousQuantity, {
+                name: product.name,
+                details: product.details || product.description || "",
+                price: product.currentPrice || `${product.price} kr`,
+                image: product.image || product.image_url,
+                store: product.store
+              });
+            }}
             viewMode={viewMode}
           />
         ))}

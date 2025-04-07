@@ -13,6 +13,7 @@ export interface Product {
   offer_details?: string;
   price?: number | string;
   position?: number;
+  is_kortvara?: boolean;
 }
 
 export interface CategoryData {
