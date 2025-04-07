@@ -13,6 +13,7 @@ const translateStore = (name: string): string => {
     "ICA": "ICA",
     "Lidl": "Lidl",
     "Willys": "Willys",
+    "Willys Johanneberg": "Willys Johanneberg",
     "Hemköp": "Hemköp",
     "City Gross": "City Gross"
   };
