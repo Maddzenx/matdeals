@@ -15,6 +15,7 @@ interface ProductCardProps {
     unitPrice?: string;
     offer_details?: string;
     image?: string;
+    is_kortvara?: boolean;
   };
   onQuantityChange: (
     productId: string, 
