@@ -12,6 +12,7 @@ import { useViewMode } from '@/hooks/useViewMode';
 import { PageHeader } from '@/components/PageHeader';
 import { ProductListView } from '@/components/products/ProductListView';
 import { useProductFilters } from '@/hooks/useProductFilters';
+import { Product } from '@/types/product';
 
 export default function Erbjudande() {
   const { navItems, setNavItems, handleProductQuantityChange } = useNavigationState();
@@ -61,7 +62,7 @@ export default function Erbjudande() {
     setSearchQuery(query);
   };
 
-  const filteredProducts = applyAllFilters(products, activeStores);
+  const filteredProducts: Product[] = applyAllFilters(products, activeStores);
 
   const storeTags = activeStores.map(storeId => {
     let displayName = storeId;

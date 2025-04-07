@@ -48,7 +48,18 @@ export function ProductListView({
         {products.map(product => (
           <ProductCard 
             key={product.id}
-            product={product}
+            product={{
+              id: product.id,
+              name: product.name,
+              details: product.details || product.description || "",
+              currentPrice: product.currentPrice || `${product.price} kr`,
+              originalPrice: product.originalPrice?.toString() || "",
+              store: product.store,
+              offerBadge: product.offerBadge,
+              unitPrice: product.unitPrice,
+              offer_details: product.offer_details,
+              image: product.image || product.image_url
+            }}
             onQuantityChange={onQuantityChange}
             viewMode={viewMode}
           />

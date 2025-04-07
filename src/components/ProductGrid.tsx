@@ -1,24 +1,25 @@
+
 import React from "react";
 import { ProductCard } from "./products/ProductCard";
 import { Product } from "@/types/product";
 
 interface ProductGridProps {
   title?: string;
-  products: {
-    id: string;
-    name: string;
-    details: string;
-    currentPrice: string;
-    originalPrice: string;
-    store: string;
-    offerBadge?: string;
-    category?: string;
-    image?: string;
-    unitPrice?: string;
-    offer_details?: string;
-  }[];
+  products: Product[];
   showCategoryHeaders?: boolean;
-  onQuantityChange?: (productId: string, newQuantity: number, previousQuantity: number) => void;
+  onQuantityChange?: (
+    productId: string, 
+    newQuantity: number, 
+    previousQuantity: number,
+    productDetails?: {
+      name: string;
+      details: string;
+      price: string;
+      store?: string;
+      recipeId?: string;
+      recipeTitle?: string;
+    }
+  ) => void;
   viewMode?: "grid" | "list";
   className?: string;
   allCategoryNames?: string[];
@@ -102,6 +103,25 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
     console.warn("Products array:", products);
   }
 
+  // Safely handle onQuantityChange
+  const handleQuantityChange = (
+    productId: string, 
+    newQuantity: number, 
+    previousQuantity: number,
+    productDetails?: {
+      name: string;
+      details: string;
+      price: string;
+      store?: string;
+      recipeId?: string;
+      recipeTitle?: string;
+    }
+  ) => {
+    if (onQuantityChange) {
+      onQuantityChange(productId, newQuantity, previousQuantity, productDetails);
+    }
+  };
+
   return (
     <div className={className}>
       {title && <h2 className="text-base font-bold text-[#1C1C1C] mb-3">{title}</h2>}
@@ -121,11 +141,22 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
             )}
             {categoryProducts.length > 0 && (
               <div className={`${viewMode === "grid" ? "grid grid-cols-2 gap-2" : "flex flex-col gap-2"} mb-5`}>
-                {categoryProducts.map((product) => (
+                {categoryProducts.map((product: Product) => (
                   <ProductCard
                     key={product.id}
-                    product={product}
-                    onQuantityChange={onQuantityChange}
+                    product={{
+                      id: product.id,
+                      name: product.name,
+                      details: product.details || product.description || "",
+                      currentPrice: product.currentPrice || `${product.price} kr`,
+                      originalPrice: product.originalPrice?.toString() || "",
+                      store: product.store,
+                      offerBadge: product.offerBadge,
+                      unitPrice: product.unitPrice,
+                      offer_details: product.offer_details,
+                      image: product.image || product.image_url
+                    }}
+                    onQuantityChange={handleQuantityChange}
                     viewMode={viewMode}
                   />
                 ))}

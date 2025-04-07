@@ -101,7 +101,7 @@ export const useSupabaseProducts = () => {
             offer_details: item.offer_details || '',
             image: item.image_url || "https://assets.icanet.se/e_sharpen:100,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_226367/cf_259/morotter_i_knippe.jpg",
             price: priceVal,
-            position: item.position
+            position: item.position || undefined
           };
         });
         
