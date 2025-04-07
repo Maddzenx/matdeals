@@ -1,73 +1,49 @@
 
 /**
- * Extracts product price from a card element
+ * Utility for extracting price information from HTML elements
  */
-export function extractPrice(card: Element): number | null {
-  // Try various selectors for prices
-  const priceSelectors = [
-    '.price', 
-    '.current-price',
-    '[class*="price"]',
-    '[data-test="price"]',
-    '.offer-price'
-  ];
-  
-  let priceText = null;
-  
-  for (const selector of priceSelectors) {
-    const priceElement = card.querySelector(selector);
-    if (priceElement && priceElement.textContent) {
-      priceText = priceElement.textContent.trim();
-      break;
-    }
-  }
-  
-  let price = null;
-  if (priceText) {
-    // Extract numeric price from text (e.g., "29:90 kr" -> 29.90)
-    const priceMatch = priceText.match(/(\d+)[,\.:]*(\d*)/);
-    if (priceMatch) {
-      const whole = parseInt(priceMatch[1]);
-      const decimal = priceMatch[2] ? parseInt(priceMatch[2]) : 0;
-      price = whole + (decimal / 100);
-    }
-  }
-  
-  return price;
-}
 
 /**
- * Extracts original price from a card element
+ * Extracts price information from an HTML element
  */
-export function extractOriginalPrice(card: Element): number | null {
-  // Look for original price
-  const originalPriceSelectors = [
-    '.original-price',
-    '.old-price',
-    '[class*="original-price"]',
-    '[class*="old-price"]',
-    '[data-test="original-price"]'
-  ];
-  
-  let originalPriceText = null;
-  
-  for (const selector of originalPriceSelectors) {
-    const element = card.querySelector(selector);
-    if (element && element.textContent) {
-      originalPriceText = element.textContent.trim();
-      break;
+export function extractProductPrice(element: Element): any {
+  try {
+    // Find elements with price-related classes
+    const priceElement = 
+      element.querySelector('.price, [class*="price"], .offer-price, [class*="offer"]') ||
+      element.querySelector('span, div, p');
+      
+    if (priceElement && priceElement.textContent) {
+      const text = priceElement.textContent.trim();
+      
+      // Look for price patterns (e.g., '25:- kr', '25,90 kr', etc.)
+      const priceMatches = text.match(/(\d+[.,]?\d*)(?:\s*(?::-|kr|SEK))/i);
+      
+      if (priceMatches && priceMatches[1]) {
+        return {
+          price: priceMatches[1],
+          priceText: text
+        };
+      }
     }
-  }
-  
-  let originalPrice = null;
-  if (originalPriceText) {
-    const priceMatch = originalPriceText.match(/(\d+)[,\.:]*(\d*)/);
-    if (priceMatch) {
-      const whole = parseInt(priceMatch[1]);
-      const decimal = priceMatch[2] ? parseInt(priceMatch[2]) : 0;
-      originalPrice = whole + (decimal / 100);
+    
+    // If no specific pattern found, look for any price-like text
+    const allText = element.textContent || '';
+    const priceMatches = allText.match(/(\d+[.,]?\d*)(?:\s*(?::-|kr|SEK))/i);
+    
+    if (priceMatches && priceMatches[1]) {
+      return {
+        price: priceMatches[1],
+        priceText: priceMatches[0]
+      };
     }
+    
+    return null;
+  } catch (error) {
+    console.error("Error extracting product price:", error);
+    return null;
   }
-  
-  return originalPrice;
 }
+
+// Default export for compatibility
+export default extractProductPrice;

@@ -8,7 +8,7 @@ import { fetchHtmlContent } from "./utils/dom-utils.ts";
 import { createSuccessResponse, createErrorResponse } from "./utils/response-utils.ts";
 import { HEMKOP_URLS, USER_AGENTS, BASE_URL } from "./config/scraper-config.ts";
 
-serve(async (req) => {
+serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -96,6 +96,7 @@ serve(async (req) => {
       console.error("Error storing fallback products:", storeError);
     }
     
-    return createErrorResponse(error, sampleProducts);
+    // Cast the unknown error to Error type using type assertion
+    return createErrorResponse(error as Error, sampleProducts);
   }
 });

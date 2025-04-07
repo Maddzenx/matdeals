@@ -1,15 +1,22 @@
 
 import { DOMParser } from "https://deno.land/x/deno_dom/deno-dom-wasm.ts";
 
+// Define a custom type for the return value of fetchHtmlContent
+interface FetchResult {
+  document: any | null; // Using any to avoid type conflicts
+  html: string;
+  fetchSuccess: boolean;
+}
+
 // Function to fetch HTML content with multiple retry strategies
 export async function fetchHtmlContent(
   urls: string[], 
   userAgents: string[], 
   forceRefresh: boolean = false
-): Promise<{document: Document | null, html: string, fetchSuccess: boolean}> {
+): Promise<FetchResult> {
   let html = '';
   let fetchSuccess = false;
-  let document = null;
+  let document: any = null;
   
   for (const url of urls) {
     for (const userAgent of userAgents) {
@@ -64,26 +71,37 @@ export async function fetchHtmlContent(
               // Try different approaches to find product containers
               const approaches = [
                 // Approach 1: Standard product selectors
-                () => document?.querySelectorAll('.product, .product-card, [class*="product"], article, .offer, .campaign-item'),
+                () => {
+                  const elements = document?.querySelectorAll('.product, .product-card, [class*="product"], article, .offer, .campaign-item');
+                  return elements ? Array.from(elements) : [];
+                },
                 // Approach 2: Price-related elements
-                () => document?.querySelectorAll('[class*="price"], [class*="Price"], [class*="kr"], [class*="erbjudande"]'),
+                () => {
+                  const elements = document?.querySelectorAll('[class*="price"], [class*="Price"], [class*="kr"], [class*="erbjudande"]');
+                  return elements ? Array.from(elements) : [];
+                },
                 // Approach 3: Generic containers with images
-                () => document?.querySelectorAll('div > img, a > img'),
+                () => {
+                  const elements = document?.querySelectorAll('div > img, a > img');
+                  return elements ? Array.from(elements) : [];
+                },
                 // Approach 4: List items with price text (common pattern)
                 () => {
                   const allListItems = document?.querySelectorAll('li');
-                  return Array.from(allListItems || []).filter(el => 
-                    el.textContent?.includes('kr') || el.textContent?.includes(':-')
-                  );
+                  return allListItems ? Array.from(allListItems).filter(el => {
+                    const text = el.textContent || '';
+                    return text.includes('kr') || text.includes(':-');
+                  }) : [];
                 },
                 // Approach 5: Div containers with product-like structure
                 () => {
                   const divs = document?.querySelectorAll('div');
-                  return Array.from(divs || []).filter(div => {
+                  return divs ? Array.from(divs).filter(div => {
                     const hasImg = div.querySelector('img') !== null;
-                    const hasPriceText = div.textContent?.match(/\d+[,.:]?\d*\s*kr/) !== null;
+                    const text = div.textContent || '';
+                    const hasPriceText = text.match(/\d+[,.:]?\d*\s*kr/) !== null;
                     return hasImg && hasPriceText;
-                  });
+                  }) : [];
                 }
               ];
               

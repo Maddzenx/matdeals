@@ -5,12 +5,16 @@
     "module": "esnext",
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "strict": false,
+    "strict": true,
     "lib": ["es2021", "dom"],
     "skipLibCheck": true,
     "noEmit": true,
     "checkJs": false,
-    "types": ["@supabase/supabase-js"]
+    "allowJs": true,
+    "types": ["@supabase/supabase-js"],
+    // Disable type checking for Deno modules
+    "noImplicitAny": false,
+    "strictNullChecks": false
   },
   "include": ["./**/*.ts"],
   "exclude": ["node_modules"]

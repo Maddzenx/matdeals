@@ -1,10 +1,11 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../shared/cors.ts";
 import { extractProducts } from "./products-extractor.ts";
 import { storeProducts, Product } from "../shared/product-storage.ts";
 
 // Define the function handler
-serve(async (req) => {
+serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -34,7 +35,7 @@ serve(async (req) => {
     const html = await response.text();
     console.log(`Successfully fetched Willys webpage (${html.length} bytes)`);
     
-    // Extract products from the HTML
+    // Extract products from the HTML - passing html as string since our extractor can handle it
     console.log("Extracting products from HTML...");
     const extractorResults = await extractProducts(html, target, "johanneberg");
     console.log(`Extracted ${extractorResults.length} products from HTML`);

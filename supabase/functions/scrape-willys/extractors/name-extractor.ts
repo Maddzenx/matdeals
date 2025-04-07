@@ -1,32 +1,37 @@
 
 /**
- * Extracts product name from a card element
+ * Utility for extracting product names from HTML elements
  */
-export function extractName(card: Element): string | null {
-  // Try various selectors for product name
-  const nameSelectors = [
-    '.product-name', 
-    '.product-title',
-    '.title',
-    '[class*="product-name"]',
-    '[class*="product-title"]',
-    'h2', 
-    'h3',
-    '[data-test="product-name"]'
-  ];
-  
-  for (const selector of nameSelectors) {
-    const nameElement = card.querySelector(selector);
+
+/**
+ * Extracts the product name from an HTML element
+ */
+export function extractProductName(element: Element): string | null {
+  try {
+    // Find elements with name-related classes
+    const nameElement = 
+      element.querySelector('.product-name, .product-title, .offer-title, h3, [class*="name"], [class*="title"]') || 
+      element.querySelector('h1, h2, h3, h4, h5');
+      
     if (nameElement && nameElement.textContent) {
       return nameElement.textContent.trim();
     }
+    
+    // If no specific name element found, try to get the most likely text
+    const headingElements = element.querySelectorAll('h1, h2, h3, h4, h5, strong, b');
+    for (let i = 0; i < headingElements.length; i++) {
+      const heading = headingElements[i];
+      if (heading && heading.textContent && heading.textContent.trim().length > 2) {
+        return heading.textContent.trim();
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    console.error("Error extracting product name:", error);
+    return null;
   }
-  
-  // Fallback to any heading
-  const heading = card.querySelector('h1, h2, h3, h4, h5');
-  if (heading && heading.textContent) {
-    return heading.textContent.trim();
-  }
-  
-  return null;
 }
+
+// Default export for compatibility
+export default extractProductName;
