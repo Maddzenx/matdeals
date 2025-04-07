@@ -1,12 +1,17 @@
-
 import React from "react";
 import { Tag } from "lucide-react";
 import { Product } from "@/data/types";
 import { productMatchesIngredient } from "@/utils/ingredientsMatchUtils";
 import { Badge } from "@/components/ui/badge";
 
+interface Ingredient {
+  name: string;
+  amount: number;
+  unit: string;
+}
+
 interface RecipeIngredientsProps {
-  ingredients: string[] | null;
+  ingredients: (string | Ingredient)[] | null;
   servings: number | null;
   matchedProducts?: Product[];
 }
@@ -21,9 +26,17 @@ export const RecipeIngredients: React.FC<RecipeIngredientsProps> = ({
   }
 
   // Check if an ingredient has a matching discounted product
-  const isDiscounted = (ingredient: string): Product | undefined => {
+  const isDiscounted = (ingredient: string | Ingredient): Product | undefined => {
     if (!matchedProducts || matchedProducts.length === 0) return undefined;
     return matchedProducts.find(product => productMatchesIngredient(product.name, ingredient));
+  };
+
+  // Format ingredient display text
+  const formatIngredient = (ingredient: string | Ingredient): string => {
+    if (typeof ingredient === 'string') {
+      return ingredient;
+    }
+    return `${ingredient.amount} ${ingredient.unit} ${ingredient.name}`;
   };
 
   return (
@@ -35,6 +48,7 @@ export const RecipeIngredients: React.FC<RecipeIngredientsProps> = ({
       <ul className="space-y-3">
         {ingredients.map((ingredient, idx) => {
           const discountedProduct = isDiscounted(ingredient);
+          const displayText = formatIngredient(ingredient);
           
           return (
             <li 
@@ -48,7 +62,7 @@ export const RecipeIngredients: React.FC<RecipeIngredientsProps> = ({
               } rounded-full mr-3`}></span>
               
               <div className="flex-1">
-                <span className="text-gray-800 leading-tight">{ingredient}</span>
+                <span className="text-gray-800 leading-tight">{displayText}</span>
                 
                 {discountedProduct && (
                   <div className="mt-1.5 flex items-center">

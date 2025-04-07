@@ -1,13 +1,14 @@
 export interface Product {
   id: string;
   name: string;
-  price: string;
-  unit: string;
-  category: string;
-  brand: string;
-  is_kortvara: boolean;
-  additional_info: string;
-  originalPriceText: string;
+  description?: string;
+  price: number;
+  originalPrice: number;
+  discount_percentage?: number;
+  image_url?: string;
+  product_url?: string;
+  category?: string;
   store: string;
-  created_at: string;
+  store_location?: string;
+  position: number;
 } 

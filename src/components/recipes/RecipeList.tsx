@@ -1,9 +1,9 @@
-
 import React from "react";
 import { Recipe } from "@/types/recipe";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { Button } from "@/components/ui/button";
 import { RecipeCard } from "./RecipeCard";
+import { AlertCircle, RefreshCw } from "lucide-react";
 
 interface RecipeListProps {
   recipes: Recipe[];
@@ -19,15 +19,29 @@ export const RecipeList: React.FC<RecipeListProps> = ({
   onRefresh
 }) => {
   if (loading) {
-    return <LoadingIndicator message="Laddar recept..." />;
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <LoadingIndicator message="Laddar recept..." />
+        <p className="text-sm text-gray-500 mt-4">Detta kan ta några sekunder...</p>
+      </div>
+    );
   }
 
   if (error) {
     return (
-      <div className="text-center py-8 text-red-500">
-        <p>Ett fel inträffade vid laddning av recept.</p>
-        <p className="text-sm">{error.message}</p>
-        <Button onClick={onRefresh} className="mt-4" variant="destructive">
+      <div className="flex flex-col items-center justify-center py-12">
+        <div className="text-red-500 mb-4">
+          <AlertCircle size={32} />
+        </div>
+        <p className="text-center text-red-600 font-medium mb-2">
+          {error.message || 'Ett fel inträffade vid laddning av recept.'}
+        </p>
+        <Button 
+          onClick={onRefresh} 
+          className="mt-4 bg-red-600 hover:bg-red-700 text-white"
+          disabled={loading}
+        >
+          <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           Försök igen
         </Button>
       </div>
@@ -36,10 +50,17 @@ export const RecipeList: React.FC<RecipeListProps> = ({
 
   if (recipes.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
-        <p>Inga recept hittades. Ladda in recept genom att klicka på knappen nedan.</p>
-        <Button onClick={onRefresh} className="mt-4">
-          Läs in recept från godare.se
+      <div className="flex flex-col items-center justify-center py-12">
+        <p className="text-center text-gray-500 mb-4">
+          Inga recept hittades för den valda kategorin.
+        </p>
+        <Button 
+          onClick={onRefresh} 
+          variant="outline"
+          disabled={loading}
+        >
+          <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          Uppdatera recept
         </Button>
       </div>
     );

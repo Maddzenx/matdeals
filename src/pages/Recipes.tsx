@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { useNavigationState } from "@/hooks/useNavigationState";
@@ -22,7 +21,8 @@ const Recipes = () => {
     activeCategory,
     categories,
     changeCategory,
-    scrapeRecipes
+    scrapeRecipes,
+    generateAndInsertRecipes
   } = useRecipes();
 
   // Load meal plan hook to make it available for recipe cards
@@ -33,6 +33,18 @@ const Recipes = () => {
     console.log("Selected nav:", id);
   };
 
+  const handleGenerateRecipes = async () => {
+    try {
+      setIsRefreshing(true);
+      console.log("Manually generating recipes...");
+      await generateAndInsertRecipes();
+    } catch (error) {
+      console.error("Error generating recipes:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   // Auto refresh recipes only on first app load
   useEffect(() => {
     if (isFirstLoad) {
@@ -41,6 +53,7 @@ const Recipes = () => {
           console.log("Auto refreshing recipes on first app load...");
           setIsRefreshing(true);
           await scrapeRecipes();
+          await generateAndInsertRecipes();
         } catch (error) {
           console.error("Error during auto recipe refresh:", error);
         } finally {
@@ -50,7 +63,7 @@ const Recipes = () => {
       
       autoRefreshRecipes();
     }
-  }, [isFirstLoad, scrapeRecipes]);
+  }, [isFirstLoad, scrapeRecipes, generateAndInsertRecipes]);
 
   return (
     <div className="min-h-screen pb-20 bg-white">
@@ -63,7 +76,7 @@ const Recipes = () => {
         categories={categories}
         activeCategory={activeCategory}
         onCategoryChange={changeCategory}
-        onRefresh={() => {}} // Keeping the prop to avoid TypeScript errors, but it's unused now
+        onRefresh={handleGenerateRecipes}
         isRefreshing={isRefreshing}
         isLoading={loading}
       />
@@ -73,7 +86,7 @@ const Recipes = () => {
           recipes={recipes}
           loading={loading}
           error={error}
-          onRefresh={() => {}} // Keeping the prop to avoid TypeScript errors, but it's unused now
+          onRefresh={handleGenerateRecipes}
         />
       </div>
 

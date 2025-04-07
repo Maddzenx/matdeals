@@ -1,4 +1,3 @@
-
 import { Product } from "@/data/types";
 
 /**
@@ -6,10 +5,11 @@ import { Product } from "@/data/types";
  */
 export const productMatchesIngredient = (
   productName: string,
-  ingredient: string
+  ingredient: string | { name: string; amount: number; unit: string }
 ): boolean => {
   const productNameLower = productName.toLowerCase();
-  const ingredientLower = ingredient.toLowerCase();
+  const ingredientName = typeof ingredient === 'string' ? ingredient : ingredient.name;
+  const ingredientLower = ingredientName.toLowerCase();
   
   // First check if product name is contained in the ingredient
   if (ingredientLower.includes(productNameLower)) {
@@ -44,7 +44,7 @@ export const productMatchesIngredient = (
  * Finds matching products for recipe ingredients
  */
 export const findMatchingProducts = (
-  ingredients: string[] | null,
+  ingredients: (string | { name: string; amount: number; unit: string })[] | null,
   products: Product[]
 ): Product[] => {
   if (!ingredients || ingredients.length === 0 || !products || products.length === 0) {
@@ -70,7 +70,7 @@ export const findMatchingProducts = (
  * Calculate savings for a recipe based on matching discounted products
  */
 export const calculateRecipeSavings = (
-  ingredients: string[] | null,
+  ingredients: (string | { name: string; amount: number; unit: string })[] | null,
   products: Product[]
 ): { 
   discountedPrice: number | null;
