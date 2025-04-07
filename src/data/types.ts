@@ -9,6 +9,10 @@ export interface Product {
   store: string;
   offerBadge?: string;
   category?: string;
+  unitPrice?: string;
+  offer_details?: string;
+  price?: number | string;
+  position?: number;
 }
 
 export interface CategoryData {

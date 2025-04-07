@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Product } from "@/data/types";
+import { Product } from "@/types/product";
 import { supabase } from "@/integrations/supabase/client";
 
 export const useSupabaseProducts = () => {
@@ -61,7 +61,8 @@ export const useSupabaseProducts = () => {
               details: "Willys, Italien, Klass 1",
               image: "https://assets.icanet.se/e_sharpen:100,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_226367/cf_259/morotter_i_knippe.jpg",
               originalPrice: "29:- kr",
-              offerBadge: "Erbjudande"
+              offerBadge: "Erbjudande",
+              price: 24
             },
             {
               id: "fallback-2",
@@ -72,7 +73,8 @@ export const useSupabaseProducts = () => {
               details: "Kronfågel, Sverige, 700-925g",
               image: "https://assets.icanet.se/e_sharpen:100,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_226367/cf_259/morotter_i_knippe.jpg",
               originalPrice: "109:- kr",
-              offerBadge: "Erbjudande"
+              offerBadge: "Erbjudande",
+              price: 89
             }
           ];
           setProducts(fallbackProducts);
@@ -80,18 +82,28 @@ export const useSupabaseProducts = () => {
         }
         
         // Transform database products to match our Product type
-        const transformedProducts: Product[] = data.map(item => ({
-          id: item.id || `product-${Math.random().toString(36).substring(2, 9)}`,
-          name: item.product_name || 'Unnamed Product',
-          category: determineCategoryFromText(item.product_name || ''),
-          store: item.store || 'Unknown Store',
-          currentPrice: formatPrice(item.price),
-          details: item.description || '',
-          originalPrice: item.original_price ? formatPrice(item.original_price) : '',
-          offerBadge: item.label || 'Erbjudande',
-          unitPrice: item.unit_price || '',
-          offer_details: item.offer_details || ''
-        }));
+        const transformedProducts: Product[] = data.map(item => {
+          // Parse price values
+          const priceVal = typeof item.price === 'string' 
+            ? parseFloat(item.price.replace(/[^\d.,]/g, '').replace(',', '.')) || 0 
+            : item.price || 0;
+            
+          return {
+            id: item.id || `product-${Math.random().toString(36).substring(2, 9)}`,
+            name: item.product_name || 'Unnamed Product',
+            category: item.category || determineCategoryFromText(item.product_name || ''),
+            store: item.store || 'Unknown Store',
+            currentPrice: formatPrice(priceVal),
+            details: item.description || '',
+            originalPrice: item.original_price ? formatPrice(item.original_price) : '',
+            offerBadge: item.label || 'Erbjudande',
+            unitPrice: item.unit_price || '',
+            offer_details: item.offer_details || '',
+            image: item.image_url || "https://assets.icanet.se/e_sharpen:100,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_226367/cf_259/morotter_i_knippe.jpg",
+            price: priceVal,
+            position: item.position
+          };
+        });
         
         console.log(`Transformed ${transformedProducts.length} products`);
         
@@ -113,7 +125,9 @@ export const useSupabaseProducts = () => {
             details: "Svenskt Butikskött, 800g",
             image: "https://assets.icanet.se/e_sharpen:100,q_auto,dpr_1.25,w_718,h_718,c_lfill/imagevaultfiles/id_226367/cf_259/morotter_i_knippe.jpg",
             originalPrice: "89:- kr",
-            offerBadge: "Veckans erbjudande"
+            offerBadge: "Veckans erbjudande",
+            price: 69,
+            position: 1
           }
         ];
         setProducts(fallbackProducts);

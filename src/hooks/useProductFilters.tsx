@@ -21,10 +21,10 @@ export function useProductFilters() {
     return products.filter(product => {
       // Check all possible fields where we might find relevant product information
       const nameMatch = product.name?.toLowerCase().includes(query);
-      const descriptionMatch = product.description?.toLowerCase().includes(query);
+      const descriptionMatch = (product.description || product.details)?.toLowerCase().includes(query);
       const categoryMatch = product.category?.toLowerCase().includes(query);
       const storeMatch = product.store?.toLowerCase().includes(query);
-      const offerDetailsMatch = product.offer_details?.toLowerCase().includes(query);
+      const offerDetailsMatch = (product.offer_details)?.toLowerCase().includes(query);
       
       // If any field matches, return true to include the product
       return nameMatch || descriptionMatch || categoryMatch || storeMatch || offerDetailsMatch;

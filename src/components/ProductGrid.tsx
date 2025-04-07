@@ -1,22 +1,22 @@
-
 import React from "react";
-import { ProductCard } from "./ProductCard";
-
-interface Product {
-  id: string;
-  image: string;
-  name: string;
-  details: string;
-  currentPrice: string;
-  originalPrice: string;
-  store: string;
-  offerBadge?: string;
-  category?: string;
-}
+import { ProductCard } from "./products/ProductCard";
+import { Product } from "@/types/product";
 
 interface ProductGridProps {
   title?: string;
-  products: Product[];
+  products: {
+    id: string;
+    name: string;
+    details: string;
+    currentPrice: string;
+    originalPrice: string;
+    store: string;
+    offerBadge?: string;
+    category?: string;
+    image?: string;
+    unitPrice?: string;
+    offer_details?: string;
+  }[];
   showCategoryHeaders?: boolean;
   onQuantityChange?: (productId: string, newQuantity: number, previousQuantity: number) => void;
   viewMode?: "grid" | "list";
@@ -124,14 +124,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                 {categoryProducts.map((product) => (
                   <ProductCard
                     key={product.id}
-                    id={product.id}
-                    image={product.image}
-                    name={product.name}
-                    details={product.details}
-                    currentPrice={product.currentPrice}
-                    originalPrice={product.originalPrice}
-                    store={product.store}
-                    offerBadge={product.offerBadge}
+                    product={product}
                     onQuantityChange={onQuantityChange}
                     viewMode={viewMode}
                   />

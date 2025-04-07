@@ -14,6 +14,7 @@ interface ProductCardProps {
     offerBadge?: string;
     unitPrice?: string;
     offer_details?: string;
+    image?: string;
   };
   onQuantityChange: (
     productId: string, 

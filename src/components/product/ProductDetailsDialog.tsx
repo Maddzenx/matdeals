@@ -97,7 +97,7 @@ export const ProductDetailsDialog: React.FC<ProductDetailsDialogProps> = ({
             </div>
 
             {/* Offer Badge and Details Section */}
-            {(offerBadge || unitPrice || formattedOfferDetails?.length > 0) && (
+            {(offerBadge || unitPrice || (formattedOfferDetails && formattedOfferDetails.length > 0)) && (
               <div className="bg-neutral-50 p-3 rounded-md mt-2">
                 <div className="flex flex-col gap-2">
                   {offerBadge && (
