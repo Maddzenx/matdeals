@@ -1,19 +1,19 @@
-
 export interface Product {
   id: string;
-  image: string;
   name: string;
-  details: string;
-  currentPrice: string;
+  description: string;
+  price: number;
   originalPrice: string;
+  currentPrice: string;
+  image: string;
   store: string;
-  offerBadge?: string;
-  category?: string;
-  unitPrice?: string;
-  offer_details?: string;
-  price?: number | string;
-  position?: number;
-  is_kortvara?: boolean;
+  isDiscounted: boolean;
+  category: string;
+  brand: string;
+  unit: string;
+  quantity: number;
+  url: string;
+  lastUpdated: string;
 }
 
 export interface CategoryData {

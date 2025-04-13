@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { NavItem } from "@/components/BottomNav";
 import { useLocation } from "react-router-dom";
 
@@ -21,34 +21,34 @@ export const useNavItems = (cartItems: CartItem[]) => {
   // Update active tab based on current route
   useEffect(() => {
     const path = location.pathname;
-    const updatedItems = navItems.map(item => {
-      if (path === "/" && item.id === "offers") {
-        return { ...item, active: true };
-      }
-      if (path === "/recipes" && item.id === "recipes") {
-        return { ...item, active: true };
-      }
-      if (path === "/shopping-list" && item.id === "cart") {
-        return { ...item, active: true };
-      }
-      if (path === "/auth" && item.id === "profile") {
-        return { ...item, active: true };
-      }
-      if ((path === "/meal-plan" || path === "/menu") && item.id === "menu") {
-        return { ...item, active: true };
-      }
-      return { ...item, active: false };
-    });
-    setNavItems(updatedItems);
-  }, [location.pathname, navItems]);
+    setNavItems(prevItems => 
+      prevItems.map(item => {
+        if (path === "/" && item.id === "offers") {
+          return { ...item, active: true };
+        }
+        if (path === "/recipes" && item.id === "recipes") {
+          return { ...item, active: true };
+        }
+        if (path === "/shopping-list" && item.id === "cart") {
+          return { ...item, active: true };
+        }
+        if (path === "/auth" && item.id === "profile") {
+          return { ...item, active: true };
+        }
+        if ((path === "/meal-plan" || path === "/menu") && item.id === "menu") {
+          return { ...item, active: true };
+        }
+        return { ...item, active: false };
+      })
+    );
+  }, [location.pathname]);
 
   // Update nav items with total quantity of items in cart
   useEffect(() => {
-    // Calculate total quantity of items in the cart
     const totalQuantity = cartItems.reduce((total, item) => total + item.quantity, 0);
     
-    setNavItems(prev => 
-      prev.map(item => 
+    setNavItems(prevItems => 
+      prevItems.map(item => 
         item.id === "cart" 
           ? { ...item, badge: totalQuantity > 0 ? totalQuantity : undefined } 
           : item

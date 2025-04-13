@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Card,
@@ -13,9 +12,11 @@ import { Recipe } from "@/types/recipe";
 import { Product } from "@/data/types";
 import { RecipePrice } from "./RecipePrice";
 import { Badge } from "../ui/badge";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Calendar } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useMealPlan } from "@/hooks/useMealPlan";
+import { useCart } from "@/hooks/useCart";
 
 export const RecipeCard = ({
   recipe,
@@ -33,21 +34,31 @@ export const RecipeCard = ({
   const [showDetails, setShowDetails] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { addToMealPlan } = useMealPlan();
+  const { addProduct } = useCart();
 
-  const handleAddToShoppingListClick = (recipe: Recipe) => {
-    onAddToShoppingList?.(recipe);
-    toast({
-      title: "Recept tillagt i inköpslistan!",
-      description: "Du hittar receptet i inköpslistan.",
-    });
+  const handleAddToShoppingListClick = async () => {
+    try {
+      await onAddToShoppingList?.(recipe);
+      toast({
+        title: "Recept tillagt i inköpslistan!",
+        description: "Du hittar receptet i inköpslistan.",
+      });
+    } catch (error) {
+      console.error("Error adding to shopping list:", error);
+    }
   };
 
-  const handleAddToMealPlanClick = (recipe: Recipe) => {
-    onAddToMealPlan?.(recipe);
-    toast({
-      title: "Recept tillagt i matsedeln!",
-      description: "Du hittar receptet i matsedeln.",
-    });
+  const handleAddToMealPlanClick = async () => {
+    try {
+      await addToMealPlan(recipe.id, "default");
+      toast({
+        title: "Recept tillagt i matsedeln!",
+        description: "Du hittar receptet i matsedeln.",
+      });
+    } catch (error) {
+      console.error("Error adding to meal plan:", error);
+    }
   };
 
   const handleCardClick = () => {
@@ -95,7 +106,7 @@ export const RecipeCard = ({
           size="sm"
           onClick={(e) => {
             e.stopPropagation();
-            handleAddToShoppingListClick(recipe);
+            handleAddToShoppingListClick();
           }}
         >
           <ShoppingCart className="mr-2 h-4 w-4" />
@@ -105,9 +116,10 @@ export const RecipeCard = ({
           size="sm"
           onClick={(e) => {
             e.stopPropagation();
-            handleAddToMealPlanClick(recipe);
+            handleAddToMealPlanClick();
           }}
         >
+          <Calendar className="mr-2 h-4 w-4" />
           Matsedel
         </Button>
       </CardFooter>

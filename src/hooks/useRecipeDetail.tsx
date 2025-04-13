@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Recipe, convertDatabaseRecipeToRecipe, RecipeIngredient } from "@/types/recipe";
@@ -7,36 +7,32 @@ import { useCart } from "./useCart";
 import { useProductMatch } from "./useProductMatch";
 import { useMealPlan } from "./useMealPlan";
 import { ShoppingCartProduct } from "./useCart";
+import { MatchedIngredient } from "@/types/matchedIngredient";
 
-interface MatchedIngredient {
+type JsonIngredient = {
   name: string;
-  amount?: string;
+  amount: string;
   unit?: string;
   notes?: string;
-  matchedProduct?: Product;
-}
+};
 
-interface DatabaseRecipe {
+type DatabaseRecipe = {
   id: string;
   title: string;
   description: string | null;
   instructions: string[];
   category: string;
-  created_at?: string | null;
+  created_at: string | null;
   ingredients: RecipeIngredient[];
   image_url?: string;
   time_minutes?: number | null;
   servings?: number | null;
   difficulty?: string | null;
   source_url?: string | null;
-}
-
-type JsonIngredient = {
-  name: string;
-  amount?: string;
-  unit?: string;
-  notes?: string;
 };
+
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 second
 
 export function useRecipeDetail(recipeId: string | undefined) {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
@@ -49,41 +45,63 @@ export function useRecipeDetail(recipeId: string | undefined) {
   const { addToMealPlan } = useMealPlan();
   const { findMatchingProducts } = useProductMatch();
 
-  useEffect(() => {
-    async function fetchRecipeDetails() {
-      if (!recipeId) {
-        setError('No recipe ID provided');
-        setLoading(false);
-        return;
-      }
-      
+  const fetchRecipeDetails = useCallback(async () => {
+    if (!recipeId) {
+      setError('No recipe ID provided');
+      setLoading(false);
+      navigate('/recipes');
+      return;
+    }
+
+    let retries = 0;
+    
+    while (retries < MAX_RETRIES) {
       try {
         setLoading(true);
+        
+        if (!supabase) {
+          throw new Error('Supabase client not initialized');
+        }
+
         const { data, error: supabaseError } = await supabase
           .from('recipes')
           .select('*')
           .eq('id', recipeId)
           .single();
 
-        if (supabaseError) throw supabaseError;
+        if (supabaseError) {
+          if (supabaseError.code === 'PGRST116') {
+            setError('Recipe not found');
+            setLoading(false);
+            navigate('/recipes');
+            return;
+          }
+          throw supabaseError;
+        }
 
         if (!data) {
           setError('Recipe not found');
           setLoading(false);
+          navigate('/recipes');
           return;
         }
 
-        // Convert ingredients from JSON to RecipeIngredient[]
+        if (!isValidRecipeData(data)) {
+          throw new Error('Invalid recipe data received from database');
+        }
+
         const ingredients = Array.isArray(data.ingredients) 
           ? data.ingredients
               .filter((ing): ing is JsonIngredient => 
                 ing !== null && 
                 typeof ing === 'object' && 
                 'name' in ing && 
-                typeof ing.name === 'string')
+                typeof ing.name === 'string' &&
+                'amount' in ing && 
+                typeof ing.amount === 'string')
               .map(ing => ({
                 name: ing.name,
-                amount: ing.amount || '',
+                amount: ing.amount,
                 unit: ing.unit,
                 notes: ing.notes
               }))
@@ -97,31 +115,32 @@ export function useRecipeDetail(recipeId: string | undefined) {
         const recipe = convertDatabaseRecipeToRecipe(recipeData);
         setRecipe(recipe);
         
-        // Find matching products for recipe ingredients
         const { matchedProducts, matchedIngredients } = findMatchingProducts(recipe.ingredients);
         setRecipeProducts(matchedProducts);
         setMatchedIngredients(matchedIngredients);
+        
+        break;
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'An error occurred while fetching recipe details';
-        setError(errorMessage);
-        console.error('Error fetching recipe:', err);
-      } finally {
-        setLoading(false);
+        console.error('Error fetching recipe details:', err);
+        retries++;
+        if (retries === MAX_RETRIES) {
+          setError(err instanceof Error ? err.message : 'An error occurred while fetching recipe details');
+          setLoading(false);
+        } else {
+          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+        }
       }
     }
+  }, [recipeId, navigate, findMatchingProducts]);
 
+  useEffect(() => {
     fetchRecipeDetails();
-  }, [recipeId, findMatchingProducts]);
+  }, [fetchRecipeDetails]);
 
   const handleAddToShoppingList = async (recipe: Recipe) => {
-    if (!recipe.matchedProducts || recipe.matchedProducts.length === 0) {
-      console.warn('No matched products found for recipe');
-      return;
-    }
-
     try {
-      // Add each product to the shopping list
-      for (const product of recipe.matchedProducts) {
+      const productsToAdd = recipe.matchedProducts || [];
+      for (const product of productsToAdd) {
         const price = parseFloat(product.currentPrice.replace(/[^0-9,.]/g, '').replace(',', '.'));
         if (isNaN(price)) {
           console.warn(`Invalid price format for product ${product.name}: ${product.currentPrice}`);
@@ -166,5 +185,23 @@ export function useRecipeDetail(recipeId: string | undefined) {
     matchedIngredients,
     handleAddToShoppingList,
     handleAddToMealPlan,
+    refreshRecipe: fetchRecipeDetails
   };
+}
+
+function isValidRecipeData(data: any): data is DatabaseRecipe {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    typeof data.id === 'string' &&
+    typeof data.title === 'string' &&
+    typeof data.category === 'string' &&
+    Array.isArray(data.instructions) &&
+    (data.description === null || typeof data.description === 'string') &&
+    (data.image_url === undefined || typeof data.image_url === 'string') &&
+    (data.time_minutes === null || typeof data.time_minutes === 'number') &&
+    (data.servings === null || typeof data.servings === 'number') &&
+    (data.difficulty === null || typeof data.difficulty === 'string') &&
+    (data.source_url === null || typeof data.source_url === 'string')
+  );
 }

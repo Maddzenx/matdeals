@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { BottomNav } from "@/components/BottomNav";
 import { useNavigationState } from "@/hooks/useNavigationState";
 import { useNavigate } from "react-router-dom";
@@ -28,12 +28,12 @@ const Recipes = () => {
   // Load meal plan hook to make it available for recipe cards
   useMealPlan();
 
-  const handleNavSelect = (id: string) => {
+  const handleNavSelect = useCallback((id: string) => {
     // Navigation logic is now handled in BottomNav component
     console.log("Selected nav:", id);
-  };
+  }, []);
 
-  const handleGenerateRecipes = async () => {
+  const handleGenerateRecipes = useCallback(async () => {
     try {
       setIsRefreshing(true);
       console.log("Manually generating recipes...");
@@ -43,7 +43,7 @@ const Recipes = () => {
     } finally {
       setIsRefreshing(false);
     }
-  };
+  }, [generateAndInsertRecipes]);
 
   // Auto refresh recipes only on first app load
   useEffect(() => {
@@ -53,7 +53,6 @@ const Recipes = () => {
           console.log("Auto refreshing recipes on first app load...");
           setIsRefreshing(true);
           await scrapeRecipes();
-          await generateAndInsertRecipes();
         } catch (error) {
           console.error("Error during auto recipe refresh:", error);
         } finally {
@@ -63,33 +62,24 @@ const Recipes = () => {
       
       autoRefreshRecipes();
     }
-  }, [isFirstLoad, scrapeRecipes, generateAndInsertRecipes]);
+  }, [isFirstLoad, scrapeRecipes]);
 
   return (
-    <div className="min-h-screen pb-20 bg-white">
-      <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"
-      />
-      
+    <div className="flex flex-col min-h-screen">
       <RecipeListHeader
-        categories={categories}
         activeCategory={activeCategory}
+        categories={categories}
         onCategoryChange={changeCategory}
         onRefresh={handleGenerateRecipes}
         isRefreshing={isRefreshing}
         isLoading={loading}
       />
-
-      <div className="px-4 py-4 bg-gray-50">
-        <RecipeList
-          recipes={recipes}
-          loading={loading}
-          error={error}
-          onRefresh={handleGenerateRecipes}
-        />
-      </div>
-
+      <RecipeList
+        recipes={recipes}
+        loading={loading}
+        error={error}
+        onRefresh={handleGenerateRecipes}
+      />
       <BottomNav items={navItems} onSelect={handleNavSelect} />
     </div>
   );

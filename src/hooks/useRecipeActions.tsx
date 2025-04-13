@@ -2,9 +2,20 @@ import { useState, useCallback } from "react";
 import { Product } from "@/data/types";
 import { Recipe } from "@/types/recipe";
 
-interface ProductQuantityChangeHandler {
-  (productId: string, quantity: number, previousQuantity: number, productDetails: { name: string; details?: string }): void;
-}
+type ProductQuantityChangeHandler = (
+  productId: string,
+  newQuantity: number,
+  previousQuantity: number,
+  productDetails?: {
+    name: string;
+    details: string;
+    price: string;
+    image?: string;
+    store?: string;
+    recipeId?: string;
+    recipeTitle?: string;
+  }
+) => void;
 
 export const useRecipeActions = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -32,7 +43,12 @@ export const useRecipeActions = () => {
           0,
           {
             name: product.name,
-            details: product.details,
+            details: product.description || "",
+            price: product.currentPrice,
+            image: product.image,
+            store: product.store,
+            recipeId: recipe.id,
+            recipeTitle: recipe.title
           }
         );
       });
