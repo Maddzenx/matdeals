@@ -14,6 +14,7 @@
     "types": ["@supabase/supabase-js"],
     "noImplicitAny": false,
     "strictNullChecks": false,
+    "allowSyntheticDefaultImports": true,
     "suppressImplicitAnyIndexErrors": true
   },
   "include": ["./**/*.ts"],

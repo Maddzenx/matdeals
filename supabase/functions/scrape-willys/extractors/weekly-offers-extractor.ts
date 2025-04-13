@@ -1,6 +1,6 @@
 
 import { ExtractorResult, normalizeImageUrl, extractPrice } from "./base-extractor.ts";
-import { extractName } from "./name-extractor.ts";
+import extractName from "./name-extractor.ts";
 
 /**
  * Extract products from the weekly offers section
@@ -184,7 +184,12 @@ export function extractFromWeeklyOffers(document: Document, baseUrl: string): Ex
             description: description || null,
             image_url: imageUrl || 'https://assets.icanet.se/t_product_large_v1,f_auto/7300156501245.jpg',
             offer_details: offerDetails,
-            store: 'willys'
+            original_price: null,
+            comparison_price: null,
+            quantity_info: null,
+            is_member_price: false,
+            store: 'willys',
+            store_location: 'johanneberg'
           });
           
           console.log(`Added weekly offer: ${name}, price: ${price}`);

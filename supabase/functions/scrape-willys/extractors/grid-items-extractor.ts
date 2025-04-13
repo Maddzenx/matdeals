@@ -1,6 +1,6 @@
 
 import { ExtractorResult, normalizeImageUrl, extractPrice } from "./base-extractor.ts";
-import { extractName } from "./name-extractor.ts";
+import extractName from "./name-extractor.ts";
 import { extractOfferDetails } from "./offer-details-extractor.ts";
 
 /**
@@ -84,7 +84,12 @@ export function extractGridItems(document: Document, baseUrl: string): Extractor
               description,
               image_url: imageUrl,
               offer_details: offerDetails,
-              store: 'willys'
+              original_price: null,
+              comparison_price: null,
+              quantity_info: null,
+              is_member_price: false,
+              store: 'willys',
+              store_location: 'johanneberg'
             });
             
             console.log(`Added grid product: ${name}, price: ${price}`);
@@ -185,7 +190,12 @@ export function extractGridItems(document: Document, baseUrl: string): Extractor
           description,
           image_url: imageUrl,
           offer_details: offerDetails,
-          store: 'willys'
+          original_price: null,
+          comparison_price: null,
+          quantity_info: null,
+          is_member_price: false,
+          store: 'willys',
+          store_location: 'johanneberg'
         });
         
         console.log(`Added grid product: ${name}, price: ${price}`);

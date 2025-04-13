@@ -10,7 +10,7 @@ export interface ExtractorResult {
   image_url: string | null;
   
   // Price-related information
-  original_price: string | null;
+  original_price: number | null;
   comparison_price: string | null;
   offer_details: string | null;
   
@@ -20,8 +20,7 @@ export interface ExtractorResult {
   
   // Store information
   store: string;
-  store_location?: string;
-  store_name?: string;
+  store_location: string | null;
   
   // Legacy fields for compatibility with older implementations
   "Product Name"?: string;
@@ -35,5 +34,7 @@ export interface ExtractorResult {
   "Savings"?: string;
   "Unit Price"?: string;
   "Purchase Limit"?: string;
-  "Position"?: string;
+  "Position"?: number;
+  index?: number;
+  store_name?: string;
 }

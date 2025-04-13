@@ -1,7 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../shared/cors.ts";
-import { extractProducts } from "./products-extractor.ts";
+import { extractProductsFromHTML } from "./products-extractor.ts";
 import { storeProducts, Product } from "../shared/product-storage.ts";
 
 // Define the function handler
@@ -37,11 +37,11 @@ serve(async (req: Request) => {
     
     // Extract products from the HTML - passing html as string since our extractor can handle it
     console.log("Extracting products from HTML...");
-    const extractorResults = await extractProducts(html, target, "johanneberg");
+    const extractorResults = extractProductsFromHTML(html);
     console.log(`Extracted ${extractorResults.length} products from HTML`);
     
     // Convert ExtractorResult to Product
-    const products: Product[] = extractorResults.map(result => ({
+    const products: Product[] = extractorResults.map((result: any) => ({
       product_name: result.name,
       description: result.description,
       price: result.price ? parseFloat(String(result.price).replace(',', '.').replace('kr', '').trim()) : null,

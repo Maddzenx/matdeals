@@ -1,3 +1,4 @@
+
 // Base extractor with common utilities and shared functionality
 export interface ExtractorResult {
   name: string;
@@ -11,6 +12,20 @@ export interface ExtractorResult {
   is_member_price: boolean;
   store: string;
   store_location: string | null;
+  "Product Name"?: string;
+  "Brand and Weight"?: string;
+  "Price"?: number;
+  "Product Image"?: string;
+  "Product Link"?: string;
+  "Label 1"?: string;
+  "Label 2"?: string;
+  "Label 3"?: string;
+  "Savings"?: string | number;
+  "Unit Price"?: string;
+  "Purchase Limit"?: string;
+  "Position"?: number;
+  index?: number;
+  store_name?: string;
 }
 
 export const DEFAULT_IMAGE_URL = 'https://assets.icanet.se/t_product_large_v1,f_auto/7300156501245.jpg';

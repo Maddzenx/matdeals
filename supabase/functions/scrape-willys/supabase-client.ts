@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.7";
-import { ExtractorResult } from "./extractors/base-extractor.ts";
+import { ExtractorResult } from "./types.ts";
 
 // Initialize the Supabase client
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
@@ -11,6 +11,22 @@ if (!supabaseUrl || !supabaseKey) {
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Define structure for legacy table format
+interface WillysJohannebergProduct {
+  "Product Name": string;
+  "Brand and Weight": string | null;
+  "Price": number;
+  "Product Image": string | null;
+  "Product Link": string | null;
+  "Label 1": string | null;
+  "Label 2": string | null;
+  "Label 3": string | null;
+  "Savings": number | null;
+  "Unit Price": string | null;
+  "Purchase Limit": string | null;
+  "Position": number;
+}
 
 /**
  * Store product data in Supabase
@@ -41,32 +57,50 @@ export async function storeProducts(products: ExtractorResult[]): Promise<number
       console.log("Successfully cleared existing products");
     }
     
+    // First check if we can get any data from the table
+    console.log("Checking if we can read from the Willys Johanneberg table");
+    const { data: existingData, error: readError } = await supabase
+      .from('Willys Johanneberg')
+      .select('*')
+      .limit(1);
+      
+    if (readError) {
+      console.error("Error reading from Willys Johanneberg table:", readError);
+      console.error("Error details:", JSON.stringify(readError));
+    } else {
+      console.log("Successfully read from table, found rows:", existingData?.length || 0);
+    }
+    
     // Prepare the data for Willys Johanneberg table format
-    const validProducts = products.filter(product => {
+    const validProducts: WillysJohannebergProduct[] = products.filter(product => {
       // Basic validation
-      if (!product["Product Name"] && !product.name) {
+      if (!product.name) {
         console.warn("Product missing name:", product);
         return false;
       }
       
       return true;
     }).map((product, index) => {
+      // Convert decimal prices to integers (multiply by 100)
+      const priceCents = product.price ? Math.round(product.price * 100) : 0;
+      const savingsCents = product.original_price && product.price 
+        ? Math.round((product.original_price - product.price) * 100)
+        : 0;
+      
       // Map to Willys Johanneberg table schema
       return {
-        "Product Name": product["Product Name"] || product.name,
-        "Brand and Weight": product["Brand and Weight"] || product.description || null,
-        "Price": typeof product.price === 'number' ? product.price : 
-                (typeof product.Price === 'number' ? product.Price : 
-                (parseInt(String(product.price || product.Price)) || 0)),
-        "Product Image": product["Product Image"] || product.image_url || null,
-        "Product Link": product["Product Link"] || null,
-        "Label 1": product["Label 1"] || "Veckans erbjudande",
-        "Label 2": product["Label 2"] || null,
-        "Label 3": product["Label 3"] || null,
-        "Savings": product["Savings"] || null,
-        "Unit Price": product["Unit Price"] || null,
-        "Purchase Limit": product["Purchase Limit"] || null,
-        "Position": product["Position"] || (index + 1)
+        "Product Name": product.name,
+        "Brand and Weight": product.description || null,
+        "Price": priceCents, // Store price as cents/öre
+        "Product Image": product.image_url || null,
+        "Product Link": null,
+        "Label 1": product.offer_details || "Veckans erbjudande",
+        "Label 2": null,
+        "Label 3": null,
+        "Savings": savingsCents, // Store savings as cents/öre
+        "Unit Price": product.comparison_price || null,
+        "Purchase Limit": product.quantity_info || null,
+        "Position": index + 1
       };
     });
     

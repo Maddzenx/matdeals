@@ -1,73 +1,54 @@
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 
-// Create Supabase client
+// Initialize the Supabase client
 export function createSupabaseClient() {
   const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+  const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
   
-  if (!supabaseUrl || !supabaseServiceKey) {
+  if (!supabaseUrl || !supabaseKey) {
     throw new Error("Missing Supabase credentials");
   }
   
-  console.log("Creating Supabase client with service role key");
-  
-  // Use the service role key to bypass RLS policies
-  return createClient(supabaseUrl, supabaseServiceKey);
+  return createClient(supabaseUrl, supabaseKey);
 }
 
 // Store recipes in Supabase
-export async function storeRecipes(recipes: any[]) {
+export async function storeRecipes(recipes: any[]): Promise<number> {
   if (!recipes || recipes.length === 0) {
     console.log("No recipes to store");
     return 0;
   }
   
-  const supabase = createSupabaseClient();
+  console.log(`Preparing to store ${recipes.length} recipes in Supabase`);
   
   try {
-    console.log(`Storing ${recipes.length} recipes in Supabase...`);
+    const supabase = createSupabaseClient();
     
-    // Clear existing recipes first
-    console.log("Clearing existing recipes");
-    const { error: deleteError } = await supabase
-      .from('recipes')
-      .delete()
-      .neq('id', '00000000-0000-0000-0000-000000000000'); // Safe condition
-      
-    if (deleteError) {
-      console.error("Error clearing existing recipes:", deleteError);
-      throw deleteError;
-    }
-    
-    console.log("Successfully cleared existing recipes.");
-    
-    // Insert new recipes
-    let successCount = 0;
-    const batchSize = 5; // Process in batches of 5
+    // Insert in batches to avoid request size limits
+    const batchSize = 10;
+    let insertedCount = 0;
     
     for (let i = 0; i < recipes.length; i += batchSize) {
       const batch = recipes.slice(i, i + batchSize);
-      console.log(`Processing batch ${i/batchSize + 1}/${Math.ceil(recipes.length/batchSize)}`);
+      console.log(`Inserting batch ${Math.floor(i / batchSize) + 1} of recipes`);
       
-      const { data, error: insertError } = await supabase
+      const { data, error } = await supabase
         .from('recipes')
-        .insert(batch)
+        .upsert(batch, { onConflict: 'id' })
         .select();
-        
-      if (insertError) {
-        console.error(`Error inserting batch of recipes:`, insertError);
-        console.error("Error details:", JSON.stringify(insertError));
+      
+      if (error) {
+        console.error(`Error inserting recipe batch:`, error);
       } else {
-        console.log(`Successfully inserted batch of ${data?.length || 0} recipes`);
-        successCount += data?.length || 0;
+        insertedCount += data.length;
+        console.log(`Successfully inserted/updated ${data.length} recipes`);
       }
     }
     
-    console.log(`Successfully inserted ${successCount} of ${recipes.length} recipes`);
-    return successCount;
+    return insertedCount;
   } catch (error) {
-    console.error("Error storing recipes in Supabase:", error);
-    throw error;
+    console.error("Error in storeRecipes:", error);
+    return 0;
   }
 }

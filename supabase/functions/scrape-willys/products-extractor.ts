@@ -1,7 +1,6 @@
 
-import { extractProductsFromGrid } from "./extractors/grid-items-extractor.ts";
-import { extractProductsFromWeeklyOffers } from "./extractors/weekly-offers-extractor.ts";
-import { fallbackGenericExtractor } from "./extractors/generic-extractor.ts";
+import { extractGridItems } from "./extractors/grid-items-extractor.ts";
+import { extractFromWeeklyOffers } from "./extractors/weekly-offers-extractor.ts";
 import { ExtractorResult } from "./types.ts";
 
 /**
@@ -36,18 +35,18 @@ export function extractProductsFromHTML(docOrHtml: Document | string): Extractor
   try {
     // Try the grid extractor first (for normal product listings)
     console.log("Trying grid extractor...");
-    products = extractProductsFromGrid(document);
+    products = extractGridItems(document, "https://www.willys.se");
     
     // If that didn't work, try the weekly offers extractor
     if (products.length === 0) {
       console.log("Grid extractor found no products, trying weekly offers extractor...");
-      products = extractProductsFromWeeklyOffers(document);
+      products = extractFromWeeklyOffers(document, "https://www.willys.se");
     }
     
-    // If we still have no products, try the fallback extractor
+    // If we still have no products, use fallback
     if (products.length === 0) {
-      console.log("Weekly offers extractor found no products, trying fallback extractor...");
-      products = fallbackGenericExtractor(document);
+      console.log("All extractors failed to find products");
+      return [];
     }
     
     console.log(`Total extracted products: ${products.length}`);
@@ -57,4 +56,22 @@ export function extractProductsFromHTML(docOrHtml: Document | string): Extractor
     console.error("Error extracting products:", error);
     return [];
   }
+}
+
+// Create a fallback extractor function
+export function fallbackGenericExtractor(document: Document): ExtractorResult[] {
+  console.log("Using fallback generic extractor");
+  return []; // Return empty array as fallback
+}
+
+// Add a compatibility function for the old API
+export function extractProducts(html: string, store: string = "willys", location: string = "johanneberg"): ExtractorResult[] {
+  const products = extractProductsFromHTML(html);
+  
+  // Add store and location to all products
+  return products.map(product => ({
+    ...product,
+    store,
+    store_location: location
+  }));
 }
