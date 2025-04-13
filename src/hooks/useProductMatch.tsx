@@ -1,6 +1,16 @@
-
 import { useCallback } from "react";
 import { Product } from "@/data/types";
+
+interface Ingredient {
+  name: string;
+  amount?: string;
+  unit?: string;
+  notes?: string;
+}
+
+interface MatchedIngredient extends Ingredient {
+  matchedProduct?: Product;
+}
 
 // Mock data - in a real app, this would be fetched from the database
 const allProducts: Product[] = [
@@ -42,45 +52,47 @@ const allProducts: Product[] = [
 
 export function useProductMatch() {
   // Function to find matching products for recipe ingredients
-  const findMatchingProducts = useCallback((ingredients: any[]) => {
+  const findMatchingProducts = useCallback((ingredients: (string | Ingredient)[]) => {
     // Default empty array if ingredients is not provided
     if (!ingredients || !Array.isArray(ingredients)) {
       return { matchedProducts: [], matchedIngredients: [] };
     }
 
     const matchedProducts: Product[] = [];
-    const matchedIngredients: any[] = [];
+    const matchedIngredients: MatchedIngredient[] = [];
     
     // Simple matching logic - in a real app, this would be more sophisticated
     ingredients.forEach(ingredient => {
       let ingredientName = "";
+      let ingredientObj: Ingredient;
       
       // Handle different ingredient formats
       if (typeof ingredient === 'string') {
         ingredientName = ingredient;
-      } else if (ingredient && typeof ingredient === 'object') {
-        ingredientName = ingredient.name || ingredient.item || "";
+        ingredientObj = { name: ingredient };
+      } else {
+        ingredientName = ingredient.name;
+        ingredientObj = ingredient;
       }
       
-      if (!ingredientName) return;
-      
-      // Look for matches in product names (simple substring match)
-      const matchedProduct = allProducts.find(product => 
-        product.name.toLowerCase().includes(ingredientName.toLowerCase()) ||
-        ingredientName.toLowerCase().includes(product.name.toLowerCase())
+      // Find matching product
+      const matchingProduct = allProducts.find(product => 
+        product.name.toLowerCase().includes(ingredientName.toLowerCase())
       );
       
-      if (matchedProduct) {
-        matchedProducts.push(matchedProduct);
+      if (matchingProduct) {
+        matchedProducts.push(matchingProduct);
         matchedIngredients.push({
-          ...ingredient,
-          matchedProduct
+          ...ingredientObj,
+          matchedProduct: matchingProduct
         });
+      } else {
+        matchedIngredients.push(ingredientObj);
       }
     });
     
     return { matchedProducts, matchedIngredients };
   }, []);
-  
+
   return { findMatchingProducts };
 }

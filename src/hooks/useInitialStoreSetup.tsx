@@ -1,12 +1,17 @@
-
 import { useEffect } from "react";
 import { storeTagsData } from "@/data/productData";
+import { Product } from "@/data/types";
+
+interface StoreTag {
+  id: string;
+  name: string;
+}
 
 export const useInitialStoreSetup = (
   activeStores: string[],
-  addStoreIfNeeded: (storeId: string, storeName: string, storeTagsData: any[]) => void,
+  addStoreIfNeeded: (storeId: string, storeName: string, storeTagsData: StoreTag[]) => void,
   handleStoreToggle: (storeId: string) => void,
-  supabaseProducts: any[]
+  supabaseProducts: Product[]
 ) => {
   // Initialize store filters
   useEffect(() => {
@@ -25,7 +30,7 @@ export const useInitialStoreSetup = (
     if (!activeStores.includes('hemkop')) {
       handleStoreToggle('hemkop');
     }
-  }, []);
+  }, [activeStores, addStoreIfNeeded, handleStoreToggle]);
   
   // Add store filters based on product data
   useEffect(() => {

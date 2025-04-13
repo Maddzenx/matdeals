@@ -1,4 +1,3 @@
-
 import { Product as BaseProduct } from './product';
 
 declare module './product' {
@@ -12,7 +11,7 @@ declare namespace DenoDOM {
   interface Document {
     querySelector(selector: string): Element | null;
     querySelectorAll(selector: string): NodeListOf<Element>;
-    [key: string]: any;
+    [key: string]: unknown;
   }
   
   interface Element {
@@ -21,6 +20,6 @@ declare namespace DenoDOM {
     getAttribute(name: string): string | null;
     textContent: string | null;
     innerHTML: string;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 }

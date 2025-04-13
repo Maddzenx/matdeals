@@ -1,9 +1,13 @@
-
 import { useState, useEffect } from "react";
 import { NavItem } from "@/components/BottomNav";
 import { useLocation } from "react-router-dom";
 
-export const useNavItems = (cartItems: any[]) => {
+interface CartItem {
+  quantity: number;
+  [key: string]: unknown;
+}
+
+export const useNavItems = (cartItems: CartItem[]) => {
   const location = useLocation();
   
   const [navItems, setNavItems] = useState<NavItem[]>([
@@ -36,7 +40,7 @@ export const useNavItems = (cartItems: any[]) => {
       return { ...item, active: false };
     });
     setNavItems(updatedItems);
-  }, [location.pathname]);
+  }, [location.pathname, navItems]);
 
   // Update nav items with total quantity of items in cart
   useEffect(() => {

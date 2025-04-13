@@ -1,11 +1,15 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useScrapeIca } from "@/hooks/useScrapeIca";
 import { useScrapeWillys } from "@/hooks/useScrapeWillys";
 import { useScrapeHemkop } from "@/hooks/useScrapeHemkop";
 import { useAppSession } from "@/hooks/useAppSession";
 
-export const useProductRefresh = (refetch: () => Promise<{ success: boolean; error?: any }>) => {
+interface RefetchResult {
+  success: boolean;
+  error?: Error;
+}
+
+export const useProductRefresh = (refetch: () => Promise<RefetchResult>) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { scraping: scrapingIca, handleScrapeIca } = useScrapeIca(refetch);
   const { scraping: scrapingWillys, handleScrapeWillys } = useScrapeWillys(refetch);

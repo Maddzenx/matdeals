@@ -1,10 +1,22 @@
-
 import { useCallback } from "react";
 import { Product } from "@/data/types";
 import { transformIcaProducts, transformWillysProducts } from "@/utils/transformers";
 
+interface RawProduct {
+  id: string;
+  name: string;
+  price: string;
+  originalPrice?: string;
+  image?: string;
+  store: string;
+  category?: string;
+  details?: string;
+  offerBadge?: string;
+  [key: string]: unknown;
+}
+
 export const useProductTransformation = () => {
-  const transformProducts = useCallback((icaData: any[], willysData: any[]) => {
+  const transformProducts = useCallback((icaData: RawProduct[], willysData: RawProduct[]) => {
     console.log("Starting product transformation");
     
     // Transform products using our utility functions
@@ -18,10 +30,7 @@ export const useProductTransformation = () => {
         id: p.id,
         name: p.name,
         store: p.store,
-        category: p.category
       })));
-    } else {
-      console.warn("No ICA products after transformation!");
     }
     
     console.log('Willys products transformed:', willysProducts.length);
@@ -30,24 +39,12 @@ export const useProductTransformation = () => {
         id: p.id,
         name: p.name,
         store: p.store,
-        category: p.category
       })));
-    } else {
-      console.warn("No Willys products after transformation!");
     }
     
     // Combine all products
     const allProducts = [...icaProducts, ...willysProducts];
-    console.log('Total number of products:', allProducts.length);
-    
-    // Group products by store for debugging
-    const storeCount = allProducts.reduce((acc, product) => {
-      const store = product.store?.toLowerCase() || 'unknown';
-      acc[store] = (acc[store] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-    
-    console.log('Products by store:', storeCount);
+    console.log('Total products after transformation:', allProducts.length);
     
     return allProducts;
   }, []);

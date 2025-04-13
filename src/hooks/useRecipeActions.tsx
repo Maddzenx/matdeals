@@ -1,5 +1,10 @@
-
 import { useState, useCallback } from "react";
+import { Product } from "@/data/types";
+import { Recipe } from "@/types/recipe";
+
+interface ProductQuantityChangeHandler {
+  (productId: string, quantity: number, previousQuantity: number, productDetails: { name: string; details?: string }): void;
+}
 
 export const useRecipeActions = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -18,9 +23,9 @@ export const useRecipeActions = () => {
   }, []);
 
   // Handle add to cart without toast notification
-  const handleAddToCartWithToast = useCallback((recipe: any, handleProductQuantityChange: any) => {
+  const handleAddToCartWithToast = useCallback((recipe: Recipe, handleProductQuantityChange: ProductQuantityChangeHandler) => {
     if (recipe && recipe.matchedProducts && recipe.matchedProducts.length > 0) {
-      recipe.matchedProducts.forEach((product: any) => {
+      recipe.matchedProducts.forEach((product: Product) => {
         handleProductQuantityChange(
           product.id,
           1,
@@ -28,24 +33,19 @@ export const useRecipeActions = () => {
           {
             name: product.name,
             details: product.details,
-            price: product.currentPrice,
-            image: product.image,
-            store: product.store,
-            recipeId: recipe.id,
-            recipeTitle: recipe.title
           }
         );
       });
-      
-      // Manually close dropdown after action
-      setIsDropdownOpen(false);
     }
+    
+    // Manually close dropdown after action
+    setIsDropdownOpen(false);
   }, []);
 
   return {
     isDropdownOpen,
     handleDropdownChange,
     handleAddToMealPlanWithToast,
-    handleAddToCartWithToast
+    handleAddToCartWithToast,
   };
 };

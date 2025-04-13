@@ -1,5 +1,11 @@
-
 import { Product } from "@/data/types";
+
+export interface RecipeIngredient {
+  name: string;
+  amount: string;
+  unit?: string;
+  notes?: string;
+}
 
 export interface Recipe {
   id: string;
@@ -8,7 +14,7 @@ export interface Recipe {
   instructions: string[];
   category: string;
   created_at?: string | null;
-  ingredients: any; // Use more specific type if known
+  ingredients: RecipeIngredient[];
   
   // Frontend-calculated fields
   calculatedPrice?: number | null;
@@ -28,8 +34,23 @@ export interface Recipe {
   source_url?: string | null;
 }
 
+export interface DatabaseRecipe {
+  id: string;
+  title: string;
+  description: string | null;
+  instructions: string[];
+  category: string;
+  created_at?: string | null;
+  ingredients: RecipeIngredient[];
+  image_url?: string;
+  time_minutes?: number | null;
+  servings?: number | null;
+  difficulty?: string | null;
+  source_url?: string | null;
+}
+
 // Helper function to convert database recipe to frontend Recipe type
-export function convertDatabaseRecipeToRecipe(dbRecipe: any): Recipe {
+export function convertDatabaseRecipeToRecipe(dbRecipe: DatabaseRecipe): Recipe {
   return {
     id: dbRecipe.id,
     title: dbRecipe.title,
