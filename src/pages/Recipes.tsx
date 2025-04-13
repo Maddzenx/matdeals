@@ -21,8 +21,7 @@ const Recipes = () => {
     activeCategory,
     categories,
     changeCategory,
-    scrapeRecipes,
-    generateAndInsertRecipes
+    refreshRecipes
   } = useRecipes();
 
   // Load meal plan hook to make it available for recipe cards
@@ -36,14 +35,14 @@ const Recipes = () => {
   const handleGenerateRecipes = useCallback(async () => {
     try {
       setIsRefreshing(true);
-      console.log("Manually generating recipes...");
-      await generateAndInsertRecipes();
+      console.log("Manually refreshing recipes...");
+      await refreshRecipes();
     } catch (error) {
-      console.error("Error generating recipes:", error);
+      console.error("Error refreshing recipes:", error);
     } finally {
       setIsRefreshing(false);
     }
-  }, [generateAndInsertRecipes]);
+  }, [refreshRecipes]);
 
   // Auto refresh recipes only on first app load
   useEffect(() => {
@@ -52,7 +51,7 @@ const Recipes = () => {
         try {
           console.log("Auto refreshing recipes on first app load...");
           setIsRefreshing(true);
-          await scrapeRecipes();
+          await refreshRecipes();
         } catch (error) {
           console.error("Error during auto recipe refresh:", error);
         } finally {
@@ -62,7 +61,7 @@ const Recipes = () => {
       
       autoRefreshRecipes();
     }
-  }, [isFirstLoad, scrapeRecipes]);
+  }, [isFirstLoad, refreshRecipes]);
 
   return (
     <div className="flex flex-col min-h-screen">

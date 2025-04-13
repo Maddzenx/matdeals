@@ -30,9 +30,15 @@ export const useProductMatch = () => {
     const unmatchedIngredients: RecipeIngredient[] = [];
 
     ingredients.forEach(ingredient => {
-      const matches = products.filter(product => 
-        product.name.toLowerCase().includes(ingredient.name.toLowerCase())
-      );
+      if (!ingredient?.name) {
+        unmatchedIngredients.push(ingredient);
+        return;
+      }
+
+      const matches = products.filter(product => {
+        if (!product?.name) return false;
+        return product.name.toLowerCase().includes(ingredient.name.toLowerCase());
+      });
 
       if (matches.length > 0) {
         matchedProducts.push(...matches);

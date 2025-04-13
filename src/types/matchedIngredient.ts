@@ -1,4 +1,4 @@
-import { Product } from './product';
+import { Product } from '@/data/types';
 
 export interface MatchedIngredient {
   name: string;
