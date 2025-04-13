@@ -1,33 +1,39 @@
 
 /**
- * Unified ExtractorResult interface to be used across all extractors
+ * Result from product extraction
  */
 export interface ExtractorResult {
+  // Basic product information
   name: string;
-  price: string | number;
-  description?: string | null;
-  image_url?: string;
-  original_price?: string | number | null;
-  comparison_price?: string | null;
-  quantity_info?: string | null;
-  is_member_price?: boolean;
-  offer_details?: string;
-  store?: string;
-  store_location?: string;
-  store_name?: string; // Added to fix generic-extractor errors
-  index?: number;
+  price: number;
+  description: string | null;
+  image_url: string | null;
   
-  // Legacy properties used in some extractors - added to prevent type errors
+  // Price-related information
+  original_price: string | null;
+  comparison_price: string | null;
+  offer_details: string | null;
+  
+  // Additional information
+  quantity_info: string | null;
+  is_member_price: boolean;
+  
+  // Store information
+  store: string;
+  store_location?: string;
+  store_name?: string;
+  
+  // Legacy fields for compatibility with older implementations
   "Product Name"?: string;
   "Brand and Weight"?: string;
-  "Price"?: number | string;
+  "Price"?: number;
   "Product Image"?: string;
   "Product Link"?: string;
   "Label 1"?: string;
   "Label 2"?: string;
   "Label 3"?: string;
-  "Savings"?: number;
+  "Savings"?: string;
   "Unit Price"?: string;
   "Purchase Limit"?: string;
-  "Position"?: number;
+  "Position"?: string;
 }

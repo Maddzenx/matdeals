@@ -1,114 +1,113 @@
 
-// This file provides type declarations for Deno modules to satisfy TypeScript
+// Deno standard library modules
 declare module "https://deno.land/std@0.168.0/http/server.ts" {
-  export function serve(handler: (req: Request) => Response | Promise<Response>): void;
-}
-
-declare module "https://esm.sh/@supabase/supabase-js@*" {
-  export * from "@supabase/supabase-js";
-}
-
-declare module "https://deno.land/x/deno_dom/deno-dom-wasm.ts" {
-  export class DOMParser {
-    parseFromString(html: string, type: string): Document;
-  }
-  
-  export interface Document {
-    querySelector(selector: string): Element | null;
-    querySelectorAll(selector: string): NodeListOf<Element>;
-    [key: string]: any; // Allow any other properties
-  }
-  
-  export interface Element {
-    querySelector(selector: string): Element | null;
-    querySelectorAll(selector: string): NodeListOf<Element>;
-    getAttribute(name: string): string | null;
-    textContent: string | null;
-    innerHTML: string;
-    tagName: string;
-    [key: string]: any; // Allow any other properties
-  }
-  
-  export interface NodeListOf<T> {
-    length: number;
-    item(index: number): T | null;
-    [index: number]: T;
-    forEach(callbackfn: (value: T, key: number, parent: NodeListOf<T>) => void): void;
-    [Symbol.iterator](): Iterator<T>; // Add iterator method
-  }
-}
-
-declare module "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts" {
-  export * from "https://deno.land/x/deno_dom/deno-dom-wasm.ts";
+  export function serve(handler: (req: Request) => Promise<Response> | Response): void;
 }
 
 declare module "https://deno.land/std@0.195.0/testing/asserts.ts" {
-  export function assertEquals(actual: any, expected: any, msg?: string): void;
-  export function assertStringIncludes(actual: string, expected: string, msg?: string): void;
-  export function assertNotEquals(actual: any, expected: any, msg?: string): void;
-  export function assert(condition: boolean, msg?: string): void;
-  export function assertThrows(fn: () => void, ErrorClass?: new (...args: any[]) => Error, msgIncludes?: string, msg?: string): Error;
+  export function assertEquals(actual: unknown, expected: unknown, msg?: string): void;
+  export function assertExists(actual: unknown, msg?: string): void;
+  export function assert(condition: unknown, msg?: string): asserts condition;
+  export function assertThrows(fn: () => void, errorClass?: any): void;
 }
 
 declare module "https://deno.land/std@0.195.0/testing/mod.ts" {
-  export function test(name: string, fn: () => void | Promise<void>): void;
-  export const runTests: any;
+  export function runTests(options?: any): Promise<void>;
 }
 
-// Fix for the extractProductName and extractProductPrice exports
-declare module "../extractors/name-extractor.ts" {
-  export function extractProductName(element: any): string | null;
-  export default function extractProductName(element: any): string | null;
+// Deno DOM module
+declare module "https://deno.land/x/deno_dom/deno-dom-wasm.ts" {
+  export class DOMParser {
+    constructor();
+    parseFromString(markup: string, type: string): Document;
+  }
+  
+  // Define Document interface that's compatible with standard DOM Document
+  export interface Document {
+    querySelectorAll(selectors: string): NodeListOf<Element>;
+    querySelector(selectors: string): Element | null;
+    createElement(tagName: string): Element;
+    // Add minimal properties needed
+    documentElement: Element;
+    body: Element;
+  }
+  
+  // Define Element interface that's compatible with standard DOM Element
+  export interface Element {
+    querySelectorAll(selectors: string): NodeListOf<Element>;
+    querySelector(selectors: string): Element | null;
+    getAttribute(name: string): string | null;
+    setAttribute(name: string, value: string): void;
+    textContent: string | null;
+    innerHTML: string;
+    tagName: string;
+    className: string;
+    id: string;
+    classList: DOMTokenList;
+    children: HTMLCollection;
+    parentElement: Element | null;
+    firstChild: Node | null;
+    lastChild: Node | null;
+  }
+  
+  export interface DOMTokenList {
+    contains(token: string): boolean;
+    add(token: string): void;
+    remove(token: string): void;
+    toggle(token: string): boolean;
+  }
+  
+  export interface HTMLCollection {
+    length: number;
+    item(index: number): Element | null;
+    [index: number]: Element;
+  }
+  
+  export interface NodeListOf<T> extends Array<T> {
+    length: number;
+    item(index: number): T | null;
+    [index: number]: T;
+  }
+  
+  export interface Node {
+    textContent: string | null;
+    nodeName: string;
+    nodeType: number;
+    parentNode: Node | null;
+  }
 }
 
-declare module "../extractors/price-extractor.ts" {
-  export function extractProductPrice(element: any): any;
-  export default function extractProductPrice(element: any): any;
+// Supabase module
+declare module "https://esm.sh/@supabase/supabase-js@2" {
+  export * from "@supabase/supabase-js";
 }
 
-// Fix for import in scrape-ica/supabase-client.test.ts
+declare module "https://esm.sh/@supabase/supabase-js@2.7.1" {
+  export * from "@supabase/supabase-js";
+}
+
+declare module "https://esm.sh/@supabase/supabase-js@2.38.1" {
+  export * from "@supabase/supabase-js";
+}
+
+declare module "https://esm.sh/@supabase/supabase-js@2.39.7" {
+  export * from "@supabase/supabase-js";
+}
+
+// Add missing product-extractor module
 declare module "./product-extractor.ts" {
-  export const extractProducts: any;
+  export function extractProducts(html: string): any[];
 }
 
-// Declare exported members for scrape-recipes modules
+// Define mock scraper modules
 declare module "./scrapers/coop-scraper.ts" {
-  export const scrapeCoopRecipes: any;
+  export const scrapeCoopRecipes: () => Promise<any[]>;
 }
 
 declare module "./scrapers/ica-scraper.ts" {
-  export const scrapeIcaRecipes: any;
+  export const scrapeIcaRecipes: () => Promise<any[]>;
 }
 
 declare module "./mock/mock-recipes.ts" {
-  export const mockRecipes: any;
-}
-
-// Define the ExtractorResult type to fix issues in scrape-willys
-interface ExtractorResult {
-  name: string;
-  price: string | number;
-  description?: string | null;
-  image_url?: string;
-  original_price?: string | number | null;
-  comparison_price?: string | null;
-  quantity_info?: string | null;
-  is_member_price?: boolean;
-  offer_details?: string;
-  store?: string;
-  store_location?: string;
-  store_name?: string;
-  index?: number;
-  "Product Name"?: string;
-  "Brand and Weight"?: string;
-  "Price"?: number | string;
-  "Product Image"?: string;
-  "Product Link"?: string;
-  "Label 1"?: string;
-  "Label 2"?: string;
-  "Label 3"?: string;
-  "Savings"?: number;
-  "Unit Price"?: string;
-  "Purchase Limit"?: string;
-  "Position"?: number;
+  export const mockRecipes: any[];
 }

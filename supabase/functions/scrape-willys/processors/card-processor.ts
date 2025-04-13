@@ -1,52 +1,73 @@
 
-import { Product } from "../types/product.ts";
-import { extractProductName } from "../extractors/name-extractor.ts";
-import { extractProductDescription } from "../extractors/description-extractor.ts";
-import { extractProductPrice } from "../extractors/price-extractor.ts";
-import { extractProductImageUrl } from "../extractors/image-extractor.ts";
-import { extractOfferDetails } from "../extractors/offer-details-extractor.ts";
+import extractName from "../extractors/name-extractor.ts";
+import extractPrice from "../extractors/price-extractor.ts";
+import { ExtractorResult } from "../types.ts";
 
 /**
- * Processes a single product card and extracts product information
+ * Process a product card element to extract product details
+ * @param cardElement The product card element to process
+ * @param store The store name
+ * @returns Product information object or null if extraction failed
  */
-export function processProductCard(
-  card: Element, 
-  baseUrl: string, 
-  processedProductNames: Set<string>
-): Product | null {
+export function processCard(cardElement: Element, store: string = "Willys"): ExtractorResult | null {
   try {
-    // Extract product name
-    const name = extractProductName(card);
+    // Extract name
+    const name = extractName(cardElement);
     
-    if (!name) {
+    if (!name || name === "Unknown Product") {
+      console.warn("Failed to extract product name, skipping card");
       return null;
     }
     
-    // Normalize name for deduplication
-    const normalizedName = name.toLowerCase().trim();
+    // Extract price
+    const price = extractPrice(cardElement);
     
-    if (!normalizedName || processedProductNames.has(normalizedName)) {
+    if (!price) {
+      console.warn(`Failed to extract price for product: ${name}, skipping card`);
       return null;
     }
     
-    // Extract other product details
-    const description = extractProductDescription(card);
-    const { price, originalPrice } = extractProductPrice(card);
-    const imageUrl = extractProductImageUrl(card, baseUrl);
+    // Process image
+    let imageUrl = null;
+    const imgElement = cardElement.querySelector('img');
+    if (imgElement) {
+      imageUrl = imgElement.getAttribute('src');
+      
+      // If src is not available, try data-src (lazy loading)
+      if (!imageUrl) {
+        imageUrl = imgElement.getAttribute('data-src');
+      }
+    }
     
-    // Add to processed names
-    processedProductNames.add(normalizedName);
+    // Process description/brand
+    let description = null;
+    const brandElement = cardElement.querySelector('.brand, [class*="brand"], [class*="subtitle"], p:not([class*="price"])');
+    if (brandElement && brandElement.textContent) {
+      description = brandElement.textContent.trim();
+    }
+    
+    // Process offer details
+    let offerDetails = '';
+    const offerElement = cardElement.querySelector('.offer, [class*="campaign"], [class*="offer"], [class*="badge"]');
+    if (offerElement && offerElement.textContent) {
+      offerDetails = offerElement.textContent.trim();
+    }
     
     return {
       name,
-      description,
       price,
+      description,
       image_url: imageUrl,
-      original_price: originalPrice,
-      offer_details: extractOfferDetails(card)
+      offer_details: offerDetails || null,
+      store,
+      original_price: null,
+      comparison_price: null,
+      quantity_info: null,
+      is_member_price: false
     };
-  } catch (cardError) {
-    console.error("Error processing a card:", cardError);
+    
+  } catch (error) {
+    console.error("Error processing product card:", error);
     return null;
   }
 }

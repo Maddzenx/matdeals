@@ -1,49 +1,83 @@
 
 /**
- * Utility for extracting price information from HTML elements
+ * Extract the price of a product from a product element
+ * @param element The product element
+ * @returns The product price as a number
  */
-
-/**
- * Extracts price information from an HTML element
- */
-export function extractProductPrice(element: Element): any {
+export default function extractPrice(element: Element): number {
   try {
-    // Find elements with price-related classes
-    const priceElement = 
-      element.querySelector('.price, [class*="price"], .offer-price, [class*="offer"]') ||
-      element.querySelector('span, div, p');
-      
-    if (priceElement && priceElement.textContent) {
-      const text = priceElement.textContent.trim();
-      
-      // Look for price patterns (e.g., '25:- kr', '25,90 kr', etc.)
-      const priceMatches = text.match(/(\d+[.,]?\d*)(?:\s*(?::-|kr|SEK))/i);
-      
-      if (priceMatches && priceMatches[1]) {
-        return {
-          price: priceMatches[1],
-          priceText: text
-        };
+    // Try different approaches to find price
+    
+    // 1. Look for standard price elements
+    const priceEl = element.querySelector('[class*="price"], [class*="pris"], .product-price');
+    
+    if (priceEl && priceEl.textContent) {
+      const priceText = priceEl.textContent.trim();
+      return parsePriceText(priceText);
+    }
+    
+    // 2. Look for spans containing price format
+    const spans = Array.from(element.querySelectorAll('span, div, p'));
+    
+    for (const span of spans) {
+      if (span.textContent && 
+          (span.textContent.includes('kr') || 
+           span.textContent.includes(':-') || 
+           span.textContent.match(/\d+[,.]\d{2}/))) {
+        return parsePriceText(span.textContent);
       }
     }
     
-    // If no specific pattern found, look for any price-like text
-    const allText = element.textContent || '';
-    const priceMatches = allText.match(/(\d+[.,]?\d*)(?:\s*(?::-|kr|SEK))/i);
-    
-    if (priceMatches && priceMatches[1]) {
-      return {
-        price: priceMatches[1],
-        priceText: priceMatches[0]
-      };
+    // 3. Look in the element's text content
+    if (element.textContent) {
+      return parsePriceText(element.textContent);
     }
     
-    return null;
+    return 0;
+    
   } catch (error) {
     console.error("Error extracting product price:", error);
-    return null;
+    return 0;
   }
 }
 
-// Default export for compatibility
-export default extractProductPrice;
+/**
+ * Parse price text to number
+ * @param text Price text to parse
+ * @returns Parsed price number
+ */
+function parsePriceText(text: string): number {
+  try {
+    // Extract digits and decimals
+    const matches = text.match(/(\d+)[,.]?(\d{0,2})/);
+    
+    if (matches) {
+      const wholePart = parseInt(matches[1]);
+      
+      if (matches[2]) {
+        const fractionPart = parseInt(matches[2]);
+        return parseFloat(`${wholePart}.${fractionPart}`);
+      }
+      
+      return wholePart;
+    }
+    
+    // For special offers like "3 för 25", return the total price
+    const specialOfferMatch = text.match(/(\d+)\s*för\s*(\d+)/i);
+    if (specialOfferMatch) {
+      return parseInt(specialOfferMatch[2]);
+    }
+    
+    return 0;
+    
+  } catch (error) {
+    console.error("Error parsing price text:", error);
+    return 0;
+  }
+}
+
+// Also export the renamed function for backwards compatibility  
+export const extractProductPrice = extractPrice;
+
+// Export as named export for direct imports
+export { extractPrice };

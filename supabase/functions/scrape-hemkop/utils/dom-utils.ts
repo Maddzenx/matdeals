@@ -88,7 +88,8 @@ export async function fetchHtmlContent(
                 // Approach 4: List items with price text (common pattern)
                 () => {
                   const allListItems = document?.querySelectorAll('li');
-                  return allListItems ? Array.from(allListItems).filter(el => {
+                  // Using type assertion for safety
+                  return allListItems ? Array.from(allListItems).filter((el: any) => {
                     const text = el.textContent || '';
                     return text.includes('kr') || text.includes(':-');
                   }) : [];
@@ -96,7 +97,8 @@ export async function fetchHtmlContent(
                 // Approach 5: Div containers with product-like structure
                 () => {
                   const divs = document?.querySelectorAll('div');
-                  return divs ? Array.from(divs).filter(div => {
+                  // Using type assertion for safety 
+                  return divs ? Array.from(divs).filter((div: any) => {
                     const hasImg = div.querySelector('img') !== null;
                     const text = div.textContent || '';
                     const hasPriceText = text.match(/\d+[,.:]?\d*\s*kr/) !== null;

@@ -1,37 +1,56 @@
 
 /**
- * Utility for extracting product names from HTML elements
+ * Extract the name of a product from a product element
+ * @param element The product element
+ * @returns The product name
  */
-
-/**
- * Extracts the product name from an HTML element
- */
-export function extractProductName(element: Element): string | null {
+export default function extractName(element: Element): string {
   try {
-    // Find elements with name-related classes
-    const nameElement = 
-      element.querySelector('.product-name, .product-title, .offer-title, h3, [class*="name"], [class*="title"]') || 
-      element.querySelector('h1, h2, h3, h4, h5');
-      
-    if (nameElement && nameElement.textContent) {
-      return nameElement.textContent.trim();
+    // Look for standard title elements
+    const titleEl = element.querySelector('h2, h3, h4, [class*="title"], [class*="name"], .product-name');
+    
+    if (titleEl && titleEl.textContent) {
+      return titleEl.textContent.trim();
     }
     
-    // If no specific name element found, try to get the most likely text
-    const headingElements = element.querySelectorAll('h1, h2, h3, h4, h5, strong, b');
-    for (let i = 0; i < headingElements.length; i++) {
-      const heading = headingElements[i];
-      if (heading && heading.textContent && heading.textContent.trim().length > 2) {
-        return heading.textContent.trim();
+    // Try generic selectors with name or title classes
+    const nameEl = element.querySelector('[class*="name"], [class*="title"]');
+    if (nameEl && nameEl.textContent) {
+      return nameEl.textContent.trim();
+    }
+    
+    // Try finding by text content pattern
+    const paragraphs = Array.from(element.querySelectorAll('p, span, div'));
+    for (const p of paragraphs) {
+      if (p.textContent && 
+          !p.textContent.includes('kr') && 
+          !p.textContent.includes(':-') && 
+          p.textContent.length > 5 && 
+          p.textContent.length < 100) {
+        return p.textContent.trim();
       }
     }
     
-    return null;
+    // Last resort: any text content in the element
+    if (element.textContent) {
+      const text = element.textContent.trim();
+      const firstSentence = text.split(/[.!?]/)[0].trim();
+      
+      if (firstSentence.length > 3 && firstSentence.length < 100) {
+        return firstSentence;
+      }
+    }
+    
+    return "Unknown Product";
+    
   } catch (error) {
     console.error("Error extracting product name:", error);
-    return null;
+    return "Error: Could not extract product name";
   }
 }
 
-// Default export for compatibility
-export default extractProductName;
+// Also export the renamed function for backwards compatibility
+export const extractProductName = extractName;
+
+// Export as named export for direct imports
+export { extractName };

@@ -1,102 +1,113 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { corsHeaders } from "./cors.ts";
-import { storeProducts } from "./supabase-client.ts";
-import { extractProducts } from "./products-extractor.ts";
-import { createSampleProducts } from "./extractors/fallback-extractor.ts";
 import { fetchHtmlContent } from "./utils/dom-utils.ts";
-import { createSuccessResponse, createErrorResponse } from "./utils/response-utils.ts";
-import { HEMKOP_URLS, USER_AGENTS, BASE_URL } from "./config/scraper-config.ts";
+import { corsHeaders } from "./cors.ts";
+import { upsertProducts } from "./supabase-client.ts";
+import { extractProductsFromHTML } from "./products-extractor.ts";
 
-serve(async (req: Request) => {
-  // Handle CORS preflight requests
+// Configuration for the scraper
+import { scrapeConfig } from "./config/scraper-config.ts";
+
+// Handle requests
+serve(async (req: any) => {
+  // Handle preflight CORS
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders });
+  }
+
+  // For any method except GET, require a provided URL in request body
+  let providedUrl: string | null = null;
+  let forceRefresh = false;
+  
+  if (req.method !== 'GET') {
+    try {
+      const body = await req.json();
+      providedUrl = body.url;
+      forceRefresh = body.forceRefresh === true;
+    } catch {
+      // Ignore errors, just continue with default configuration
+    }
   }
 
   try {
-    console.log("Starting Hemköp scraper function...");
+    const startTime = Date.now();
+    console.log(`Starting Hemköp scraping at ${new Date().toISOString()}`);
     
-    // Parse request body to check for forceRefresh flag
-    let forceRefresh = false;
+    // Get the URLs to try, either from request or config
+    const urlsToTry = providedUrl 
+      ? [providedUrl] 
+      : scrapeConfig.hemkop.urlsToTry;
     
-    try {
-      const body = await req.json();
-      forceRefresh = body?.forceRefresh || false;
-      console.log(`ForceRefresh flag: ${forceRefresh}`);
-    } catch (e) {
-      console.log("No valid JSON body or forceRefresh flag");
-    }
-    
-    // Try each URL in the config with different user agents
-    let allProducts: any[] = [];
-    let successfulUrl = "";
-    
-    for (const url of HEMKOP_URLS) {
-      console.log(`Attempting to scrape from URL: ${url}`);
-      
-      // Fetch HTML content using the utility function
-      const { document, html, fetchSuccess } = await fetchHtmlContent([url], USER_AGENTS, forceRefresh);
-      
-      if (fetchSuccess && document) {
-        console.log(`Successfully fetched content from ${url}, extracting products...`);
-        
-        // Extract products using the modular extractor
-        const products = extractProducts(document, BASE_URL);
-        
-        console.log(`Extracted ${products.length} products from page`);
-        
-        // If products were found, store them and return success
-        if (products && products.length > 0) {
-          allProducts = products;
-          successfulUrl = url;
-          break;
-        } else {
-          console.log(`No products found from ${url}, trying next URL...`);
-        }
-      } else {
-        console.log(`Failed to fetch content from ${url}, trying next URL...`);
-      }
-    }
-    
-    // If we've found products, store them
-    if (allProducts.length > 0) {
-      console.log(`Found ${allProducts.length} products from ${successfulUrl}, storing in database`);
-      const insertedCount = await storeProducts(allProducts);
-      console.log(`Stored ${insertedCount} products in database`);
+    console.log(`Will try the following URLs: ${urlsToTry.join(', ')}`);
 
-      // Return success response
-      return createSuccessResponse(
-        `Successfully extracted and stored ${insertedCount} products from Hemköp website (${successfulUrl}).`,
-        allProducts
+    // Fetch the HTML content with our utility
+    const { document, html, fetchSuccess } = await fetchHtmlContent(
+      urlsToTry,
+      scrapeConfig.hemkop.userAgents,
+      forceRefresh
+    );
+    
+    if (!fetchSuccess || !html) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Failed to fetch valid HTML content",
+          htmlLength: html?.length || 0
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400
+        }
       );
     }
     
-    // If we've tried all URLs and no products were found, use sample products
-    console.log("Failed to fetch and extract products from all URLs, using fallback products");
-    const sampleProducts = createSampleProducts();
-    const insertedCount = await storeProducts(sampleProducts);
+    console.log(`Successfully fetched HTML content, length: ${html.length} chars`);
     
-    return createSuccessResponse(
-      `Failed to fetch Hemköp website. Using ${insertedCount} fallback products instead.`,
-      sampleProducts
-    );
-
-  } catch (error) {
-    console.error("Error scraping Hemköp website:", error);
+    // Extract products
+    const products = extractProductsFromHTML(html);
     
-    // Create and store fallback products even when there's an error
-    console.log("Error occurred during scraping. Using sample products as fallback...");
-    const sampleProducts = createSampleProducts();
+    console.log(`Extracted ${products.length} products from HTML`);
     
-    try {
-      const insertedCount = await storeProducts(sampleProducts);
-      console.log(`Stored ${insertedCount} fallback products after error`);
-    } catch (storeError) {
-      console.error("Error storing fallback products:", storeError);
+    // Store products in the database if we have any
+    let dbResult = { success: false, count: 0 };
+    
+    if (products.length > 0) {
+      console.log(`Storing ${products.length} products in the database...`);
+      dbResult = await upsertProducts(products, "hemkop");
+      console.log(`Database result: ${JSON.stringify(dbResult)}`);
     }
     
-    // Cast the unknown error to Error type using type assertion
-    return createErrorResponse(error as Error, sampleProducts);
+    const endTime = Date.now();
+    const duration = (endTime - startTime) / 1000;
+    
+    console.log(`Hemköp scraping completed in ${duration} seconds`);
+    
+    return new Response(
+      JSON.stringify({
+        success: true,
+        productCount: products.length,
+        dbResult,
+        duration
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200
+      }
+    );
+    
+  } catch (error: any) {
+    console.error("Error in Hemkop scraper:", error);
+    
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error occurred",
+        stack: error instanceof Error ? error.stack : undefined
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500
+      }
+    );
   }
 });

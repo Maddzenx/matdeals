@@ -1,6 +1,3 @@
-import { SupabaseClient } from '@supabase/supabase-js';
-import { Database } from './database.types';
-
 export type Json =
   | string
   | number
@@ -270,12 +267,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-
-export type ExtendedSupabaseClient = SupabaseClient<Database> & {
-  rpc: SupabaseClient<Database>['rpc'] & {
-    (fn: 'scrape_recipes'): Promise<{ error: Error | null }>;
-    (fn: 'scrape_willys_products'): Promise<{ error: Error | null }>;
-    (fn: 'scrape_ica'): Promise<{ error: Error | null }>;
-    (fn: 'scrape_hemkop'): Promise<{ error: Error | null }>;
-  };
-};
