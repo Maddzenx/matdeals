@@ -4,7 +4,7 @@ import { TabsContent } from "@/components/ui/tabs";
 import { RecipeOverview } from "@/components/recipe-detail/RecipeOverview";
 import { RecipeIngredients } from "@/components/recipe-detail/RecipeIngredients";
 import { RecipeInstructions } from "@/components/recipe-detail/RecipeInstructions";
-import { Recipe } from "@/types/recipe";
+import { Recipe, RecipeIngredient } from "@/types/recipe";
 
 interface RecipeTabContentProps {
   activeTab: string;

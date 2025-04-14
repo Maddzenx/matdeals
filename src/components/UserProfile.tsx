@@ -1,98 +1,92 @@
+import React from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
-import React, { useState, useEffect } from 'react';
-import { supabase } from "@/integrations/supabase/client";
-import { User } from "@supabase/supabase-js";
-import { useToast } from "@/hooks/use-toast";
+interface UserProfileProps {
+  // Add any specific props if needed
+}
 
-export const UserProfile: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+export function UserProfile({}: UserProfileProps) {
+  const [session, setSession] = React.useState<any>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [username, setUsername] = React.useState('');
+  const [email, setEmail] = React.useState('');
 
-  useEffect(() => {
-    // Get the current user
-    const getUser = async () => {
+  React.useEffect(() => {
+    const getProfile = async () => {
       try {
-        const { data } = await supabase.auth.getUser();
-        setUser(data.user);
+        setLoading(true);
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (session) {
+          const { user } = session;
+          setSession(session);
+          setEmail(user?.email || '');
+        }
       } catch (error) {
-        console.error('Error getting user:', error);
+        console.error('Error loading user data!', error);
       } finally {
         setLoading(false);
       }
     };
 
-    getUser();
+    getProfile();
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setUser(session?.user || null);
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event: string, session: any) => {
+        setSession(session);
+        if (session?.user) {
+          setEmail(session.user.email || '');
+        }
       }
     );
 
     return () => {
-      subscription.unsubscribe();
+      if (authListener && authListener.subscription) {
+        authListener.subscription.unsubscribe();
+      }
     };
   }, []);
 
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
-      toast({
-        title: "Utloggad",
-        description: "Du har loggats ut från ditt konto",
-      });
     } catch (error) {
       console.error('Error signing out:', error);
-      toast({
-        title: "Ett fel uppstod",
-        description: "Kunde inte logga ut, försök igen senare",
-        variant: "destructive",
-      });
     }
   };
 
-  if (loading) {
-    return <div className="p-4 text-center">Laddar...</div>;
-  }
-
-  if (!user) {
-    return null;
-  }
-
   return (
-    <div className="p-4 bg-white shadow rounded-lg mt-4 mb-20">
-      <div className="text-center mb-6">
-        <div className="inline-block bg-green-100 p-4 rounded-full mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-        </div>
-        <h2 className="text-xl font-semibold">Din profil</h2>
-        <p className="text-gray-600">{user.email}</p>
+    <div className="container mx-auto mt-8">
+      <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <h2 className="text-2xl font-semibold mb-4">User Profile</h2>
+        {loading ? (
+          <p>Loading user data...</p>
+        ) : session ? (
+          <>
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                Email:
+              </label>
+              <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                type="email"
+                placeholder="Email"
+                value={email}
+                readOnly
+              />
+            </div>
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              type="button"
+              onClick={handleSignOut}
+            >
+              Sign Out
+            </button>
+          </>
+        ) : (
+          <p>Not signed in</p>
+        )}
       </div>
-      
-      {user.user_metadata && (
-        <div className="mb-6 border-t border-b border-gray-100 py-4">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-gray-500">Användarnamn</span>
-            <span className="font-medium">{user.user_metadata.name || 'Ej angivet'}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-500">Senast inloggad</span>
-            <span className="font-medium">{new Date(user.last_sign_in_at || '').toLocaleDateString('sv-SE')}</span>
-          </div>
-        </div>
-      )}
-      
-      <button
-        onClick={handleSignOut}
-        className="w-full bg-red-500 text-white font-medium py-2 px-4 rounded-md hover:bg-red-600 transition-colors"
-      >
-        Logga ut
-      </button>
     </div>
   );
-};
+}

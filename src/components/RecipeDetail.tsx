@@ -20,12 +20,14 @@ export function RecipeDetail() {
   if (!recipe) return <div className="text-gray-500 p-4">Recipe not found</div>;
 
   const totalOriginalPrice = recipeProducts.reduce((sum, product) => {
-    const originalPrice = parseFloat(product.originalPrice.replace(/[^0-9,.]/g, '').replace(',', '.'));
+    if (!product.originalPrice) return sum;
+    const originalPrice = parseFloat(String(product.originalPrice).replace(/[^0-9,.]/g, '').replace(',', '.'));
     return sum + (isNaN(originalPrice) ? 0 : originalPrice);
   }, 0);
 
   const totalCurrentPrice = recipeProducts.reduce((sum, product) => {
-    const currentPrice = parseFloat(product.currentPrice.replace(/[^0-9,.]/g, '').replace(',', '.'));
+    if (!product.currentPrice) return sum;
+    const currentPrice = parseFloat(String(product.currentPrice).replace(/[^0-9,.]/g, '').replace(',', '.'));
     return sum + (isNaN(currentPrice) ? 0 : currentPrice);
   }, 0);
 
@@ -157,4 +159,4 @@ export function RecipeDetail() {
       </div>
     </div>
   );
-} 
+}

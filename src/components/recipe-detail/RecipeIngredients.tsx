@@ -3,15 +3,10 @@ import { Tag } from "lucide-react";
 import { Product } from "@/data/types";
 import { productMatchesIngredient } from "@/utils/ingredientsMatchUtils";
 import { Badge } from "@/components/ui/badge";
-
-interface Ingredient {
-  name: string;
-  amount: number;
-  unit: string;
-}
+import { RecipeIngredient } from "@/types/recipe";
 
 interface RecipeIngredientsProps {
-  ingredients: (string | Ingredient)[] | null;
+  ingredients: RecipeIngredient[];
   servings: number | null;
   matchedProducts?: Product[];
 }
@@ -26,17 +21,14 @@ export const RecipeIngredients: React.FC<RecipeIngredientsProps> = ({
   }
 
   // Check if an ingredient has a matching discounted product
-  const isDiscounted = (ingredient: string | Ingredient): Product | undefined => {
+  const isDiscounted = (ingredient: RecipeIngredient): Product | undefined => {
     if (!matchedProducts || matchedProducts.length === 0) return undefined;
     return matchedProducts.find(product => productMatchesIngredient(product.name, ingredient));
   };
 
   // Format ingredient display text
-  const formatIngredient = (ingredient: string | Ingredient): string => {
-    if (typeof ingredient === 'string') {
-      return ingredient;
-    }
-    return `${ingredient.amount} ${ingredient.unit} ${ingredient.name}`;
+  const formatIngredient = (ingredient: RecipeIngredient): string => {
+    return `${ingredient.amount} ${ingredient.unit || ''} ${ingredient.name} ${ingredient.notes ? `(${ingredient.notes})` : ''}`;
   };
 
   return (

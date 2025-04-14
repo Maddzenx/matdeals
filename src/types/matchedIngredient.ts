@@ -1,3 +1,4 @@
+
 import { Product } from '@/data/types';
 
 export interface MatchedIngredient {
@@ -6,4 +7,4 @@ export interface MatchedIngredient {
   unit?: string;
   notes?: string;
   matchedProduct?: Product;
-} 
+}

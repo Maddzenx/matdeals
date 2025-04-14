@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Product } from '../types/product';
 import { Card, CardContent } from './ui/card';
@@ -6,6 +5,7 @@ import { ProductCard } from './ProductCard';
 import { useProductSection } from '@/hooks/useProductSection';
 import { ProductSectionLayout } from './product-section/ProductSectionLayout';
 import { Product as DataProduct } from '@/data/types';
+import { adaptToDataProducts } from '@/utils/productAdapter';
 
 interface ProductSectionProps {
   title?: string;
@@ -47,20 +47,23 @@ const ProductSection: React.FC<ProductSectionProps> = ({
 }) => {
   const [selectedStore, setSelectedStore] = useState<string>('all');
   
-  // If we have supabase products, transform them to match the Product interface from data/types
-  const displayProducts: DataProduct[] = supabaseProducts.length > 0 
+  // Transform supabase products to DataProduct type
+  const transformedSupabaseProducts: DataProduct[] = supabaseProducts.length > 0 
     ? supabaseProducts.map((product: any) => ({
         id: product.id || '',
         name: product.name || product.product_name || '',
         details: product.brand || product.additional_info || '',
+        description: product.description || '',
         currentPrice: product.price || '',
         originalPrice: product.originalPriceText || product.original_price || '',
         category: product.category || 'Other',
         store: product.store || '',
-        image: product.image || 'https://assets.icanet.se/t_product_large_v1,f_auto/7310865085313.jpg', // Default image
-        offerBadge: 'Erbjudande'
+        image: product.image || product.image_url || 'https://assets.icanet.se/t_product_large_v1,f_auto/7310865085313.jpg',
+        offerBadge: 'Erbjudande',
+        isDiscounted: false,
+        brand: product.brand || ''
       }))
-    : products as unknown as DataProduct[]; // Cast to DataProduct[] since the structures match
+    : adaptToDataProducts(products);
   
   // If we have categories from props, use those
   const defaultCategories = [
@@ -85,7 +88,7 @@ const ProductSection: React.FC<ProductSectionProps> = ({
     handleCategorySelect
   } = useProductSection(
     productCategories,
-    displayProducts,
+    transformedSupabaseProducts,
     activeStoreIds,
     storeTags || [],
     searchQuery

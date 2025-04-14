@@ -1,16 +1,33 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { Product, CategoryData } from "@/data/types";
 
-export const useProductSection = (
+export function useProductSection(
   categories: CategoryData[],
   products: Product[],
-  activeStoreIds: string[],
-  storeTags: { id: string; name: string }[],
-  searchQuery: string = ""
-) => {
-  const [activeCategory, setActiveCategory] = useState("all");
-
+  activeStoreIds: string[] = [],
+  storeTags: { id: string; name: string }[] = [],
+  searchQuery: string = ''
+) {
+  const [activeCategory, setActiveCategory] = useState<string>("all");
+  
+  // Filter products by active store tags if any are selected
+  const storeFilteredProducts = activeStoreIds.length > 0
+    ? products.filter(product => activeStoreIds.includes(product.store.toLowerCase()))
+    : products;
+  
+  // Apply search filter if a query is provided
+  const searchFilteredProducts = searchQuery.length > 0
+    ? storeFilteredProducts.filter(product => {
+        const searchLower = searchQuery.toLowerCase();
+        return (
+          product.name?.toLowerCase().includes(searchLower) ||
+          product.description?.toLowerCase().includes(searchLower) ||
+          product.category?.toLowerCase().includes(searchLower) ||
+          (product.details && product.details.toLowerCase().includes(searchLower))
+        );
+      })
+    : storeFilteredProducts;
+  
   // Filter products by active stores and search query
   const filteredProducts = useMemo(() => {
     console.log("Filtering products:", products.length);
@@ -20,7 +37,7 @@ export const useProductSection = (
     const lowerCaseActiveStores = activeStoreIds.map(store => store.toLowerCase());
     
     // Filter by active stores - case insensitive
-    let filtered = products.filter(product => {
+    let filtered = searchFilteredProducts.filter(product => {
       // Ensure the product has a store property and convert to lowercase
       const productStore = (product.store || '').toLowerCase();
       
@@ -35,17 +52,6 @@ export const useProductSection = (
     });
     
     console.log("After store filtering:", filtered.length, "products remaining");
-    
-    // Filter by search query if provided
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        product => 
-          product.name.toLowerCase().includes(query) ||
-          (product.details && product.details.toLowerCase().includes(query))
-      );
-      console.log("After search filtering:", filtered.length, "products remaining");
-    }
     
     // Create a breakdown of the filtered products by store
     const storeCount = filtered.reduce((acc, product) => {
@@ -123,4 +129,4 @@ export const useProductSection = (
     allCategoryNames,
     handleCategorySelect
   };
-};
+}
