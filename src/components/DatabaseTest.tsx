@@ -3,8 +3,9 @@ import { createClient } from '@supabase/supabase-js';
 import { Recipe } from '../types/recipe';
 import { Product } from '../types/product';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Use hardcoded values for deployment reliability
+const supabaseUrl = 'https://rnccetwpkhskcaxsqrig.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJuY2NldHdwa2hza2NheHNxcmlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMTY2ODgsImV4cCI6MjA1NjU5MjY4OH0.sRbjsz0pzA34GPrGg6qZsjfOa-EGEq8DKjsX6GG01PE';
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
@@ -72,4 +73,4 @@ export default function DatabaseTest() {
       </div>
     </div>
   );
-} 
+}

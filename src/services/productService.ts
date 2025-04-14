@@ -2,11 +2,11 @@
 import { createClient } from '@supabase/supabase-js';
 import { Product } from '../types/product';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Use hardcoded values for deployment reliability
+const supabaseUrl = 'https://rnccetwpkhskcaxsqrig.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJuY2NldHdwa2hza2NheHNxcmlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMTY2ODgsImV4cCI6MjA1NjU5MjY4OH0.sRbjsz0pzA34GPrGg6qZsjfOa-EGEq8DKjsX6GG01PE';
 
-console.log('Supabase URL:', supabaseUrl);
-console.log('Supabase Anon Key:', supabaseAnonKey ? 'Present' : 'Missing');
+console.log('Initializing Supabase client with:', supabaseUrl);
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');

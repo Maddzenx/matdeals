@@ -77,27 +77,36 @@ export type Database = {
           category: string
           created_at: string | null
           description: string | null
+          difficulty: string | null
           id: string
           ingredients: Json
           instructions: string[]
+          servings: number | null
+          time_minutes: number | null
           title: string
         }
         Insert: {
           category: string
           created_at?: string | null
           description?: string | null
+          difficulty?: string | null
           id?: string
           ingredients: Json
           instructions: string[]
+          servings?: number | null
+          time_minutes?: number | null
           title: string
         }
         Update: {
           category?: string
           created_at?: string | null
           description?: string | null
+          difficulty?: string | null
           id?: string
           ingredients?: Json
           instructions?: string[]
+          servings?: number | null
+          time_minutes?: number | null
           title?: string
         }
         Relationships: []
@@ -146,6 +155,10 @@ export type Database = {
       scrape_willys_products: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      validate_recipe_ingredient: {
+        Args: { ingredient: Json }
+        Returns: boolean
       }
     }
     Enums: {
