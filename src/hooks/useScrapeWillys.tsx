@@ -1,15 +1,16 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolean; error?: any }>) => {
   const [scraping, setScraping] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
   const handleScrapeWillys = async (showNotification = true) => {
+    setScraping(true);
+    setError(null);
+
     try {
-      setScraping(true);
-      
       if (showNotification) {
         toast.info("Startar datainsamling från Willys...", {
           description: "Detta kan ta upp till 2 minuter",
@@ -45,16 +46,16 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
       });
       
       // Race between timeout and invocation
-      const { data, error } = await Promise.race([
+      const { data, error: scrapeError } = await Promise.race([
         invocationPromise,
         timeoutPromise.then(() => { 
           throw new Error('Request took too long (120 seconds)');
         })
       ]);
       
-      if (error) {
-        console.error("Function error:", error);
-        throw error;
+      if (scrapeError) {
+        console.error("Function error:", scrapeError);
+        throw scrapeError;
       }
       
       console.log("Scraping results from Willys:", data);
@@ -97,6 +98,17 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
         console.log("After refresh Willys Johanneberg data count:", afterData);
       }
       
+      // Log the scraping completion
+      const { error: logError } = await supabase.rpc('log_scrape_completion', {
+        p_store: 'Willys',
+        p_success: true,
+        p_products_scraped: productsCount
+      });
+
+      if (logError) {
+        console.error('Failed to log scraping completion:', logError);
+      }
+      
       if (showNotification && productsCount > 0) {
         toast.success("Datainsamling från Willys klar", {
           description: `Uppdaterade ${productsCount} produkter.`
@@ -122,6 +134,13 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
         console.error("Could not refresh products after error:", refreshErr);
       }
       
+      // Log the failed scraping attempt
+      await supabase.rpc('log_scrape_completion', {
+        p_store: 'Willys',
+        p_success: false,
+        p_error_message: err.message
+      });
+      
       // Re-throw for handling in the caller
       return { success: false, error: err };
     } finally {
@@ -129,5 +148,5 @@ export const useScrapeWillys = (refetchProducts: () => Promise<{ success: boolea
     }
   };
 
-  return { scraping, handleScrapeWillys };
+  return { scraping, handleScrapeWillys, error };
 };

@@ -6,8 +6,7 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { useCart } from '@/hooks/useCart';
 import { useMealPlan } from '@/hooks/useMealPlan';
 import { LoadingIndicator } from '@/components/LoadingIndicator';
-import { Product } from '@/types/product';
-import { ShoppingCartProduct } from '@/types/cart';
+import { RecipeThemeProvider } from '@/components/recipe-theme-provider';
 
 export default function RecipeDetail() {
   const { id } = useParams<{ id: string }>();
@@ -37,13 +36,12 @@ export default function RecipeDetail() {
 
   const handleAddToCart = () => {
     if (recipeProducts.length > 0) {
-      recipeProducts.forEach((product: Product) => {
-        const cartProduct: ShoppingCartProduct = {
+      recipeProducts.forEach((product) => {
+        addProduct({
           ...product,
           quantity: 1,
           checked: false
-        };
-        addProduct(cartProduct);
+        });
       });
     }
   };
@@ -61,14 +59,16 @@ export default function RecipeDetail() {
   };
 
   return (
-    <DetailedRecipeView
-      recipe={recipe}
-      matchedProducts={recipeProducts}
-      matchedIngredients={matchedIngredients}
-      onAddToCart={handleAddToCart}
-      onAddToMealPlan={handleAddToMealPlan}
-      onToggleFavorite={handleToggleFavorite}
-      isFavorite={favoriteIds.includes(recipe.id)}
-    />
+    <RecipeThemeProvider defaultTheme="light">
+      <DetailedRecipeView
+        recipe={recipe}
+        matchedProducts={recipeProducts}
+        matchedIngredients={matchedIngredients}
+        onAddToCart={handleAddToCart}
+        onAddToMealPlan={handleAddToMealPlan}
+        onToggleFavorite={handleToggleFavorite}
+        isFavorite={favoriteIds.includes(recipe.id)}
+      />
+    </RecipeThemeProvider>
   );
 }

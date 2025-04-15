@@ -1,12 +1,65 @@
 import { supabase } from "@/integrations/supabase/client";
-import { Recipe, convertDatabaseRecipeToRecipe } from "@/types/recipe";
+import { Recipe, RecipeIngredient, DatabaseRecipe, RecipeIngredients, convertDatabaseRecipeToRecipe } from "@/types/recipe";
 import { Product } from "@/data/types";
 import { calculateRecipeSavings } from "@/utils/ingredientsMatchUtils";
+import { getApiKey } from "@/utils/env";
+
+interface GeneratedRecipe {
+  title: string;
+  description: string;
+  ingredients: RecipeIngredient[];
+  instructions: string[];
+  category: string;
+  time_minutes?: number;
+  servings?: number;
+  difficulty?: string;
+  store?: string;
+}
+
+interface DatabaseRecipeWithTitle {
+  id: string;
+  title: string;
+}
 
 interface Ingredient {
   name: string;
-  amount: number;
+  amount: number | string;
   unit: string;
+}
+
+// Type guard function
+function isRecipeIngredients(obj: any): obj is RecipeIngredients {
+  return obj && typeof obj === 'object' && 'main' in obj;
+}
+
+// Helper function to convert ingredients to RecipeIngredient[]
+function convertIngredients(ingredients: RecipeIngredient[] | RecipeIngredients): RecipeIngredient[] {
+  if (Array.isArray(ingredients)) {
+    return ingredients.map(ing => {
+      if (typeof ing === 'string') {
+        return { name: ing, amount: 1, unit: 'st' };
+      }
+      if (typeof ing === 'object' && ing !== null && ing.name) {
+        return {
+          name: String(ing.name),
+          amount: typeof ing.amount === 'string' ? parseFloat(ing.amount) : (ing.amount || 1),
+          unit: String(ing.unit || 'st')
+        };
+      }
+      return { name: '', amount: 1, unit: 'st' };
+    });
+  }
+
+  // Handle RecipeIngredients type
+  const mainIngredients = Array.isArray(ingredients.main) ? ingredients.main : [];
+  const sauceIngredients = Array.isArray(ingredients.sauce) ? ingredients.sauce : [];
+  const garnishIngredients = Array.isArray(ingredients.garnish) ? ingredients.garnish : [];
+  
+  return [
+    ...mainIngredients,
+    ...sauceIngredients,
+    ...garnishIngredients
+  ];
 }
 
 const cleanupDuplicateRecipes = async () => {
@@ -24,7 +77,7 @@ const cleanupDuplicateRecipes = async () => {
 
     // Group recipes by title (case-insensitive)
     const recipesByTitle = new Map<string, string[]>();
-    allRecipes?.forEach(recipe => {
+    allRecipes?.forEach((recipe: DatabaseRecipeWithTitle) => {
       const normalizedTitle = recipe.title.toLowerCase();
       if (!recipesByTitle.has(normalizedTitle)) {
         recipesByTitle.set(normalizedTitle, []);
@@ -97,6 +150,7 @@ export const fetchRecipesByCategory = async (
       console.log('No recipes found in database, attempting to generate new ones');
       // Try to generate new recipes if none found
       const generatedRecipes = await generateRecipesFromDiscountedProducts(products);
+     
       if (generatedRecipes.length > 0) {
         const { success, error } = await insertGeneratedRecipes(generatedRecipes);
         if (success) {
@@ -110,7 +164,7 @@ export const fetchRecipesByCategory = async (
     }
 
     // Convert database recipes to frontend Recipe type and add calculated prices
-    const processedRecipes = data.map((dbRecipe) => {
+    const processedRecipes = data.map((dbRecipe: DatabaseRecipe) => {
       try {
         if (!dbRecipe) {
           console.error('Received null or undefined recipe from database');
@@ -123,21 +177,33 @@ export const fetchRecipesByCategory = async (
         const recipe = convertDatabaseRecipeToRecipe(dbRecipe);
         
         // Ensure ingredients is an array of objects with name property
-        const validIngredients = Array.isArray(recipe.ingredients) 
-          ? recipe.ingredients.map((ing: any) => {
-              if (typeof ing === 'string') {
-                return { name: ing, amount: 1, unit: 'st' };
-              }
-              if (typeof ing === 'object' && ing !== null && ing.name) {
-                return {
-                  name: String(ing.name),
-                  amount: Number(ing.amount || 1),
-                  unit: String(ing.unit || 'st')
-                };
-              }
-              return null;
-            }).filter((ing): ing is Ingredient => ing !== null)
-          : [];
+        let validIngredients: RecipeIngredient[] = [];
+        
+        if (Array.isArray(recipe.ingredients)) {
+          validIngredients = (recipe.ingredients as RecipeIngredient[]).map((ing: RecipeIngredient) => {
+            if (typeof ing === 'string') {
+              return { name: ing, amount: 1, unit: 'st' } as RecipeIngredient;
+            }
+            if (typeof ing === 'object' && ing !== null && ing.name) {
+              return {
+                name: String(ing.name),
+                amount: typeof ing.amount === 'string' ? parseFloat(ing.amount) : (ing.amount || 1),
+                unit: String(ing.unit || 'st')
+              } as RecipeIngredient;
+            }
+            return null;
+          }).filter((ing): ing is RecipeIngredient => ing !== null);
+        } else if (isRecipeIngredients(recipe.ingredients)) {
+          const mainIngredients = Array.isArray(recipe.ingredients.main) ? recipe.ingredients.main : [];
+          const sauceIngredients = Array.isArray(recipe.ingredients.sauce) ? recipe.ingredients.sauce : [];
+          const garnishIngredients = Array.isArray(recipe.ingredients.garnish) ? recipe.ingredients.garnish : [];
+          
+          validIngredients = [
+            ...mainIngredients,
+            ...sauceIngredients,
+            ...garnishIngredients
+          ];
+        }
         
         recipe.ingredients = validIngredients;
         
@@ -149,26 +215,19 @@ export const fetchRecipesByCategory = async (
           ...recipe,
           calculatedPrice: discountedPrice || recipe.price,
           calculatedOriginalPrice: originalPrice || recipe.original_price,
-          savings: savings || 0,
-          matchedProducts: matchedProducts || []
-        } as Recipe;
+          savings,
+          matchedProducts
+        };
       } catch (err) {
-        console.error('Error processing recipe:', dbRecipe?.id, err);
+        console.error('Error processing recipe:', err);
         return null;
       }
-    });
+    }).filter((recipe: Recipe | null): recipe is Recipe => recipe !== null);
 
-    const validRecipes = processedRecipes.filter((recipe): recipe is Recipe => recipe !== null);
-    console.log(`Successfully processed ${validRecipes.length} recipes`);
-    
-    if (validRecipes.length === 0) {
-      throw new Error('No valid recipes could be processed');
-    }
-    
-    return validRecipes;
+    return processedRecipes;
   } catch (err) {
-    console.error('Error in fetchRecipesByCategory:', err);
-    throw new Error(err instanceof Error ? err.message : 'Failed to fetch recipes');
+    console.error('Error fetching recipes:', err);
+    throw err;
   }
 };
 
@@ -231,9 +290,11 @@ export const insertGeneratedRecipes = async (recipes: Recipe[]): Promise<{ succe
       return { success: false, error: fetchError.message };
     }
 
+    console.log('Found existing recipes:', existingRecipes?.length || 0);
+
     // Create a map of existing titles (case-insensitive)
     const existingTitles = new Map<string, string>();
-    existingRecipes?.forEach(recipe => {
+    existingRecipes?.forEach((recipe: DatabaseRecipeWithTitle) => {
       const normalizedTitle = recipe.title.toLowerCase();
       if (!existingTitles.has(normalizedTitle)) {
         existingTitles.set(normalizedTitle, recipe.id);
@@ -255,6 +316,8 @@ export const insertGeneratedRecipes = async (recipes: Recipe[]): Promise<{ succe
       return { success: true };
     }
 
+    console.log(`Found ${newRecipes.length} new recipes to insert`);
+
     // Convert recipes to database format
     const dbRecipes = newRecipes.map(recipe => {
       // Ensure we have a valid UUID
@@ -262,24 +325,29 @@ export const insertGeneratedRecipes = async (recipes: Recipe[]): Promise<{ succe
         ? recipe.id 
         : crypto.randomUUID();
 
-      return {
+      const dbRecipe = {
         id: recipeId,
         title: recipe.title,
         description: recipe.description,
         instructions: recipe.instructions,
         category: recipe.category,
-        ingredients: recipe.ingredients.map((ing: Ingredient) => ({
-          name: String(ing.name || ''),
-          amount: Number(ing.amount || 1),
-          unit: String(ing.unit || 'st')
-        }))
+        ingredients: convertIngredients(recipe.ingredients),
+        time_minutes: recipe.time_minutes,
+        servings: recipe.servings,
+        difficulty: recipe.difficulty,
+        store: recipe.store || 'ICA', // Default to ICA if no store is specified
+        created_at: recipe.created_at || new Date().toISOString()
       };
+
+      console.log('Converting recipe to database format:', dbRecipe);
+      return dbRecipe;
     });
 
     console.log('Inserting new recipes into database:', dbRecipes.map(r => r.title));
 
     // Insert recipes one at a time to handle potential duplicates
     for (const recipe of dbRecipes) {
+      console.log(`Inserting recipe: ${recipe.title}`);
       const { error } = await supabase
         .from('recipes')
         .insert(recipe)
@@ -293,6 +361,7 @@ export const insertGeneratedRecipes = async (recipes: Recipe[]): Promise<{ succe
         console.error("Error inserting recipe:", error);
         return { success: false, error: error.message };
       }
+      console.log(`Successfully inserted recipe: ${recipe.title}`);
     }
 
     console.log(`Successfully processed ${dbRecipes.length} recipes`);
@@ -307,69 +376,161 @@ export const insertGeneratedRecipes = async (recipes: Recipe[]): Promise<{ succe
 };
 
 export const generateRecipesFromDiscountedProducts = async (products: Product[]): Promise<Recipe[]> => {
-  console.log('Starting recipe generation from discounted products...');
-  
-  // Get all existing recipes
-  const { data: existingRecipes, error: fetchError } = await supabase
-    .from('recipes')
-    .select('title')
-    .order('created_at', { ascending: false });
+  console.log('Starting recipe generation for products:', products);
+  const apiKey = getApiKey();
 
-  if (fetchError) {
-    console.error("Error checking for existing recipes:", fetchError);
+  if (!apiKey) {
+    console.error('No API key found for recipe generation');
     return [];
   }
 
-  // Create a set of existing titles (case-insensitive)
-  const existingTitles = new Set(existingRecipes?.map(r => r.title.toLowerCase()) || []);
-  
-  // Filter products to only include those with discounts
-  const discountedProducts = products.filter(product => 
-    product.originalPrice && product.currentPrice && product.originalPrice > product.currentPrice
-  );
-  
-  console.log(`Found ${discountedProducts.length} discounted products to generate recipes from`);
-  
-  // Create a set of recipes to ensure uniqueness
-  const recipeSet = new Set<string>();
-  const recipes: Recipe[] = [];
-  
-  // Generate recipes for each discounted product
-  for (const product of discountedProducts) {
-    const recipeTitle = `Recept med ${product.name}`;
-    const normalizedTitle = recipeTitle.toLowerCase();
-    
-    // Skip if recipe with this title already exists
-    if (existingTitles.has(normalizedTitle) || recipeSet.has(normalizedTitle)) {
-      console.log(`Skipping duplicate recipe: ${recipeTitle}`);
-      continue;
+  try {
+    // Group products by category
+    const productsByCategory = products.reduce((acc, product) => {
+      if (!acc[product.category]) {
+        acc[product.category] = [];
+      }
+      acc[product.category].push(product);
+      return acc;
+    }, {} as Record<string, Product[]>);
+
+    const generatedRecipes: Recipe[] = [];
+
+    // Generate recipes for each category
+    for (const [category, categoryProducts] of Object.entries(productsByCategory)) {
+      if (categoryProducts.length === 0) continue;
+
+      // Take the first product from the category as the main ingredient
+      const mainProduct = categoryProducts[0];
+      console.log(`Generating recipe for ${mainProduct.name} in category ${category}`);
+
+      const prompt = `Create a detailed Swedish recipe using ${mainProduct.name} as the main ingredient. 
+The recipe should be authentic, practical, and include exact measurements. Follow this structure:
+
+1. Title: A creative Swedish name that reflects the dish
+2. Description: A brief overview of the dish and its flavors
+3. Category: ${category}
+4. Time: Total cooking time in minutes
+5. Servings: Number of servings
+6. Difficulty: Lätt/Medel/Avancerad
+7. Ingredients: List with exact measurements in Swedish units (dl, msk, tsk, g, kg)
+8. Instructions: Create detailed, step-by-step instructions with clear explanations for each step:
+
+   Preparation Steps:
+   - List all preparation tasks (e.g., preheating oven, chopping ingredients)
+   - Explain why each preparation step is important
+   - Include any special equipment needed
+   - Note any time-sensitive preparations
+
+   Cooking Steps:
+   - Break down each cooking step into clear, numbered instructions
+   - Include exact temperatures and cooking times
+   - Explain what to look for at each stage (e.g., "when the onions are translucent")
+   - Provide visual cues for doneness
+   - Include safety tips where relevant
+   - Explain the purpose of each step (e.g., "browning adds flavor")
+
+   Finishing Steps:
+   - Describe how to check if the dish is properly cooked
+   - Explain how to adjust seasoning if needed
+   - Provide plating suggestions
+   - Include garnishing tips
+
+   Serving and Storage:
+   - Suggest appropriate side dishes
+   - Explain how to store leftovers
+   - Provide reheating instructions
+   - Note any make-ahead tips
+
+Format the response as a JSON object with this structure:
+{
+  "title": "Recipe title in Swedish",
+  "description": "Brief description in Swedish",
+  "category": "${category}",
+  "time_minutes": number,
+  "servings": number,
+  "difficulty": "Lätt/Medel/Avancerad",
+  "ingredients": [
+    { "name": "ingredient name", "amount": number, "unit": "unit" }
+  ],
+  "instructions": [
+    "Step 1: Detailed instruction with explanation",
+    "Step 2: Detailed instruction with explanation",
+    ...
+  ]
+}`;
+
+      console.log('Sending request to OpenAI API...');
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [{
+            role: 'user',
+            content: prompt
+          }],
+          response_format: { type: 'json_object' }
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('OpenAI API error:', errorText);
+        throw new Error(`API request failed with status ${response.status}: ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('Received response from OpenAI API:', data);
+
+      const recipeData = JSON.parse(data.choices[0].message.content);
+      console.log('Parsed recipe data:', recipeData);
+
+      // Convert prices to numbers
+      const price = mainProduct.price ? parseFloat(String(mainProduct.price).replace(',', '.').replace(/[^\d.-]/g, '')) : null;
+      const originalPrice = mainProduct.originalPrice ? parseFloat(String(mainProduct.originalPrice).replace(',', '.').replace(/[^\d.-]/g, '')) : null;
+      const currentPrice = mainProduct.currentPrice ? parseFloat(String(mainProduct.currentPrice).replace(',', '.').replace(/[^\d.-]/g, '')) : null;
+      const savings = originalPrice && currentPrice ? originalPrice - currentPrice : 0;
+
+      // Convert the generated recipe to our Recipe type
+      const recipe: Recipe = {
+        id: crypto.randomUUID(),
+        title: recipeData.title,
+        description: recipeData.description,
+        ingredients: recipeData.ingredients,
+        instructions: recipeData.instructions,
+        category: recipeData.category,
+        time_minutes: recipeData.time_minutes,
+        servings: recipeData.servings,
+        difficulty: recipeData.difficulty,
+        created_at: new Date().toISOString(),
+        price,
+        original_price: originalPrice,
+        savings,
+        store: mainProduct.store
+      };
+
+      console.log('Generated recipe:', recipe);
+      generatedRecipes.push(recipe);
     }
-    
-    // Add to our set to prevent duplicates in this batch
-    recipeSet.add(normalizedTitle);
-    
-    const recipe: Recipe = {
-      id: crypto.randomUUID(),
-      title: recipeTitle,
-      description: `Ett enkelt och smakfullt recept med ${product.name} som huvudingrediens.`,
-      instructions: [
-        "1. Förbered alla ingredienser",
-        "2. Följ stegen i receptet",
-        "3. Servera och njut!"
-      ],
-      category: "Rabatterade varor",
-      ingredients: [
-        {
-          name: product.name,
-          amount: 1,
-          unit: "st"
-        }
-      ]
-    };
-    
-    recipes.push(recipe);
+
+    // Insert the generated recipes into the database
+    if (generatedRecipes.length > 0) {
+      console.log('Inserting generated recipes into database...');
+      const { success, error } = await insertGeneratedRecipes(generatedRecipes);
+      if (!success) {
+        console.error('Failed to insert recipes:', error);
+        throw new Error(`Failed to insert recipes: ${error}`);
+      }
+      console.log('Successfully inserted recipes into database');
+    }
+
+    return generatedRecipes;
+  } catch (error) {
+    console.error('Error in generateRecipesFromDiscountedProducts:', error);
+    throw error;
   }
-  
-  console.log(`Generated ${recipes.length} unique recipes from discounted products`);
-  return recipes;
 };

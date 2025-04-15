@@ -7,6 +7,8 @@ import { RecipeListHeader } from "@/components/recipes/RecipeListHeader";
 import { RecipeList } from "@/components/recipes/RecipeList";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import { useAppSession } from "@/hooks/useAppSession";
+import { useAutoRecipeGeneration } from "@/hooks/useAutoRecipeGeneration";
+import { RecipeThemeProvider } from "@/components/recipe-theme-provider";
 
 const Recipes = () => {
   const navigate = useNavigate();
@@ -26,6 +28,8 @@ const Recipes = () => {
 
   // Load meal plan hook to make it available for recipe cards
   useMealPlan();
+
+  useAutoRecipeGeneration();
 
   const handleNavSelect = useCallback((id: string) => {
     // Navigation logic is now handled in BottomNav component
@@ -64,23 +68,25 @@ const Recipes = () => {
   }, [isFirstLoad, refreshRecipes]);
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <RecipeListHeader
-        activeCategory={activeCategory}
-        categories={categories}
-        onCategoryChange={changeCategory}
-        onRefresh={handleGenerateRecipes}
-        isRefreshing={isRefreshing}
-        isLoading={loading}
-      />
-      <RecipeList
-        recipes={recipes}
-        loading={loading}
-        error={error}
-        onRefresh={handleGenerateRecipes}
-      />
-      <BottomNav items={navItems} onSelect={handleNavSelect} />
-    </div>
+    <RecipeThemeProvider defaultTheme="light">
+      <div className="flex flex-col min-h-screen">
+        <RecipeListHeader
+          activeCategory={activeCategory}
+          categories={categories}
+          onCategoryChange={changeCategory}
+          onRefresh={handleGenerateRecipes}
+          isRefreshing={isRefreshing}
+          isLoading={loading}
+        />
+        <RecipeList
+          recipes={recipes}
+          loading={loading}
+          error={error}
+          onRefresh={handleGenerateRecipes}
+        />
+        <BottomNav items={navItems} onSelect={handleNavSelect} />
+      </div>
+    </RecipeThemeProvider>
   );
 };
 
