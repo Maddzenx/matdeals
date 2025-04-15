@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS recipes (
     instructions TEXT[] NOT NULL,
     image_url TEXT,
     category TEXT NOT NULL,
-    tags TEXT[],
     price DECIMAL(10,2),
     original_price DECIMAL(10,2),
     servings INTEGER,
@@ -20,11 +19,14 @@ CREATE TABLE IF NOT EXISTS recipes (
 -- Create index on category for faster filtering
 CREATE INDEX IF NOT EXISTS recipes_category_idx ON recipes(category);
 
--- Create index on tags for faster filtering
-CREATE INDEX IF NOT EXISTS recipes_tags_idx ON recipes USING GIN(tags);
-
 -- Enable Row Level Security
 ALTER TABLE recipes ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies
+DROP POLICY IF EXISTS "Allow authenticated users to read recipes" ON recipes;
+DROP POLICY IF EXISTS "Allow authenticated users to insert recipes" ON recipes;
+DROP POLICY IF EXISTS "Allow authenticated users to update recipes" ON recipes;
+DROP POLICY IF EXISTS "Allow authenticated users to delete recipes" ON recipes;
 
 -- Create policy to allow all authenticated users to read recipes
 CREATE POLICY "Allow authenticated users to read recipes" 

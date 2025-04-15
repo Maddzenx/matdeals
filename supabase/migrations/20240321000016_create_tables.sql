@@ -17,6 +17,9 @@ CREATE TABLE IF NOT EXISTS public.recipes (
 -- Enable RLS for recipes
 ALTER TABLE public.recipes ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing recipe policies
+DROP POLICY IF EXISTS "Public recipes are viewable by everyone" ON public.recipes;
+
 -- Create policy for recipes
 CREATE POLICY "Public recipes are viewable by everyone"
     ON public.recipes
@@ -34,6 +37,11 @@ CREATE TABLE IF NOT EXISTS public.favorites (
 
 -- Enable RLS for favorites
 ALTER TABLE public.favorites ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing favorites policies
+DROP POLICY IF EXISTS "Users can view their own favorites" ON public.favorites;
+DROP POLICY IF EXISTS "Users can insert their own favorites" ON public.favorites;
+DROP POLICY IF EXISTS "Users can delete their own favorites" ON public.favorites;
 
 -- Create policies for favorites
 CREATE POLICY "Users can view their own favorites"

@@ -1,16 +1,15 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "ESNext",
+    "module": "CommonJS",
     "moduleResolution": "Node",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": ["ES2020"],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
     "rootDir": ".",
-    "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
@@ -19,9 +18,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "allowImportingTsExtensions": true,
-    "types": ["node", "vite/client"]
+    "types": ["node"]
   },
-  "include": ["src/**/*", "supabase/functions/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules"]
-}
+} 

@@ -1,1 +1,0 @@
-ALTER TABLE "Willys Johanneberg" ADD COLUMN store TEXT; 

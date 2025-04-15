@@ -5,16 +5,52 @@ export interface RecipeIngredient {
   amount: string | number;  // Allow both string and number
   unit?: string;
   notes?: string;
+  substitutions?: string;
+}
+
+export interface RecipeInstructions {
+  setup?: string[];
+  preparation?: string[];
+  cooking?: string[];
+  finishing?: string[];
+  storage?: string[];
+}
+
+export interface RecipeIngredients {
+  main: RecipeIngredient[];
+  sauce?: RecipeIngredient[];
+  garnish?: RecipeIngredient[];
 }
 
 export interface Recipe {
   id: string;
   title: string;
   description: string | null;
-  instructions: string[];
+  instructions: string[] | RecipeInstructions;  // Support both old and new format
   category: string;
   created_at?: string | null;
-  ingredients: RecipeIngredient[];
+  ingredients: RecipeIngredient[] | RecipeIngredients;  // Support both old and new format
+  store?: string;  // Add store field
+  
+  // Time breakdown
+  prep_time_minutes?: number;
+  cook_time_minutes?: number;
+  total_time_minutes?: number;
+  time_minutes?: number;  // Keep for backward compatibility
+  
+  // Serving details
+  servings?: number;
+  portion_size?: string;
+  
+  // Difficulty details
+  difficulty?: string;
+  difficulty_explanation?: string;
+  
+  // Equipment and additional information
+  equipment_needed?: string[];
+  tips?: string[];
+  pairings?: string[];
+  variations?: string[];
   
   // Frontend-calculated fields
   calculatedPrice?: number | null;
@@ -24,9 +60,6 @@ export interface Recipe {
   
   // Optional fields that may not be in the database but used in frontend
   image_url?: string;
-  time_minutes?: number | null;
-  servings?: number | null;
-  difficulty?: string | null;
   author?: string;
   tags?: string[];
   original_price?: number | null;
@@ -47,6 +80,7 @@ export interface DatabaseRecipe {
   servings?: number | null;
   difficulty?: string | null;
   source_url?: string | null;
+  store?: string;  // Add store field
 }
 
 // Helper function to convert database recipe to frontend Recipe type
@@ -101,6 +135,7 @@ export function convertDatabaseRecipeToRecipe(dbRecipe: DatabaseRecipe): Recipe 
     time_minutes: dbRecipe.time_minutes || defaults.time,
     servings: dbRecipe.servings || defaults.servings,
     difficulty: dbRecipe.difficulty || defaults.difficulty,
-    source_url: dbRecipe.source_url || null
+    source_url: dbRecipe.source_url || null,
+    store: dbRecipe.store || undefined
   };
 }
